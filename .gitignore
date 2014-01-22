@@ -1,6 +1,17 @@
 # Object files
 *.o
 *.ko
+*.lnp
+*.d
+*.map
+*.lst
+*.axf
+*.htm
+*.sct
+*.crf
+*.kdam1
+*.Michael
+
 
 # Libraries
 *.lib
