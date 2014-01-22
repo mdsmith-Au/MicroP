@@ -1,0 +1,17 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Project:</h2>
+C:\Users\steve\Documents\School\Masters\Masters 4\TA-ECSE426\Lab prep\lab 1 Base Project\Lab1_Project.uvproj
+Project File Date:  01/15/2014
+
+<h2>Output:</h2>
+Build target 'Target 1'
+compiling fputc_debug.c...
+compiling main.c...
+compiling system_stm32f4xx.c...
+assembling startup_stm32f40xx.s...
+linking...
+Program Size: Code=1124 RO-data=424 RW-data=28 ZI-data=1636  
+".\obj\Lab1_Project.axf" - 0 Errors, 0 Warning(s).
