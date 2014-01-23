@@ -18,10 +18,10 @@
 fermat_fact
 	; Number to be factored
 	; TODO: Parameter passing
-	movs  R1, #21
+	mov  R1, #8975
 	
-	; movs by default compares against 0,
-	; so we can use less than, equal to, etc.
+	cmp R1, #0
+	; compare so we can use less than, equal to, etc.
 	; Below: Exit if number <= 0
 	ble   stop
 	
