@@ -231,10 +231,10 @@
       <FileType>2</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>24</ColumnNumber>
+      <ColumnNumber>36</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>173</TopLine>
-      <CurrentLine>182</CurrentLine>
+      <TopLine>130</TopLine>
+      <CurrentLine>139</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\src\startup_stm32f40xx.s</PathWithFileName>
       <FilenameWithoutPath>startup_stm32f40xx.s</FilenameWithoutPath>
@@ -247,10 +247,10 @@
       <FileType>2</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>1</ColumnNumber>
+      <ColumnNumber>4</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>56</TopLine>
-      <CurrentLine>80</CurrentLine>
+      <TopLine>1</TopLine>
+      <CurrentLine>129</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\fermat_fact.s</PathWithFileName>
       <FilenameWithoutPath>fermat_fact.s</FilenameWithoutPath>
