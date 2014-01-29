@@ -9,9 +9,11 @@
 *.htm
 *.sct
 *.crf
+*.uvgui.*
 *.kdam1
 *.Michael
 *.bak
+*.dep
 
 
 # Libraries

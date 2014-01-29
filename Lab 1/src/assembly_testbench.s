@@ -1,10 +1,11 @@
 	AREA assembly_testbench, CODE, READONLY
-	EXPORT assembly_testbench
+	EXPORT asm_testbench
 	
 	IMPORT fermat_fact
 	; N - number to be factored - is placed in R0 before execution
 	; F1, F2 are R0, R1 after execution
 	
+asm_testbench
 	; Load 2 into R0, execute Fermat
 	MOV		R0, #2
 	LDR     R1, =fermat_fact
@@ -42,7 +43,7 @@
 	CMP		R0, #24
 	BNE		error
 	
-	; 87
+	; 87 
 	MOV 	R0, #87
 	LDR		R1, =fermat_fact
 	BLX		R1
@@ -94,8 +95,7 @@
 	BLX		R1
 	
 	MUL		R0, R0, R1
-	MOV		R1, #-985
-	CMP		R0, R1
+	CMP		R0, #0
 	BNE		error
 	
 	;25985
