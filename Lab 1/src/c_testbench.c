@@ -5,8 +5,12 @@
 #include <math.h>
 #include <stdio.h>
 #include <assert.h>
+#include <stdint.h>
 
 void c_fermat_fact(int n, int* f1, int* f2);
+
+extern uint64_t fermat_fact(int n);
+
 
 int c_testbench() {
 	int n_list[] = {-5, 0, 1, 2, 3, 9, 15, 17, 25, 53, 583, 617, 7957, 503809, 887869, 278872, 3273897};
@@ -17,7 +21,10 @@ int c_testbench() {
 
 	int i;
 	for (i = 0; i < sizeof(n_list)/sizeof(int); i++) {
-		c_fermat_fact(n_list[i], &f1, &f2);
+		//c_fermat_fact(n_list[i], &f1, &f2);
+		uint64_t result = fermat_fact(n_list[i]);
+		f1 = result & 0xFFFFFFFF;
+		f2 = (result >> 32) & (0xFFFFFFFF);
 		
 		printf("N = %d\n", n_list[i]);
 		printf("  F1: %d : %d == %d\n", f1_list[i] == f1, f1_list[i], f1);
