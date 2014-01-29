@@ -21,6 +21,7 @@
 
 fermat_fact
 	
+	push			{R2 - R4, LR}
 	; Check if N <= 0. If yes, exit.
 	cmp             R0, #0
 	ble             stop
@@ -76,7 +77,7 @@ factorsoln
 	add             R0, R1, R4            ; F1 = R0 = x + y
 	sub             R1, R1, R4            ; F2 = R1 = x - y
 	
-	bx              lr	
+	b				exit
 	
 find_square 
 	; Finding if a num is square
@@ -113,11 +114,14 @@ even_case
 	; Set R1 (F2) to N/2 by shifting, return
 	lsr             R1, R0, #1
 	mov             R0, #2
-	bx              lr
+	b				exit
 	
 stop
 	; Set R0, R1 to 0 (F1, F2), return
 	mov             R0, #0
 	mov             R1, #0
-	bx	            lr
+	b				exit
+
+exit
+	pop				{R2 - R4, PC}
 	end
