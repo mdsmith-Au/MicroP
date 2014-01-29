@@ -13,7 +13,7 @@
 *.kdam1
 *.Michael
 *.bak
-*.dep
+"lab 1"/*.dep
 
 
 # Libraries
