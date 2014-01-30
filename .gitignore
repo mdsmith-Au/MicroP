@@ -10,10 +10,8 @@
 *.sct
 *.crf
 *.uvgui.*
-*.kdam1
-*.Michael
 *.bak
-"lab 1"/*.dep
+*.dep
 
 
 # Libraries
