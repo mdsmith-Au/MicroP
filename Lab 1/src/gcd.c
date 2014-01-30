@@ -7,7 +7,7 @@
 #include <assert.h>
 #include <stdint.h>
 
-int gcd(int a, int b) {
+int gcd(int a, int b, int* prime_factors[]) {
 		
 	while (b != 0) {
 		int tmp = b;

@@ -7,9 +7,8 @@
 #include <assert.h>
 #include <stdint.h>
 
-int gcd(int a, int b);
 
-int lcm(int a, int b) {
+int lcm(int a, int b, int* prime_factors[]) {
 		
-		return (a * b)/gcd(a,b);
+		return 0;
 }
