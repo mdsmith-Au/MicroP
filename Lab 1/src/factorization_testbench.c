@@ -9,9 +9,10 @@
 #include <string.h>
 
 
-int gcd(int a, int b, int* prime_factors[]);
-int lcm(int a, int b, int* prime_factors[]);
+int gcd_by_prime_fact(int prime_factors_a[], int prime_factors_b[]);
+int lcm(int a, int b, int prime_factors[]);
 void get_prime_factors(int n, int prime_factors[], int* idx);
+void quick_sort(int prime_factors[], int start, int stop);
 
 int fact_testbench() {
 	int n_list[] = {-5, 0, 1, 2, 3, 9, 15, 17, 25, 53, 583, 617, 7957, 503809, 887869, 278872, 3273897};
@@ -25,6 +26,9 @@ int fact_testbench() {
 			memset(prime_factors, 0, sizeof(*prime_factors)/sizeof(int));
 			
 			get_prime_factors(n_list[i], prime_factors, &index);
+			
+			printf("Sorting....\n");
+			quick_sort(prime_factors, 0, index - 1);
 			
 			printf("N = %d\n", n_list[i]);
 			printf("Prime factors:\n");

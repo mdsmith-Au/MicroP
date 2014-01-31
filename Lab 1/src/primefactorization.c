@@ -8,8 +8,8 @@
 
 extern uint64_t fermat_fact(int n);
 
-void get_prime_factors(int n, int prime_factors[], int *idx);
 void get_factors(int n, int* f1, int* f2);
+int partition(int array[], int start, int stop);
 
 
 /** 
@@ -50,5 +50,43 @@ void get_factors(int n, int* f1, int* f2) {
 	
 	/* The second factor is stored in the upper half */
 	*f2 = ((result >> 32) & (0xFFFFFFFF));
+}
+
+/* Standard quicksort */
+void quick_sort(int prime_factors[], int start, int stop){
+	
+	/* Exit if zero or one element */
+	if (start < stop) {
+			int pivot = partition(prime_factors, start, stop);
+			quick_sort(prime_factors, start, pivot - 1);
+			quick_sort(prime_factors, pivot + 1, stop);
+	}
+	
+}
+
+int partition(int array[], int start, int stop) {
+	int pivot = array[stop];
+	int left = start;
+	int right = stop - 1;
+	while (left <= right) {
+		while ((left <= right) && array[left] < pivot) {
+				left = left + 1;
+		}
+		while ((left <= right) && array[right] >= pivot) {
+			right = right - 1;
+		}
+		
+		if (left < right) {
+			int temp = array[right];
+			array[right] = array[left];
+			array[left] = temp;
+		}
+	}
+	
+	int temp = array[stop];
+	array[stop] = array[left];
+	array[left] = temp;
+	
+	return left;
 }
 

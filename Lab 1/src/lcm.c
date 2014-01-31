@@ -8,7 +8,7 @@
 #include <stdint.h>
 
 
-int lcm(int a, int b, int* prime_factors[]) {
+int lcm(int a, int b, int prime_factors[]) {
 		
 		return 0;
 }
