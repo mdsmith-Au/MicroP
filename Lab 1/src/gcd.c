@@ -20,13 +20,13 @@ int gcd_by_prime_fact(int prime_factors_a[], short idx_a, int prime_factors_b[],
 	
 	/* Check elements in first list against
 	elements in second */
-	while (current_pos_a < idx_a) {
+	while ((current_pos_a < idx_a) && (current_pos_b < idx_b)) {
 		
 		/* Get # in a; compute only once for speed */
 		int num_a = prime_factors_a[current_pos_a];
 		int num_b = prime_factors_b[current_pos_b];
 		
-		/* No match; a bigger; move b pointer to bigger value */
+		/* num_a > b; a bigger; move b pointer to bigger value */
 		if (num_a > num_b) {
 				current_pos_b++;
 		}

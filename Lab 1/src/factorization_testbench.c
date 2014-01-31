@@ -10,7 +10,7 @@
 
 
 int gcd_by_prime_fact(int prime_factors_a[], short idx_a, int prime_factors_b[], short idx_b);
-int lcm(int a, int b, int prime_factors[]);
+int lcm_by_prime_fact(int prime_factors_a[], short idx_a, int prime_factors_b[], short idx_b);
 void get_prime_factors(int n, int prime_factors[], short* idx);
 void quick_sort(int prime_factors[], short start, short stop);
 
@@ -38,8 +38,8 @@ int fact_testbench() {
 			}
 		}*/
 	
-	int num1 = 3273897;
-	int num2 = 278872;
+	int num1 = 2875;
+	int num2 = 8724;
 	
 	int array1[32];
 	int array2[32];
@@ -56,6 +56,7 @@ int fact_testbench() {
 	quick_sort(array2, 0, idx2 - 1);
 	
 	int gcd = gcd_by_prime_fact(array1, idx1, array2, idx2);
+	int lcm = lcm_by_prime_fact(array1, idx1, array2, idx2);
 	
 	printf("Prime factors of %d:\n", num1);
 	for (short j = 0; j < idx1; j++){
@@ -68,6 +69,7 @@ int fact_testbench() {
 	}
 	
 	printf("GCD: %d\n", gcd);
+	printf("LCM : %d\n", lcm);
 	
 	return 0;
 }
