@@ -9,9 +9,9 @@ int c_testbench(void);
 int main()
 {	
 
-	fact_testbench();
+	//fact_testbench();
 	
-	//c_testbench();
+	c_testbench();
 	
 	return 0;
 }

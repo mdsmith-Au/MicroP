@@ -10,7 +10,7 @@
 ;   R0     holds the first factor F1 
 ;   R1     holds the second factor F2
 ;
-; USES REGISTERS *********************************
+; USES REGISTERS R0 - R4
 ;
 ; By: Michael Smith | Kevin Dam
 ;         260481943 | 260457383
@@ -22,7 +22,7 @@
 fermat_fact
 	
 	; Save regs that we use (and not part of ARM calling conv.)
-	push			{R2 - R4, LR}
+	push			{R4, LR}
 	; Check if N <= 0. If yes, exit.
 	cmp             R0, #0
 	ble             stop
@@ -71,6 +71,7 @@ is_not_square
 	add             R1, R1, #1             ; x = x + 1
 	mul             R2, R1, R1             ; Replace old y^2 with new (partial) y^2 = x * x
 	sub             R2, R2, R0             ; y^2 = x * x - N
+
 	b               loop
 	
 
@@ -95,7 +96,7 @@ find_square
 	vmov.F32		S0, R2
 	vcvt.F32.U32	S0, S0
 	
-	vsqrt.F32		S0, S0	              ; S10 = sqrt(R10)
+	vsqrt.F32		S0, S0	              ; S0 = sqrt(R2)
 	
 	; Convert sqrt to integer: int(y)
 	vcvt.U32.F32	S0, S0
@@ -124,5 +125,5 @@ stop
 
 exit
 	; Restore registers
-	pop				{R2 - R4, PC}
+	pop				{R4, PC}
 	end

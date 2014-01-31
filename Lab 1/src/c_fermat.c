@@ -31,10 +31,13 @@ void c_fermat_fact(int n, int* f1, int* f2) {
 	int y = 0;
 	int y2 = x * x - n;
 	while (find_square(y2, &y) == 0) {
+		
 		x = x + 1;
 		y2 = x * x - n;
 		
-		if (y2 < 0) break; /* overflow */
+		//if (y2 < 0) {
+		//	break; /* overflow */
+		//}
 	}
 	
 	*f1 = x + y;
@@ -42,10 +45,10 @@ void c_fermat_fact(int n, int* f1, int* f2) {
 	
 	/* FIXME: Not quite true. Will still fail if one of the factors are too
 	   large to find. Ex: 8388607 = 178481 * 47 */
-	if (y2 < 0) {
-		*f1 = n;
-		*f2 = 1;
-	}
+	//if (y2 < 0) {
+	//	*f1 = n;
+	//	*f2 = 1;
+	//}
 }
 
 /**

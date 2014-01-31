@@ -29,7 +29,7 @@ int c_testbench() {
 		/* Pick between C and ASM here */
 		
 		/* C */
-		//c_fermat_fact(n_list[i], &f1, &f2);
+		c_fermat_fact(n_list[i], &f1, &f2);
 		
 		/* ASM */
 		uint64_t result = fermat_fact(n_list[i]);
