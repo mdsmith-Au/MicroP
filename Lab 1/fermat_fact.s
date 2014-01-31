@@ -21,6 +21,7 @@
 
 fermat_fact
 	
+	; Save regs that we use (and not part of ARM calling conv.)
 	push			{R2 - R4, LR}
 	; Check if N <= 0. If yes, exit.
 	cmp             R0, #0
@@ -81,7 +82,6 @@ factorsoln
 	
 find_square 
 	; Finding if a num is square
-	; Takes R2 as input, writes to **************************************
 	
 	; Idea: take an integer, find the square root,
 	; convert it to an integer (stripping everything after
@@ -101,7 +101,7 @@ find_square
 	vcvt.U32.F32	S0, S0
 	vmov.F32		R3, S0
 	
-	; Copy int(y) to a seperate register for (possible) usage later
+	; Copy int(y) to a seperate register R4 for (possible) usage later
 	mov				R4, R3	
 
 	mul				R3, R3, R3         		 ; R3 = int(y) * int(y)
@@ -123,5 +123,6 @@ stop
 	b				exit
 
 exit
+	; Restore registers
 	pop				{R2 - R4, PC}
 	end

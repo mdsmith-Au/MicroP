@@ -24,21 +24,21 @@ int lcm_by_prime_fact(int prime_factors_a[], short idx_a, int prime_factors_b[],
 		
 		/* num_a > b; a bigger; numtiply b and move pointer to bigger value */
 		if (num_a > num_b) {
-			printf("Multiplying LCM %d by %d\n", lcm, num_b);
+			//printf("Multiplying LCM %d by %d\n", lcm, num_b);
 			lcm *= num_b;
 			current_pos_b++;
 		}
 		
 		/* Match, multiply only once and move a & b */
 		else if (num_a == num_b) {
-			printf("Multiplying LCM %d by %d\n", lcm, num_a);
+			//printf("Multiplying LCM %d by %d\n", lcm, num_a);
 			lcm *= num_a;
 			current_pos_a++;
 			current_pos_b++;
 		}
 		/* num_a < num_b, multiply aand increase pointer */
 		else {
-			printf("Multiplying LCM %d by %d\n", lcm, num_a);
+			//printf("Multiplying LCM %d by %d\n", lcm, num_a);
 			lcm *= num_a;
 			current_pos_a++;
 		}
@@ -51,7 +51,7 @@ int lcm_by_prime_fact(int prime_factors_a[], short idx_a, int prime_factors_b[],
 		if (a_out_of_bounds && !b_out_of_bounds) {
 			while (current_pos_b < idx_b) {
 				num_b = prime_factors_b[current_pos_b];
-				printf("Multiplying LCM %d by %d\n", lcm, num_b);
+				//printf("Multiplying LCM %d by %d\n", lcm, num_b);
 				lcm *= num_b;
 				current_pos_b++;
 			}
@@ -62,7 +62,7 @@ int lcm_by_prime_fact(int prime_factors_a[], short idx_a, int prime_factors_b[],
 		else if (!a_out_of_bounds && b_out_of_bounds) {
 			while (current_pos_a < idx_a) {
 				num_a = prime_factors_a[current_pos_a];
-				printf("Multiplying LCM %d by %d\n", lcm, num_a);
+				//printf("Multiplying LCM %d by %d\n", lcm, num_a);
 				lcm *= num_a;
 				current_pos_a++;
 			}

@@ -10,19 +10,21 @@ int find_square(int a, int* b);
 
 void c_fermat_fact(int n, int* f1, int* f2) {
 	
+	/* Exit with factors of 0 is negative or 0 number to be factored */
 	if (n <= 0) {
 		*f1 = 0;
 		*f2 = 0;
 		return;
 	}
 	
+	/* Number is even; simple /2 calculation */
 	if (n % 2 == 0) {
 		*f1 = 2;
 		*f2 = n/2;
 		return;
 	}
 	
-	/* n is guaranteed to be positive and odd
+	/* n is now guaranteed to be positive and odd
 	   Begin Fermat factorization algorithm */
 	
 	int x = ceil(sqrt(n));
@@ -48,8 +50,15 @@ void c_fermat_fact(int n, int* f1, int* f2) {
 
 /**
  * Checks if the given argument a is a square number.
- * Returns  1 if a is a square number
- *          0 if a is not a square number
+ * 
+ * Procedure: take an integer, find the square root,
+ * convert it to an integer (stripping everything after
+ * the decimal) and then square it.  If the input
+ * was a square, the integer conversion does nothing
+ * and you get the same number as was input.  Otherwise,
+ * the result is different because information was lost
+ * during the conversion - hence, it is not a square.
+ * Returns 1 if square, 0 if not
  */
 int find_square(int a, int* b) {
 	*b = sqrt(a);

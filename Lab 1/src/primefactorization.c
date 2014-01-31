@@ -31,6 +31,7 @@ void get_prime_factors(int n, int prime_factors[], short *idx) {
 		prime_factors[*idx] = f1;
 		*idx = *idx + 1;
 	} 
+	/* Continue, find factors of each factor */
 	else {
 		get_prime_factors(f1, prime_factors, idx);
 		get_prime_factors(f2, prime_factors, idx);
@@ -55,8 +56,9 @@ void get_factors(int n, int* f1, int* f2) {
 /* Standard quicksort */
 void quick_sort(int prime_factors[], short start, short stop){
 	
-	/* Exit if zero or one element */
+	/* Exit if zero or one element, otherwise loop until done */
 	if (start < stop) {
+			/* Split up, quick sort each piece */
 			short pivot = partition(prime_factors, start, stop);
 			quick_sort(prime_factors, start, pivot - 1);
 			quick_sort(prime_factors, pivot + 1, stop);
@@ -77,12 +79,14 @@ int partition(int array[], short start, short stop) {
 		}
 		
 		if (left < right) {
+			/* Exchange right, left */
 			int temp = array[right];
 			array[right] = array[left];
 			array[left] = temp;
 		}
 	}
 	
+	/* Exchange stop, left */
 	int temp = array[stop];
 	array[stop] = array[left];
 	array[left] = temp;
