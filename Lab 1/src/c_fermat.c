@@ -35,20 +35,24 @@ void c_fermat_fact(int n, int* f1, int* f2) {
 		x = x + 1;
 		y2 = x * x - n;
 		
-		//if (y2 < 0) {
-		//	break; /* overflow */
-		//}
+		/* If overflow, break */
+		if (y2 < 0) {
+			break;
+		}
 	}
 	
 	*f1 = x + y;
 	*f2 = x - y;
 	
-	/* FIXME: Not quite true. Will still fail if one of the factors are too
-	   large to find. Ex: 8388607 = 178481 * 47 */
-	//if (y2 < 0) {
-	//	*f1 = n;
-	//	*f2 = 1;
-	//}
+	/* Overflow = likely prime #.  Thus, factors = 1 and itself.
+	   Not necessarily true, will still fail if one of the factors are too
+	   large to find (ex: 8388607 = 178481 * 47) but better
+     than a guaranteed wrong answer. Sacrifices speed for correctness;
+	   at least 1 and itself are always factors :)	*/
+	if (y2 < 0) {
+		*f1 = n;
+		*f2 = 1;
+	}
 }
 
 /**

@@ -12,7 +12,7 @@ void c_fermat_fact(int n, int* f1, int* f2);
 extern uint64_t fermat_fact(int n);
 
 /* Testbench to test performance (and correctness) of C vs ASM
-End result: ASM is 2.5x to 5x faster, depending on the numbers used */
+End result: ASM is 2.5x to 7x faster, depending on the numbers used */
 
 int c_testbench() {
 	
@@ -29,7 +29,7 @@ int c_testbench() {
 		/* Pick between C and ASM here */
 		
 		/* C */
-		c_fermat_fact(n_list[i], &f1, &f2);
+		//c_fermat_fact(n_list[i], &f1, &f2);
 		
 		/* ASM */
 		uint64_t result = fermat_fact(n_list[i]);

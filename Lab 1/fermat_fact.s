@@ -70,14 +70,27 @@ loop
 is_not_square
 	add             R1, R1, #1             ; x = x + 1
 	mul             R2, R1, R1             ; Replace old y^2 with new (partial) y^2 = x * x
-	sub             R2, R2, R0             ; y^2 = x * x - N
-
+	sub             R2, R2, R0         	   ; y^2 = x * x - N
+	
+	; y^2 < 0 = overflow.  The check slows it down a little, but correctness > speed.
+	cmp				R2, #0
+	blt				factorsoln
+	
 	b               loop
 	
 
 factorsoln
+
+	; Sent here by overflow; likely prime, so F1 = N and F2 = 1.
+	; May not be prime (instead, really large factor) but at least
+    ; it returns factors rather than garbage. 
+	cmp				R2, #0
+	movlt			R1, #1
+	blt				exit
+	
+
 	add             R0, R1, R4            ; F1 = R0 = x + y
-	sub             R1, R1, R4            ; F2 = R1 = x - y
+	sub             R1, R1, R4            ; F2 = R1 = x - y	
 	
 	b				exit
 	
