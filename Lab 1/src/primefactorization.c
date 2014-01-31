@@ -9,7 +9,6 @@
 extern uint64_t fermat_fact(int n);
 
 void get_factors(int n, int* f1, int* f2);
-int partition(int array[], short start, short stop);
 
 
 /** 
@@ -53,47 +52,10 @@ void get_factors(int n, int* f1, int* f2) {
 	*f2 = ((result >> 32) & (0xFFFFFFFF));
 }
 
-/* Standard quicksort */
-void quick_sort(int prime_factors[], short start, short stop){
-	
-	/* Exit if zero or one element, otherwise loop until done */
-	if (start < stop) {
-			/* Split up, quick sort each piece */
-			short pivot = partition(prime_factors, start, stop);
-			quick_sort(prime_factors, start, pivot - 1);
-			quick_sort(prime_factors, pivot + 1, stop);
-	}
-	
-}
-
-int partition(int array[], short start, short stop) {
-	short pivot = array[stop];
-	short left = start;
-	short right = stop - 1;
-	while (left <= right) {
-		while ((left <= right) && array[left] < pivot) {
-				left = left + 1;
-		}
-		while ((left <= right) && array[right] >= pivot) {
-			right = right - 1;
-		}
-		
-		if (left < right) {
-			/* Exchange right, left */
-			int temp = array[right];
-			array[right] = array[left];
-			array[left] = temp;
-		}
-	}
-	
-	/* Exchange stop, left */
-	int temp = array[stop];
-	array[stop] = array[left];
-	array[left] = temp;
-	
-	return left;
-}
-
+/**
+ * Insertion sort algorithm
+ * Sorts a given array a of size n in ascending order.
+ */
 void insertion_sort(int a[], short n) {
 	int k;
 	for (k = 0; k < n; k++) {

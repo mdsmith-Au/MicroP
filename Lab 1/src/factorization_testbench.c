@@ -12,7 +12,6 @@
 int gcd_by_prime_fact(int prime_factors_a[], short idx_a, int prime_factors_b[], short idx_b);
 int lcm_by_prime_fact(int prime_factors_a[], short idx_a, int prime_factors_b[], short idx_b);
 void get_prime_factors(int n, int prime_factors[], short* idx);
-// void quick_sort(int prime_factors[], short start, short stop);
 void insertion_sort(int a[], short n);
 
 int fact_testbench() {
@@ -42,9 +41,7 @@ int fact_testbench() {
 		get_prime_factors(num1, array1, &idx1);
 		get_prime_factors(num2, array2, &idx2);
 		
-		/* Sort each array in increasing order using normal quicksort */
-		//quick_sort(array1, 0, idx1 - 1);
-		//quick_sort(array2, 0, idx2 - 1);
+		/* Sort each array in increasing order */
 		insertion_sort(array1, idx1);
 		insertion_sort(array2, idx2);
 		
