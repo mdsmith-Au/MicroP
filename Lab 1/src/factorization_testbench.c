@@ -12,7 +12,8 @@
 int gcd_by_prime_fact(int prime_factors_a[], short idx_a, int prime_factors_b[], short idx_b);
 int lcm_by_prime_fact(int prime_factors_a[], short idx_a, int prime_factors_b[], short idx_b);
 void get_prime_factors(int n, int prime_factors[], short* idx);
-void quick_sort(int prime_factors[], short start, short stop);
+// void quick_sort(int prime_factors[], short start, short stop);
+void insertion_sort(int a[], short n);
 
 int fact_testbench() {
 	
@@ -42,8 +43,10 @@ int fact_testbench() {
 		get_prime_factors(num2, array2, &idx2);
 		
 		/* Sort each array in increasing order using normal quicksort */
-		quick_sort(array1, 0, idx1 - 1);
-		quick_sort(array2, 0, idx2 - 1);
+		//quick_sort(array1, 0, idx1 - 1);
+		//quick_sort(array2, 0, idx2 - 1);
+		insertion_sort(array1, idx1);
+		insertion_sort(array2, idx2);
 		
 		/* Calculate GCD, LCM using the sorted array of prime factors */
 		int gcd = gcd_by_prime_fact(array1, idx1, array2, idx2);
@@ -55,12 +58,12 @@ int fact_testbench() {
 		}
 			
 		printf("Prime factors of %d:\n", num2);
-		for (short j = 0; j < idx1; j++){
+		for (short j = 0; j < idx2; j++){
 				printf("%d\n", array2[j]);
 		}
 		
 		printf("GCD: %d\n", gcd);
-		printf("LCM : %d\n", lcm);
+		printf("LCM: %d\n", lcm);
 	}
 	
 	return 0;

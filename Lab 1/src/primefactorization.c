@@ -94,3 +94,16 @@ int partition(int array[], short start, short stop) {
 	return left;
 }
 
+void insertion_sort(int a[], short n) {
+	int k;
+	for (k = 0; k < n; k++) {
+		int temp = a[k];
+		int i = k;
+		while (i > 0 && temp < a[i-1]) {
+			a[i] = a[i-1];
+			i = i - 1;
+		}
+		a[i] = temp;
+	}
+}
+

@@ -57,8 +57,8 @@ int lcm_by_prime_fact(int prime_factors_a[], short idx_a, int prime_factors_b[],
 		 take appropriate action */
 
 		/* Essentially booleans; calculate once for efficiency */
-		char a_out_of_bounds = (current_pos_a >= idx_a);
-		char b_out_of_bounds = (current_pos_b >= idx_b);
+		int a_out_of_bounds = (current_pos_a >= idx_a);
+		int b_out_of_bounds = (current_pos_b >= idx_b);
 		
 		/* a out of bounds only; get remaining numbers in b */
 		if (a_out_of_bounds && !b_out_of_bounds) {
