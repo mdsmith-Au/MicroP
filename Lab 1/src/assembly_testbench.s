@@ -7,7 +7,7 @@
 	
 asm_testbench
 	; Load -5 into R0, execute Fermat
-	MOV		R0, #-5
+	MOV		R0, #-21
 	LDR     R1, =fermat_fact
 	BLX		R1
 	
@@ -28,39 +28,43 @@ asm_testbench
 	BNE.W	error
 	
 	; # 1
-	MOV 	R0, #1
+	MOV32 	R0, #1234
 	LDR		R1, =fermat_fact
 	BLX		R1
 	
 	MUL		R0, R0, R1
-	CMP		R0, #1
+	MOV32	R1, #1234
+	CMP		R0, R1
 	BNE.W	error
 	
 	; # 2
-	MOV 	R0, #2
+	MOV 	R0, #12345
 	LDR		R1, =fermat_fact
 	BLX		R1
 	
 	MUL		R0, R0, R1
-	CMP		R0, #2
+	MOV32	R1, #12345
+	CMP		R0, R1
 	BNE.W	error
 	
 	; # 3
-	MOV 	R0, #3
+	MOV32 	R0, #3456789
 	LDR		R1, =fermat_fact
 	BLX		R1
 	
 	MUL		R0, R0, R1
-	CMP		R0, #3
+	MOV32	R1, #3456789
+	CMP		R0, R1
 	BNE.W	error
 	
 	; # 9
-	MOV 	R0, #9
+	MOV 	R0, #7919
 	LDR		R1, =fermat_fact
 	BLX		R1
 	
 	MUL		R0, R0, R1
-	CMP		R0, #9
+	MOV32	R1, #7919
+	CMP		R0, R1
 	BNE.W	error
 	
 	; # 15

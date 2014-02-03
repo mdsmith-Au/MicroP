@@ -17,7 +17,7 @@ void insertion_sort(int a[], short n);
 int fact_testbench() {
 	
 	/* List of numbers to test */
-	int n_list[] = {2875, 8724, 8763, 9813, 54382, 27653};
+	int n_list[] = {324, 1200, 8763, 9813, 54382, 27653};
 		
 	/* Test numbers, in pairs of 2 */
 	for (short i = 0; i < sizeof(n_list)/sizeof(int); i = i+2) {

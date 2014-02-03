@@ -17,7 +17,7 @@ End result: ASM is 2.5x to 7x faster, depending on the numbers used */
 int c_testbench() {
 	
 	/* Lists of numbers with their factors in seperate arrays */
-	int n_list[] = {-5, 0, 1, 2, 3, 9, 15, 17, 25, 53, 583, 617, 7957, 503809, 887869, 278872, 3273897, 8388608, 787993 };
+	int n_list[] = {3456789, 0, 1, 2, 3, 9, 15, 17, 25, 53, 583, 617, 7957, 503809, 887869, 278872, 3273897, 8388608, 787993 };
 	int f1_list[] = {0, 0, 1, 2, 3, 3,  5, 17,  5, 53,  53, 617,  109,   3967,  38603,      2,    3421,    2,    787993};
 	int f2_list[] = {0, 0, 1, 1, 1, 3,  3,  1,  5,  1,  11,   1,   73,    127,     23, 139436,     957, 4194304,    1}; 
 	
@@ -29,7 +29,7 @@ int c_testbench() {
 		/* Pick between C and ASM here */
 		
 		/* C */
-		//c_fermat_fact(n_list[i], &f1, &f2);
+		c_fermat_fact(n_list[i], &f1, &f2);
 		
 		/* ASM */
 		uint64_t result = fermat_fact(n_list[i]);
