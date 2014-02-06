@@ -4,6 +4,7 @@
 
 #include "gpio_example.h"
 #include "adc_init.h"
+#include "get_temp.h"
 
 int main()
 {
@@ -17,14 +18,10 @@ int main()
 	 * Temp sensor @ ADC1_IN16*/
 	ADC_Config();
 	
+	calibrateTemp();
+	
 	while(1) {
-		ADC_SoftwareStartConv(ADC1); //Starting Conversion
-		
-		while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == RESET); // Wait for ADC to finish by setting flag
-		
-		ADC_ClearFlag(ADC1, ADC_FLAG_EOC); //Clear the above flag
-		uint16_t temp = ADC_GetConversionValue(ADC1); // Result available in ADC1->DR
-		printf("Temp: %u %x\n", temp, temp);
+		printf("Temp: %u\n", getTemp());
 	}
 	
 }
