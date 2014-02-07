@@ -4,7 +4,7 @@
 uint8_t calibrated_GLB = 0;
 float slope_GLB = 0;
 
-uint16_t getTemp(void) {
+float getTemp(void) {
 	
 		if (!calibrated_GLB) {
 			printf("Temperature not calibrated! Using average value.\n");
@@ -26,18 +26,17 @@ uint16_t getTemp(void) {
 		
 		uint16_t temp = ADC_GetConversionValue(ADC1); // Get temp from ADC.  12 bit, aligned right -> can read directly
 		
-		double tempInMilliVolts  = (temp/VREF_INT) * VREF; // Convert to an actual voltage (i.e. 0.8V)
+		float tempInMilliVolts  = (temp/VREF_INT) * VREF; // Convert to an actual voltage (i.e. 0.8V)
 		tempInMilliVolts = ((tempInMilliVolts - V_25)/slope_GLB) + 25; //D o conversion per formula mentioned above
 		
-		/* TODO: Find way to use float without compiler complaints? */
 		return tempInMilliVolts;
 	
 }
 
 /* Temperature calibration based on factory data stored in predefined mem locations */
 void calibrateTemp(void) {
-	uint16_t *tempLow = (uint16_t*)0x1FFF7A2C;
-	uint16_t *tempHigh = (uint16_t*)0x1FFF7A2E;
+	uint16_t const * const tempLow = (uint16_t*)0x1FFF7A2C;
+	uint16_t const * const tempHigh = (uint16_t*)0x1FFF7A2E;
 	
 	/* Two calibration points @ 3.3V; 30C and 110C.  Use data to calculate slope.
 	 * Find difference, then divide by and multiply by voltage in ADC and normal format respectively.
