@@ -5,6 +5,7 @@
 #include "gpio_example.h"
 #include "adc_init.h"
 #include "get_temp.h"
+#include "filter.h"
 
 #define TICK_DELAY 6720000 /* 1/Freq * Core Clock , freq = 25Hz */
 
@@ -34,7 +35,7 @@ int main()
 		//Great, interrupt! Reset interrupt ticks and do stuff
 		ticks = 0;
 		
-		printf("Temp: %f\n", getTemp());
+		//printf("Temp: %u\n", getTemp());
 	}
 	
 }

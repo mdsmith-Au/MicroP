@@ -1,13 +1,12 @@
 #include "get_temp.h"
-#include <stdio.h>
 
 uint8_t calibrated_GLB = 0;
 float slope_GLB = 0;
 
-float getTemp(void) {
+uint16_t getTemp(void) {
 	
 		if (!calibrated_GLB) {
-			printf("Temperature not calibrated! Using average value.\n");
+			// Not calibrated, use average value
 			slope_GLB = AVG_SLOPE;
 		}
 		
@@ -24,12 +23,16 @@ float getTemp(void) {
 		 * in ARM Doc ID 018909 Rev 1 and data from Table 69 in
 		 * and Doc ID 022152 Rev 4*/
 		
-		uint16_t temp = ADC_GetConversionValue(ADC1); // Get temp from ADC.  12 bit, aligned right -> can read directly
+		return ADC_GetConversionValue(ADC1); // Get temp from ADC.  12 bit, aligned right -> can read directly
+	
+}
+
+float convertToC(uint16_t temp) {
+
+	float tempInMilliVolts  = (temp/VREF_INT) * VREF; // Convert to an actual voltage (i.e. 0.8V)
+	tempInMilliVolts = ((tempInMilliVolts - V_25)/slope_GLB) + 25; //D o conversion per formula mentioned above
 		
-		float tempInMilliVolts  = (temp/VREF_INT) * VREF; // Convert to an actual voltage (i.e. 0.8V)
-		tempInMilliVolts = ((tempInMilliVolts - V_25)/slope_GLB) + 25; //D o conversion per formula mentioned above
-		
-		return tempInMilliVolts;
+	return tempInMilliVolts;
 	
 }
 
