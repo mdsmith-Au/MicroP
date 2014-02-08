@@ -1,14 +1,14 @@
 #include <stdio.h>
-#include "stm32f4xx.h"
-#include "stm32f4xx_conf.h"
 
 #include "gpio_example.h"
 #include "adc_init.h"
-#include "get_temp.h"
-#include "filter.h"
+#include "temp_processing.h"
 
 #define TICK_DELAY 6720000 /* 1/Freq * Core Clock , freq = 25Hz */
 
+/* Variable that determines whether to process interrupt or not 
+ * Defined as uint_fast16_t so compiler uses max. speed implementation 
+ * dependent on processor architecture */
 static volatile uint_fast16_t ticks;
 
 
@@ -19,10 +19,11 @@ int main()
 	GPIO_example_config();  // Set up GPIO
 	GPIO_SetBits(GPIOD, GPIO_Pin_12); // Light up green LED
 
-	ADC_Config(); //Configure ADC (temp sensor @ ADC1_IN16 )
-	
+	ADCConfig(); //Configure ADC (temp sensor @ ADC1_IN16 )
 	
 	calibrateTemp(); // Calibrate temp sensor using factory data
+	
+	initializeBuffer(); // Ensure memory is clean in filter
 	
 	ticks = 0;
 	SysTick_Config( TICK_DELAY );
@@ -35,7 +36,7 @@ int main()
 		//Great, interrupt! Reset interrupt ticks and do stuff
 		ticks = 0;
 		
-		//printf("Temp: %u\n", getTemp());
+		printf("Temp: %f\n", getAndAverageTemp());
 	}
 	
 }
@@ -45,16 +46,5 @@ void SysTick_Handler() {
 	// Let main while loop proceed
 	ticks = 1;
 }
-
-
-/*
-	*	Configure ADC
-	* Clock gating
-	* Get temp via printf
-	* max #  bits
-	* data alignment: to the right
-	* use independent mode
-	* systick config
-	* */
 
 

@@ -1,6 +1,6 @@
 #include "adc_init.h"
 
-void ADC_Config(void){
+void ADCConfig(void){
 	
 	ADC_InitTypeDef InitStruct;
 	ADC_CommonInitTypeDef InitStructCommon;
