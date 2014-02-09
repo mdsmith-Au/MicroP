@@ -7,12 +7,9 @@ uint16_t getTemp(void) {
 	
 		ADC_SoftwareStartConv(ADC1); //Starting Conversion
 		
-		GPIO_SetBits(GPIOD, GPIO_Pin_13); // Light orange LED while waiting
-			
 		while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == RESET); // Wait for ADC to finish by setting flag
 			
 		ADC_ClearFlag(ADC1, ADC_FLAG_EOC); //Clear the above flag
-		GPIO_ResetBits(GPIOD, GPIO_Pin_13); // Reset orange LED
 		
 		return ADC_GetConversionValue(ADC1); // Get temp from ADC.  12 bit, aligned right -> can read directly
 	

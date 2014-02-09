@@ -3,6 +3,7 @@
 #include "gpio_example.h"
 #include "adc_init.h"
 #include "temp_processing.h"
+#include "display_driver.h"
 
 #define TICK_DELAY 6720000 /* 1/Freq * Core Clock , freq = 25Hz */
 
@@ -26,30 +27,6 @@ int main()
 	initializeBuffer(); // Ensure memory is clean in filter
 	
 	
-	// For TESTING
-	// 2 select lines
-	GPIO_SetBits(GPIOD, GPIO_Pin_1);
-	GPIO_SetBits(GPIOD, GPIO_Pin_2);
-	
-	// Manual digit test
-	GPIO_SetBits(GPIOD, GPIO_Pin_3);
-	
-	/*
-	NES-3015BH pins:
-	
-	 _6_
- 1|		|7
-	  2
-	 ___
- 4|		| 10
-	 ___
-	  5
-	 .	.
-	    9
-	*/
-	
-	
-	
 	ticks = 0;
 	SysTick_Config( TICK_DELAY );
 	
@@ -63,19 +40,20 @@ int main()
 	
 	while(1) {
 		
-		GPIO_ResetBits(GPIOD, GPIO_Pin_13);
 		
 		// Wait for interrupt for tick; don't do anything
 		while(!ticks);
 		
-		GPIO_SetBits(GPIOD, GPIO_Pin_13);
 		
 		//Great, interrupt! Reset interrupt ticks and do stuff
 		ticks = 0;
 		
-		
-		printf("Temp: %f\n", getAndAverageTemp());
-		
+		float temp = getAndAverageTemp();
+		printf("Temp: %f\n", temp);
+		displayNum(temp);
+
+		draw();
+
 	}
 	
 }
