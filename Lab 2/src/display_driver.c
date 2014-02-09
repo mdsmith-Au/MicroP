@@ -1,7 +1,7 @@
 #include "display_driver.h"
 
 // Numbers to be drawn on display
-uint8_t first_GBL, second_GBL, third_GBL;
+uint16_t first_GBL, second_GBL, third_GBL;
 
 // Whose turn is it to display a number
 uint8_t turn = 0;
@@ -10,63 +10,53 @@ uint8_t turn = 0;
  * Does not actually drive the display */
 void displayNum(float number) {
 	
-	char string[3];
+	char string[4];
   
-	// Conversion idea from Loki @ http://stackoverflow.com/a/339161
-	// Convers the float to a string where we can extract individual digits
-	sprintf(string, "%f", number);
+	/* Convers the float to a string where we can extract individual digits
+	 * .1 specifies only 1 digit after decimal
+	 * Output ex. : 38.1 */
+	sprintf(string, "%.1f", number);
 	
 	//Convert to integer
-	const uint8_t first = convertToInt(string[0]);
-	const uint8_t second = convertToInt(string[1]);
-	const uint8_t third = convertToInt(string[2]);
+	uint8_t first = convertToInt(string[0]);
+	uint8_t second = convertToInt(string[1]);
+	// Decimal point @ 2 is not an integer
+	uint8_t third = convertToInt(string[3]);
 	
 	// Convert to pin setting
 	first_GBL = convertToGPIO(first);
 	second_GBL = convertToGPIO(second);
 	third_GBL = convertToGPIO(third);
+	
+	/* TODO: Why when using optimization does the code freeze at the line below (literally at the bracket)? */
 }
 
 
 /* Sends a number previous given in displayNum() to the display */
 void draw() {
 	
-	/* We set the display based on whose turn it is 
-	 * First display is Pin 1, second is Pin 3, third is Pin 2
-   * NoteL GPIO_Write not used because it would interfere with built-in LEDs	*/
-	
 	if (turn == 0) {
 		
-		// Clear all selection and segment lines
-		GPIO_ResetBits(GPIOD, ALL_DISP);
-		// Set selection line to display 1
-		GPIO_SetBits(GPIOD, GPIO_Pin_1);
-		// Output number to segment lines
-		GPIO_SetBits(GPIOD, first_GBL);
-		
+		// Write number to display lines along with appropriate display select
+		GPIO_Write(GPIO_BANK, first_GBL | DISPLAY_ONE);
+		// Set for next display on next execution
 		turn = 1;
 	}
 	else if (turn == 1) {
 
-		GPIO_ResetBits(GPIOD, ALL_DISP);
-		GPIO_SetBits(GPIOD, GPIO_Pin_3);
-		GPIO_SetBits(GPIOD, second_GBL);
-		
+		GPIO_Write(GPIO_BANK, second_GBL | DISPLAY_TWO | DOT);
 		turn = 2;
 	}
 	else if (turn == 2) {
 		
-		GPIO_ResetBits(GPIOD, ALL_DISP);
-		GPIO_SetBits(GPIOD, GPIO_Pin_2);
-		GPIO_SetBits(GPIOD, third_GBL);
-		
+		GPIO_Write(GPIO_BANK, third_GBL | DISPLAY_THREE);
 		turn = 0;
 	}
 	
 }
 
 /* Converts a number into pin assignments using defined GPIO settings */
-static int convertToGPIO(uint8_t num) {
+static uint16_t convertToGPIO(uint8_t num) {
 	if (num == 0) {
 		return ZERO;
 	}
@@ -104,7 +94,7 @@ static int convertToGPIO(uint8_t num) {
 /* Returns 8-bit integer representation of a character
  * if the char is between 0 and 9 only.  Otherwise,
  * it will produce garbage values*/
-static uint8_t convertToInt(char num) {
+static uint16_t convertToInt(char num) {
 	// 0 -> 9 is 48 -> 57 in ASCII
 	return (num-48);
 }
