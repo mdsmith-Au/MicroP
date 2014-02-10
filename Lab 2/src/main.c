@@ -14,9 +14,10 @@
 
 /** 
  * The interval at which the SysTick timer will generate interrupts.
- * Computed as 1/freq * Core_Clock, where freq = 25Hz.
+ * Computed as 1/freq * Core_Clock, where freq = 25Hz, Core_Clock = 168MHz.
  */
 #define TICK_DELAY 6720000 
+//#define TICK_DELAY 2240000 
 
 /** 
  * Software flag set by the SysTick timer when an interrupt is generated 
@@ -85,6 +86,14 @@ int main() {
     */
 	
 	while(1) {
+		/*
+		for (int j = 0; j < 3; j++) {
+			int i = 0;
+			while(i < 10000) {
+				i++;
+			}
+			draw();
+		}	*/
 		
 		// Wait for interrupt for tick; don't do anything
 		while(!ticks);
@@ -97,11 +106,9 @@ int main() {
 		float temp = getAndAverageTemp();
 		printf("Temp: %f\n", temp);
 		displayNum(temp);
+		
 		draw();
-
 	}
-    
-    return 0;	
 }
 
 /** 

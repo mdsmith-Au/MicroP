@@ -2,6 +2,7 @@
 
 // Numbers to be drawn on display
 uint16_t first_GBL, second_GBL, third_GBL;
+uint16_t old_first_GBL, old_second_GBL, old_third_GBL;
 
 // Whose turn is it to display a number
 uint8_t turn = 0;
@@ -24,6 +25,10 @@ void displayNum(float number) {
 	uint8_t third = convertToInt(string[3]);
 	
 	// Convert to pin setting
+	old_first_GBL = first_GBL;
+	old_second_GBL = second_GBL;
+	old_third_GBL = third_GBL;
+	
 	first_GBL = convertToGPIO(first);
 	second_GBL = convertToGPIO(second);
 	third_GBL = convertToGPIO(third);
@@ -36,23 +41,27 @@ void displayNum(float number) {
 void draw() {
 	
 	if (turn == 0) {
-		
+		//if (old_first_GBL != first_GBL)
 		// Write number to display lines along with appropriate display select
 		GPIO_Write(GPIO_BANK, first_GBL | DISPLAY_ONE);
 		// Set for next display on next execution
-		turn = 1;
+		//turn = 1;
 	}
 	else if (turn == 1) {
-
+		//if (old_second_GBL != second_GBL)
 		GPIO_Write(GPIO_BANK, second_GBL | DISPLAY_TWO | DOT);
-		turn = 2;
+		//turn = 0;
 	}
+	/*
 	else if (turn == 2) {
 		
 		GPIO_Write(GPIO_BANK, third_GBL | DISPLAY_THREE);
 		turn = 0;
-	}
+	}*/
+	turn = (turn + 1) % 2;
 	
+	int i = 0;
+	while (i < 2000000000) i++;
 }
 
 /* Converts a number into pin assignments using defined GPIO settings */

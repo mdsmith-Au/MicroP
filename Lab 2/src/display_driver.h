@@ -47,6 +47,6 @@ Dot : 12
 		
 		*/
 void displayNum(float number);
-void draw(void);
+void draw();
 static uint16_t convertToGPIO(uint8_t num);
 static uint16_t convertToInt(char num);
