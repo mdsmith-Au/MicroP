@@ -26,6 +26,7 @@
  * dependent on processor architecture 
  */
 static volatile uint_fast16_t ticks;
+static volatile uint_fast16_t delay;
 
 /**
  * Main entry point. Calls various external functions to set up the hardware
@@ -41,6 +42,7 @@ int main() {
 	
 	
 	ticks = 0;
+	delay = 0;
 	SysTick_Config(TICK_DELAY);
 	
 	while(1) {		
@@ -58,7 +60,12 @@ int main() {
 		
 		float temp = getAndAverageTemp();
 		printf("Temp: %f\n", temp);
-		displayNum(temp);
+		
+		if (delay == 0) {
+			displayNum(temp);
+		}
+		
+		delay = (delay + 1) % 16;
 	}
 }
 
