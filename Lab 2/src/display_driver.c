@@ -41,27 +41,19 @@ void displayNum(float number) {
 void draw() {
 	
 	if (turn == 0) {
-		//if (old_first_GBL != first_GBL)
 		// Write number to display lines along with appropriate display select
 		GPIO_Write(GPIO_BANK, first_GBL | DISPLAY_ONE);
-		// Set for next display on next execution
-		//turn = 1;
 	}
 	else if (turn == 1) {
-		//if (old_second_GBL != second_GBL)
 		GPIO_Write(GPIO_BANK, second_GBL | DISPLAY_TWO | DOT);
-		//turn = 0;
 	}
-	/*
-	else if (turn == 2) {
-		
-		GPIO_Write(GPIO_BANK, third_GBL | DISPLAY_THREE);
-		turn = 0;
-	}*/
-	turn = (turn + 1) % 2;
 	
-	int i = 0;
-	while (i < 2000000000) i++;
+	else if (turn == 2) {
+		GPIO_Write(GPIO_BANK, third_GBL | DISPLAY_THREE);
+	}
+	
+	// Set for next display on next execution
+	turn = (turn + 1) % 3;
 }
 
 /* Converts a number into pin assignments using defined GPIO settings */
