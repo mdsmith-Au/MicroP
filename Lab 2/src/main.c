@@ -18,7 +18,6 @@
  * Computed as 1/freq * Core_Clock, where freq = 25Hz, Core_Clock = 168MHz.
  */
 #define TICK_DELAY 6720000 
-//#define TICK_DELAY 2240000 
 
 /** 
  * Software flag set by the SysTick timer when an interrupt is generated 
@@ -41,25 +40,26 @@ int main() {
 	calibrateTemp();                     // Calibrate temp sensor using factory data
 	initializeBuffer();                  // Ensure memory is clean in filter
 	
-	
 	ticks = 0;
 	delay = 0;
-	SysTick_Config(TICK_DELAY);
+	SysTick_Config(TICK_DELAY);          // Set up SysTick timer to interrupt every TICK_DELAY
 	
-	initPWM();
+	initPWM();                           // Configure the Pulse Width Modulator
 	
 	while(1) {		
-		// Wait for interrupt for tick
+		// Loop until SysTick generates an interrupt
 		while(!ticks) {
+            // Output the current temperature readings to 7-segment displays
 			draw();
+            
+            // Software delay between each draw to prevent flickering.
+            // Value of 10000 determined to work by experimentation.
 			int i = 0;
 			while (i < 10000) i++;
 		}
 		
-		
-		//Great, interrupt! Reset interrupt ticks and do stuff
+		// Reset the tick flag after interrupt is handled.
 		ticks = 0;
-		
 		
 		float temp = getAndAverageTemp();
 		printf("Temp: %f\n", temp);
