@@ -15,7 +15,8 @@ void displayNum(float number) {
   
 	/* Convers the float to a string where we can extract individual digits
 	 * .1 specifies only 1 digit after decimal
-	 * Output ex. : 38.1 */
+	 * Output ex. : 38.1 
+	 * Note:  sprintf automatically rounds */
 	sprintf(string, "%.1f", number);
 	
 	//Convert to integer

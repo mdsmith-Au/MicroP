@@ -11,9 +11,15 @@
 /**
  * @TODO: Unfortunately, I have no idea what this is.
  */
-#define AAR 2500
+#define ARR 2500
+#define TEMP_THRESHOLD 33    //TODO: CHANGE TO REAL VALUE
+#define TEMP_ERROR 1
 
 /**
  * Configures the Pulse Width Modulator.
  */
 void initPWM(void);
+void alarmCheckTemp(float temp);
+static void increasePWMDutyCycle(void);
+static void decreasePWMDutyCycle(void);
+static void resetPWMDutyCycle(void);

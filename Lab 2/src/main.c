@@ -61,13 +61,14 @@ int main() {
 		ticks = 0;
 		
 		float temp = getAndAverageTemp();
+		alarmCheckTemp(temp);
 		printf("Temp: %f\n", temp);
 		
 		if (delay == 0) {
 			displayNum(temp);
 		}
 		
-		delay = (delay + 1) % 16;
+		delay = (delay + 1) % 32;
 	}
 }
 

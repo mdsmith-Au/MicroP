@@ -9,9 +9,12 @@
 
 #include "alarm.h"
 
+// Keep track of whether we increasing or decreasing brightness
+int8_t increaseBrightness = 1;
+
 void initPWM() {
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
-  TIM_OCInitTypeDef TIM_OCInitStruct;
+	TIM_OCInitTypeDef TIM_OCInitStruct;
 	
 	/*
 	 * APB Max 142 Mhz
@@ -32,7 +35,7 @@ void initPWM() {
 	
 	 * We choose 50 Mhz counter clock, since we don't need a very
 	 * fast output for an LED.  Same goes for the output clock,
-	 * which we set to 20Khz => AAR = 2500
+	 * which we set to 20Khz => ARR = 2500
 	*/
 	
 	// Enable clock to TIM4
@@ -42,7 +45,7 @@ void initPWM() {
 	uint16_t PrescalerValue = (uint16_t) ((SystemCoreClock /2) / 50000000) - 1;
 	
 	/* Basic TIM Config */
-	TIM_TimeBaseInitStruct.TIM_Period = AAR;
+	TIM_TimeBaseInitStruct.TIM_Period = ARR;
   TIM_TimeBaseInitStruct.TIM_Prescaler = PrescalerValue;
 	/* No need to divide the clock in our case */
   TIM_TimeBaseInitStruct.TIM_ClockDivision = 0;
@@ -59,7 +62,7 @@ void initPWM() {
 	TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM1;
   TIM_OCInitStruct.TIM_OutputState = TIM_OutputState_Enable;
 	// By default, leave LED disabled -> no pulse (0% duty cycle)
-  TIM_OCInitStruct.TIM_Pulse = 12; // TESTING TESTING PWM
+  TIM_OCInitStruct.TIM_Pulse = 0;
 	// Active High for our LED...want it to be on at 100%
   TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_High;
 	
@@ -72,4 +75,51 @@ void initPWM() {
 	TIM_ARRPreloadConfig(TIM4, ENABLE);
 	/* Enable counter -> start */
 	TIM_Cmd(TIM4, ENABLE);
+}
+
+void alarmCheckTemp(float temp) {
+	
+	// Below threshold; reset
+	if ((temp - TEMP_THRESHOLD) < -(TEMP_ERROR) ) {
+		resetPWMDutyCycle();
+	}
+	// Activate LED; change between increasing/decreasing duty cycle
+	else if ((temp - TEMP_THRESHOLD) > TEMP_ERROR) {
+		
+		if (increaseBrightness) {
+			increasePWMDutyCycle();
+		}
+		else {
+			decreasePWMDutyCycle();
+		}
+	}
+	
+}
+
+/* Below methods change duty cycle reg. for CH3 on TIM4 
+ * Note: Increase/decrease of CCR3 must be a factor of ARR*/
+static void increasePWMDutyCycle(){
+	TIM4->CCR3 = (TIM4->CCR3 + 100) ;
+	
+	// At max brightness -> decrease next time
+	if (TIM4->CCR3 == ARR) {
+		increaseBrightness = 0;
+	}
+}
+
+static void decreasePWMDutyCycle() {
+	TIM4->CCR3 = (TIM4->CCR3 - 100) ;
+		
+	// Min brightness (i.e. off) -> increase next time
+	if (TIM4->CCR3 == 0) {
+		increaseBrightness = 1;
+	}
+}
+
+// Resets PWM Duty cycle to 0 if not already set
+static void resetPWMDutyCycle() {
+	if (TIM4->CCR3 != 0) {
+		TIM4->CCR3 = 0;
+		increaseBrightness = 1;
+	}
 }
