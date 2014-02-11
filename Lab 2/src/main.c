@@ -11,6 +11,7 @@
 #include "display_driver.h"
 #include "gpio_example.h"
 #include "temp_processing.h"
+#include "alarm.h"
 
 /** 
  * The interval at which the SysTick timer will generate interrupts.
@@ -45,8 +46,10 @@ int main() {
 	delay = 0;
 	SysTick_Config(TICK_DELAY);
 	
+	initPWM();
+	
 	while(1) {		
-		// Wait for interrupt for tick; don't do anything
+		// Wait for interrupt for tick
 		while(!ticks) {
 			draw();
 			int i = 0;
