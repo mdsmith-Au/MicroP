@@ -12,7 +12,7 @@
  * @TODO: Unfortunately, I have no idea what this is.
  */
 #define ARR 2500
-#define TEMP_THRESHOLD 33    //TODO: CHANGE TO REAL VALUE
+#define TEMP_THRESHOLD 45
 #define TEMP_ERROR 1
 
 /**
