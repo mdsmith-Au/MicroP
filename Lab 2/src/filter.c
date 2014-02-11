@@ -1,5 +1,7 @@
 #include "filter.h"
 
+// @TODO: May want to move this to its own file, or at least the header.
+// @TODO: Also, need to format for correct coding convention.
 typedef struct
 {
   uint8_t position; //Index pointing to next position to be filled

@@ -8,10 +8,10 @@
 
 #include <stdio.h>
 #include "adc_init.h"
+#include "alarm.h"
 #include "display_driver.h"
 #include "gpio_example.h"
 #include "temp_processing.h"
-#include "alarm.h"
 
 /** 
  * The interval at which the SysTick timer will generate interrupts.
@@ -31,7 +31,6 @@ static volatile uint_fast16_t delay;
 /**
  * Main entry point. Calls various external functions to set up the hardware
  * and controls the main time loop for the SysTick timer.
- * @returns 0 on successful exit, 1 otherwise.
  */
 int main() {	
 	GPIO_example_config();               // Set up GPIO

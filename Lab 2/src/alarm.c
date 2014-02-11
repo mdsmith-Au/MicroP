@@ -1,3 +1,12 @@
+/**
+ * @file alarm.c
+ * Temperature alarm implementation file.
+ * The alarm (which is simply a red LED light) will turn on 
+ * once the circuit reaches a certain temperature threshold.
+ * The LED light will fade in and out as determined by the 
+ * board's Pulse Width Modulation component.
+ */
+
 #include "alarm.h"
 
 void initPWM() {
