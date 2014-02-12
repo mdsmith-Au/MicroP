@@ -23,3 +23,4 @@ void alarmCheckTemp(float temp);
 static void increasePWMDutyCycle(void);
 static void decreasePWMDutyCycle(void);
 static void resetPWMDutyCycle(void);
+static void triggerAlarm(void);

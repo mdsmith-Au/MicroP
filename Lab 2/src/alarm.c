@@ -11,6 +11,9 @@
 
 // Keep track of whether we increasing or decreasing brightness
 int8_t increaseBrightness = 1;
+// Used to see if the alarm was already on when cooling down so that
+// we turn off the LED gracefully
+int8_t alarmOn = 0;
 
 void initPWM() {
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
@@ -82,22 +85,34 @@ void alarmCheckTemp(float temp) {
 	// Below threshold; reset
 	if ((temp - TEMP_THRESHOLD) < -(TEMP_ERROR) ) {
 		resetPWMDutyCycle();
+		alarmOn = 0;
 	}
-	// Activate LED; change between increasing/decreasing duty cycle
+	// Activate LED if temp > threshold
 	else if ((temp - TEMP_THRESHOLD) > TEMP_ERROR) {
-		
-		if (increaseBrightness) {
-			increasePWMDutyCycle();
-		}
-		else {
-			decreasePWMDutyCycle();
-		}
+		triggerAlarm();
+	}
+	// Within margin of error (Threshold +- error): keep alarm on, but only if it was already on
+	else if (alarmOn) {
+		triggerAlarm();
 	}
 	
 }
 
-/* Below methods change duty cycle reg. for CH3 on TIM4 
- * Note: Increase/decrease of CCR3 must be a factor of ARR*/
+static void triggerAlarm(){
+		
+	alarmOn = 1;
+	// Change between increasing/decreasing duty cycle -> fade in/out
+	if (increaseBrightness) {
+		increasePWMDutyCycle();
+	}
+	else {
+		decreasePWMDutyCycle();
+	}
+}
+
+/* Below methods change duty cycle reg. (CCR) for CH3 on TIM4 
+ * Note: Increase/decrease of CCR3 must be a factor of ARR
+ * Otherwise, the checks for max or min brighteness will fail*/
 static void increasePWMDutyCycle(){
 	TIM4->CCR3 = (TIM4->CCR3 + 100) ;
 	
