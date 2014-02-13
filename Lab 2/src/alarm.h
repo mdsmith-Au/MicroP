@@ -1,3 +1,6 @@
+#ifndef _ALARM_H_
+#define _ALARM_H_
+
 /**
  * @file alarm.h
  * Header file for the LED temperature alarm.
@@ -42,3 +45,5 @@ void PWM_configure(void);
  * @param temp the current temperature
  */
 void alarmCheckTemp(float temp);
+
+#endif

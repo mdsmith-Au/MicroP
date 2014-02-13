@@ -1,3 +1,6 @@
+#ifndef _TEMP_PROCESSING_H_
+#define _TEMP_PROCESSING_H_
+
 /**
  * @file temp_processing.h
  * Header file the temperature processor.
@@ -11,3 +14,5 @@
  * filter, and convert temperature data.
  */
 float getAndAverageTemp(void);
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef _GPIO_INIT_H_
+#define _GPIO_INIT_H_
+
 /**
  * @file gpio_init.h
  * Header file for GPIO initialization.
@@ -9,3 +12,5 @@
  * Configures the GPIO
  */
 void GPIO_configure(void);
+
+#endif

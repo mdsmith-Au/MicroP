@@ -1,3 +1,6 @@
+#ifndef _DISPLAY_DRIVER_H_
+#define _DISPLAY_DRIVER_H_
+
 /**
  * @file display_driver.h
  * Header file for the 7 segment display driver.
@@ -64,3 +67,4 @@ void displayNum(float number);
  */
 void draw(void);
 
+#endif

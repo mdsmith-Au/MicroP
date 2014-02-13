@@ -1,3 +1,6 @@
+#ifndef _TEMP_READER_H
+#define _TEMP_READER_H
+
 /**
  * @file temp_reader.h
  * Header file for the temperature reader.
@@ -32,3 +35,5 @@ void calibrateTempSensor(void);
  * @return the temperature in degrees Celsius
  */
 float convertToC(uint16_t temp);
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef _TEMP_FILTER_H_
+#define _TEMP_FILTER_H_
+
 /**
  * @file filter.h
  * Header file for the filter.
@@ -39,3 +42,5 @@ uint16_t filterTemperature(uint16_t temp);
  * Fills the filter buffer with zeroes.
  */ 
 void initFilterBuffer(void);
+
+#endif
