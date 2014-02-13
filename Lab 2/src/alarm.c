@@ -42,6 +42,8 @@ int8_t alarmOn = 0;
  * We choose 50 MHz counter clock, since we don't need a very
  * fast output for an LED.  Same goes for the output clock,
  * which we set to 20Khz => ARR = 2500
+ 
+ * For details, see Doc ID 018909 Rev 6 and Doc ID 022152 Rev 4
  */
 void PWM_configure() {
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
@@ -54,11 +56,11 @@ void PWM_configure() {
 	uint16_t PrescalerValue                   = (uint16_t)((SystemCoreClock/2)/50000000) - 1;
 	
 	TIM_TimeBaseInitStruct.TIM_Period         = ARR;
-    TIM_TimeBaseInitStruct.TIM_Prescaler      = PrescalerValue;
-    
+  TIM_TimeBaseInitStruct.TIM_Prescaler      = PrescalerValue;
+  
 	/* No need to divide the clock in our case */
-    TIM_TimeBaseInitStruct.TIM_ClockDivision  = 0;
-    TIM_TimeBaseInitStruct.TIM_CounterMode    = TIM_CounterMode_Up;
+  TIM_TimeBaseInitStruct.TIM_ClockDivision  = 0;
+  TIM_TimeBaseInitStruct.TIM_CounterMode    = TIM_CounterMode_Up;
 	/* Note: TIM_RepetitionCounter does not apply to TIM4 */
 	
 	/* Send struct to be processed */
@@ -69,11 +71,11 @@ void PWM_configure() {
 	// PWM mode 1 - Channel 1 is active as long as TIMx_CNT < TIMx_CCR1 else inactive
 	// i.e. active as long as counter less than CC register
 	TIM_OCInitStruct.TIM_OCMode               = TIM_OCMode_PWM1;
-    TIM_OCInitStruct.TIM_OutputState          = TIM_OutputState_Enable;
+  TIM_OCInitStruct.TIM_OutputState          = TIM_OutputState_Enable;
 	// By default, leave LED disabled -> no pulse (0% duty cycle)
-    TIM_OCInitStruct.TIM_Pulse                = 0;
+  TIM_OCInitStruct.TIM_Pulse                = 0;
 	// Active High for our LED...want it to be on at 100%
-    TIM_OCInitStruct.TIM_OCPolarity           = TIM_OCPolarity_High;
+  TIM_OCInitStruct.TIM_OCPolarity           = TIM_OCPolarity_High;
 	
 	/* Process struct for channel 3*/
 	TIM_OC3Init(TIM4, &TIM_OCInitStruct);

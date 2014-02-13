@@ -7,14 +7,16 @@
 /**
  * Configures the GPIO settings. 
  * GPIO_Pin   : Pins connected via GPIO
- * GPIO_Mode  : Sets behavior of pins (e.g. Output, Alternating)
+ * GPIO_Mode  : Sets behavior of pins (e.g. Output, Alternate)
+ *     Alternate      - Output buffer is driven by signal from a peripheral (PWM)
  * GPIO_OType : Sets pin type (Open Drain or PP)
  *     Open Drain     - activates an NMOS connected to ground, bringing the output down to 
  *                      ground when you write a 0. Otherwise, when you write a 1, it leaves
  *                      it in high-impedance, not activating NMOS or PMOS.
  *     PP (Push-Pull) - 0 activates NMOS, 1 activates PMOS.
  * GPIO_PuPd  : Push-pull resistors for GPIO_PuPd activates weak pull up/down resistors that 
- *              set the default value - low or high when not being driven.
+ *              set the default value - low or high when not being driven.  When using output,
+ *              we don't want to be connected to Vdd or GND, hence NO_PULL.
  * GPIO_Speed : Slew rate - how hard GPIO drives the pin (rise time).
  */
 void GPIO_configure() {
@@ -45,10 +47,11 @@ void GPIO_configure() {
 	GPIO_InitStructure3.GPIO_Pin   = GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13;
 	GPIO_InitStructure3.GPIO_Mode  = GPIO_Mode_OUT;
 	GPIO_InitStructure3.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStructure3.GPIO_Speed = GPIO_Speed_100MHz; 
+	GPIO_InitStructure3.GPIO_Speed = GPIO_Speed_100MHz;      // Output should change as fast as possible (max: 100MHz)
 	GPIO_InitStructure3.GPIO_PuPd  = GPIO_PuPd_NOPULL;
 	GPIO_Init(GPIOE, &GPIO_InitStructure3);
 	
-	// Connect GPIOD Pin 14 to TIM 4 for PWM (TIM4 because that pin is connected to it, see board manual)
+	// Connect GPIOD Pin 14 to TIM 4 for PWM (TIM4 because that pin for the red LED is connected to it
+	// See STM32F4 Discovery manual, Hardware and Layout, Table 5 (MCU pin description versus board function)
 	GPIO_PinAFConfig(GPIOD, GPIO_PinSource14, GPIO_AF_TIM4);
 }
