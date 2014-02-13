@@ -62,7 +62,7 @@ int main() {
             // Software delay between each draw to prevent flickering.
             // Value of 10000 determined to work by experimentation.
 			int i = 0;
-			while (i < 10000) i++;
+			while (i < 1000) i++;
 		}
 		
 		// Reset the tick flag after interrupt is handled.

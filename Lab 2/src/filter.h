@@ -19,7 +19,7 @@
  * tradeoff of time. A smaller filter depth was fast but not as smooth. The 
  * current filter depth value was chosen to balance the smoothness and speed factors.
  */
-#define FILTER_DEPTH 16
+#define FILTER_DEPTH 18
 
 /**
  * Keeps track of the internal state of the filter buffer.
