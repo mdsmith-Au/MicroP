@@ -4,6 +4,19 @@
  */
 #include "GPIO_init.h"
 
+/**
+ * Configures the GPIO settings. 
+ * GPIO_Pin   : Pins connected via GPIO
+ * GPIO_Mode  : Sets behavior of pins (e.g. Output, Alternating)
+ * GPIO_OType : Sets pin type (Open Drain or PP)
+ *     Open Drain     - activates an NMOS connected to ground, bringing the output down to 
+ *                      ground when you write a 0. Otherwise, when you write a 1, it leaves
+ *                      it in high-impedance, not activating NMOS or PMOS.
+ *     PP (Push-Pull) - 0 activates NMOS, 1 activates PMOS.
+ * GPIO_PuPd  : Push-pull resistors for GPIO_PuPd activates weak pull up/down resistors that 
+ *              set the default value - low or high when not being driven.
+ * GPIO_Speed : Slew rate - how hard GPIO drives the pin (rise time).
+ */
 void GPIO_configure() {
 	GPIO_InitTypeDef GPIO_InitStructure, GPIO_InitStructure2, GPIO_InitStructure3;
 	
@@ -13,8 +26,8 @@ void GPIO_configure() {
 	/* Set red LED (Pin 14) to PWM */
 	GPIO_InitStructure.GPIO_Pin    = GPIO_Pin_14;
 	GPIO_InitStructure.GPIO_Mode   = GPIO_Mode_AF;            // Alternate Function (PWM)
-	GPIO_InitStructure.GPIO_OType  = GPIO_OType_PP;
-	GPIO_InitStructure.GPIO_Speed  = GPIO_Speed_100MHz; 
+	GPIO_InitStructure.GPIO_OType  = GPIO_OType_PP;           // Operating output type: push-pull
+	GPIO_InitStructure.GPIO_Speed  = GPIO_Speed_100MHz;       
 	GPIO_InitStructure.GPIO_PuPd   = GPIO_PuPd_NOPULL;
 	GPIO_Init(GPIOD, &GPIO_InitStructure);
 	

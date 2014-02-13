@@ -3,7 +3,7 @@
  * Header file the temperature processor.
  */
  
-#include "get_temp.h"
+#include "temp_reader.h"
 #include "filter.h"
 
 /**
