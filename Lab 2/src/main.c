@@ -43,7 +43,7 @@ static volatile uint_fast16_t delay;
  */
 int main() {
 	GPIO_configure();                    // Set up GPIO
-	ADC_configure();                     // Configure ADC (temp sensor @ ADC1_IN16)
+	ADC_configure();                     // Configure ADC
 	calibrateTempSensor();               // Calibrate temp sensor using factory data
 	initFilterBuffer();                  // Ensure memory is clean in filter
     
@@ -62,7 +62,7 @@ int main() {
 			draw();
             
             // Software delay between each draw to prevent flickering.
-            // Value of 10000 determined to work by experimentation.
+            // Value of 1000 determined to work by experimentation.
 			int i = 0;
 			while (i < 1000) i++;
 		}
@@ -70,17 +70,21 @@ int main() {
 		// Reset the tick flag after interrupt is handled.
 		ticks = 0;
 		
+		// Retrieve and filter temperature
 		float temp = getAndAverageTemp();
-        
+     
+		// Check if temp triggers an alarm condition and print it for debug
 		alarmCheckTemp(temp);
 		printf("Temp: %f\n", temp);
 		
-        // Update the LED displays only if the delay time control has elapsed.
+    // Update the (number shown on) LED displays only if the delay time control has elapsed.
 		if (delay == 0) {
 			displayNum(temp);
 		}
 		
-        // Increment the delay time control. 32 was determined by trial-and-error.
+    /** Increment the delay time control. 
+     *  32 was determined by trial-and-error; gives about 1.28 seconds between updates
+     */
 		delay = (delay + 1) % 32;
 	}
 }

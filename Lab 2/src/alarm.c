@@ -30,10 +30,10 @@ int8_t alarmOn = 0;
  * TIM4CLK = 2 * PCLK1  (PCLK1 = APB1 clock -> clock of bus TIM4 is on)
  * but  PCLK1 = HCLK / 4
  * thus TIM4CLK = HCLK / 2 = SystemCoreClock /2
- * There is also the counter and output clock
- * Counter clock depends on prescaler
+ * There is also the counter clock (CC), output clock and prescaler
+ 
  * Prescaler = (TIM4CLK / TIM4 counter clock) - 1
- * Prescaler = ((SystemCoreClock /2) /DESIRED_MHZ) - 1
+ * Prescaler = ((SystemCoreClock /2) / TIM4 counter clock) - 1
 
  * Output clock period ARR = (TIM4 counter clock / TIM4 output clock) - 1
  
@@ -42,6 +42,8 @@ int8_t alarmOn = 0;
  * We choose 50 MHz counter clock, since we don't need a very
  * fast output for an LED.  Same goes for the output clock,
  * which we set to 20Khz => ARR = 50MHz / 20KHz - 1 = 2500
+ * Values chosen by experimentation and need for large period
+ * and thus a good degree of precision
  
  * For details, see Doc ID 018909 Rev 6 and Doc ID 022152 Rev 4
  */
@@ -53,17 +55,17 @@ void PWM_configure() {
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
 	
 	// Prescaler set dynamically based on Clock Freq, useful if we change it later
-    // According to Doc 018909 rev 6 (p. 627), sec 18.4.11:
-    // Counter clock frequency CK_CNT = fCK_PSC / (PSC[15:0] + 1).
-    // Hence, we must subtract 1 so that our prescaler value is simply fCK_PSC / PSC[15:0]
+  // According to Doc 018909 rev 6 (p. 627), sec 18.4.11:
+  // Counter clock frequency CK_CNT = fCK_PSC / (PSC[15:0] + 1).
+  // Hence, we must subtract 1 so that our prescaler value is simply fCK_PSC / PSC[15:0]
 	uint16_t PrescalerValue                   = (uint16_t)((SystemCoreClock/2)/50000000) - 1;
 	
 	TIM_TimeBaseInitStruct.TIM_Period         = ARR;
-    TIM_TimeBaseInitStruct.TIM_Prescaler      = PrescalerValue;
+  TIM_TimeBaseInitStruct.TIM_Prescaler      = PrescalerValue;
   
-	/* No need to further divide the clock in our case */
-    TIM_TimeBaseInitStruct.TIM_ClockDivision  = 0;
-    TIM_TimeBaseInitStruct.TIM_CounterMode    = TIM_CounterMode_Up;
+	/* No need to further divide the clock in our case */   
+  TIM_TimeBaseInitStruct.TIM_ClockDivision  = 0;
+  TIM_TimeBaseInitStruct.TIM_CounterMode    = TIM_CounterMode_Up;
 	/* Note: TIM_RepetitionCounter does not apply to TIM4 */
 	
 	/* Send struct to be processed */
@@ -71,21 +73,21 @@ void PWM_configure() {
 	
 	/* Now set up PWM4 for the specific channel we need - CH 3 for RED Led */
 	
-    /* PWM has two modes:
-     * Mode 1 - while the counter is TIMx_CNT < TIMx_CCRx, the PWM output is high.
-     * Mode 2 - while the counter is TIMx_CNT < TIMx_CCRx, the PWM output is low.
-     */
+  /* PWM has two modes:
+   * Mode 1 - while the counter is TIMx_CNT < TIMx_CCRx, the PWM output is high.
+   * Mode 2 - while the counter is TIMx_CNT < TIMx_CCRx, the PWM output is low.
+   */
 	TIM_OCInitStruct.TIM_OCMode               = TIM_OCMode_PWM1;
-    TIM_OCInitStruct.TIM_OutputState          = TIM_OutputState_Enable;
+  TIM_OCInitStruct.TIM_OutputState          = TIM_OutputState_Enable;
 	// By default, leave LED disabled -> no pulse (0% duty cycle)
-    TIM_OCInitStruct.TIM_Pulse                = 0;
-	// Active High for our LED...want it to be on at 100%; Polarity_high means active high on (3V)
-    TIM_OCInitStruct.TIM_OCPolarity           = TIM_OCPolarity_High;
+  TIM_OCInitStruct.TIM_Pulse                = 0;
+	// Polarity_high means active high on (3V). Polarity low would be off when 100% duty cycle
+  TIM_OCInitStruct.TIM_OCPolarity           = TIM_OCPolarity_High;
 	
 	/* Process struct for channel 3 */
 	TIM_OC3Init(TIM4, &TIM_OCInitStruct);
 	/* Enable OC preload so that behaviour is guaranteed per
-	 * p. 450 of Doc ID 018909 Rev 1.  Update occurs when counter overflows */
+	 * p. 450 of Doc ID 018909 Rev 1.  Update occurs automatically when counter overflows */
 	TIM_OC3PreloadConfig(TIM4, TIM_OCPreload_Enable);
 	/* Enable the ARR preload just in case */
 	TIM_ARRPreloadConfig(TIM4, ENABLE);

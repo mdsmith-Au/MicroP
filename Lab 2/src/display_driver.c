@@ -41,13 +41,14 @@ void displayNum(float number) {
 	/* @TODO: Why when using optimization does the code freeze at the line below (literally at the bracket)? */
 }
 
-/* Sends a number previous given in displayNum() to the display */
+/* Sends a number previously given in displayNum() to the display */
 void draw() {
 	if (turn == 0) {
 		// Write number to display lines along with appropriate display select
 		GPIO_Write(GPIO_BANK, first_GBL | DISPLAY_ONE);
 	}
 	else if (turn == 1) {
+    // In the case of the second display, we also show the dot
 		GPIO_Write(GPIO_BANK, second_GBL | DISPLAY_TWO | DOT);
 	}
 	else if (turn == 2) {

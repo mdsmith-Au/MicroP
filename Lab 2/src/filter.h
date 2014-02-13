@@ -10,7 +10,7 @@
 
 /* @TODO #ifndef */
 #include <string.h> /* For memset */
-#include <stdint.h>
+#include <stdint.h> /* For alternate type definitions */
 
 /**
  * Controls how many elements to process (the window size of the filter).
@@ -25,7 +25,7 @@
  * Keeps track of the internal state of the filter buffer.
  */
 typedef struct {
-    uint8_t position;                   ///< Index pointing to next position to be filled
+  uint8_t position;                   ///< Index pointing to next position to be filled
 	uint8_t num_samples;                ///< Number of samples in buffer.  Used when filling for the first time up to FILTER_DEPTH
 	uint16_t buffer[FILTER_DEPTH];      ///< Buffer storing old (and new) temperature values for averaging
 	int sum;                            ///< Sum of all values in buffer

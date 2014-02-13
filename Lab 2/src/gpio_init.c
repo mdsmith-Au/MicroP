@@ -33,7 +33,7 @@ void GPIO_configure() {
 	GPIO_InitStructure.GPIO_PuPd   = GPIO_PuPd_NOPULL;
 	GPIO_Init(GPIOD, &GPIO_InitStructure);
 	
-	/* Drive green LED (Pin 12), normal output */
+	/* Drive green LED (Pin 12), normal output. For debug use. */
 	GPIO_InitStructure2.GPIO_Pin   = GPIO_Pin_12;
 	GPIO_InitStructure2.GPIO_Mode  = GPIO_Mode_OUT; 
 	GPIO_InitStructure2.GPIO_OType = GPIO_OType_PP;
