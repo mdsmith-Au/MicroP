@@ -1,43 +1,46 @@
+/**
+ * @file filter.c
+ * Filter implementation using simple moving averages.
+ */
+ 
 #include "filter.h"
 
-// @TODO: May want to move this to its own file, or at least the header.
-// @TODO: Also, need to format for correct coding convention.
-typedef struct
-{
-  uint8_t position; //Index pointing to next position to be filled
-	uint8_t num_samples; //Number of samples in buffer.  Used when filling for the first time up to FILTER_DEPTH
-	uint16_t buffer[FILTER_DEPTH]; //Buffer storing old (and new) temperature values for averaging
-	int sum; //Sum of all values in buffer
+/** Manages the filter internal state. */
+FilterStruct filterBuffer;
+
+/* Temperature filter implementation.
+ * This uses a simple moving average algorithm to smooth out 
+ * any outliers in the temperature data.
+ */
+uint16_t filterTemperature(uint16_t temp) {
+    /* Temp at next position to be used */
+	const uint16_t lastTemp = filterBuffer.buffer[filterBuffer.position]; 
 	
-}filterStruct;
-
-filterStruct filterBuffer;
-
-uint16_t processTemp(uint16_t temp) {
-
-	const uint16_t lastTemp = filterBuffer.buffer[filterBuffer.position]; // Temp at next position to be used.
-	
-	/* Position already filled; remove it from sum */
+	/* If the next position already has a non-zero value 
+       (aka the filter depth has already been reached), move the 
+       window along by removing the oldest element from the sum. */
 	if (lastTemp != 0) {
 		filterBuffer.sum -= lastTemp;
 	}
 	
-	filterBuffer.buffer[filterBuffer.position] = temp; // Store new value in buffer
-
-	filterBuffer.position = (filterBuffer.position + 1) % FILTER_DEPTH; // Increment position index counter 
+    /* Store the new temperature and increment the position */
+	filterBuffer.buffer[filterBuffer.position] = temp; 
+	filterBuffer.position = (filterBuffer.position + 1) % FILTER_DEPTH;
 	
-	/* Increment non-zero sample counter if not already at max */
+	/* Tracks the number of data samples currently in the filter.
+       Maxes at FILTER_DEPTH */
 	if (filterBuffer.num_samples < FILTER_DEPTH) {
 		filterBuffer.num_samples++;
 	}
 	
-	filterBuffer.sum += temp; // Add new temperature to sum 
+    /* Add new temperature to sum */
+	filterBuffer.sum += temp; 
 	
-	return filterBuffer.sum/filterBuffer.num_samples; // Divide sum by num. of samples a.k.a. the average 
+    /* Compute the average and return */
+	return filterBuffer.sum / filterBuffer.num_samples;
 }
 
 /* Set everything to 0 */
 void initFilterBuffer() {
 	memset(&filterBuffer, 0, sizeof(filterBuffer));
-	
 }

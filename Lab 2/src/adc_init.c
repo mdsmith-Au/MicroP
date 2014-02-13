@@ -1,3 +1,8 @@
+/**
+ * @file adc_init.c
+ * Implementation of the ADC configuration.
+ */
+
 #include "adc_init.h"
 
 void ADC_configure(void) {
