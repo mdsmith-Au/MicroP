@@ -46,6 +46,8 @@ int main() {
 	ADC_configure();                     // Configure ADC (temp sensor @ ADC1_IN16)
 	calibrateTempSensor();               // Calibrate temp sensor using factory data
 	initFilterBuffer();                  // Ensure memory is clean in filter
+    
+    turnOnGreenLED();                    // For testing purposes
 	
 	ticks = 0;
 	delay = 0;

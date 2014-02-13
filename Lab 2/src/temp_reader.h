@@ -1,5 +1,5 @@
-#ifndef _TEMP_READER_H
-#define _TEMP_READER_H
+#ifndef _TEMP_READER_H_
+#define _TEMP_READER_H_
 
 /**
  * @file temp_reader.h
@@ -13,7 +13,9 @@
 #define VREF_INT   (float)0xFFF     /* 4095 a.k.a. VDD value as raw integer*/
 #define VREF               3012     /* 3.012V VDD on USB, measured */
 #define VREF_FACTORY       3300     /* 3.3V from Doc ID 022152 Rev 4 */
-#define TEMP_DIFF_FACTORY    80     /* 80C between points, from above document */
+#define TEMP_DIFF_FACTORY    80     /* 80C between points, from above document
+                                       TS_CAL2 = 110 C, TS_CAL1 = 30 C @ VREF_FACTORY
+                                       TEMP_DIFF_FACTORY = TS_CAL2 - TS_CAL1 */
 
 /**
  * Obtains the temperature as measured by the temperature sensor.

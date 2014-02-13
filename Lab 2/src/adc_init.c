@@ -35,6 +35,7 @@ void ADC_configure(void) {
 	ADC_Cmd(ADC1, ENABLE);
 	
 	/* Use ADC1, Temp sensors channel, rank 1 (rank not relevant with only 1 ADC/channel in use)
-       Keep sample time > 10us (actually, 480cycles ~ 32us, but OK) */
+       Keep sample time > 10us (actually, 480cycles ~ 32us, but OK) 
+       Doc 022152 rev 4 (sec 5.3.21) recommends sample time to be 10 us at minimum */
 	ADC_RegularChannelConfig(ADC1, ADC_Channel_TempSensor, 1, ADC_SampleTime_480Cycles);
 }
