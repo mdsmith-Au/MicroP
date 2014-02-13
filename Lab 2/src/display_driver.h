@@ -1,3 +1,8 @@
+/**
+ * @file display_driver.h
+ * Header file for the 7 segment display driver.
+ */
+
 #include <stdio.h>
 #include "gpio_init.h"
 
@@ -30,23 +35,32 @@
 #define SEVEN (TOP | TOP_RIGHT | BOTTOM_RIGHT )
 #define EIGHT (TOP | TOP_LEFT | TOP_RIGHT | MIDDLE | BOTTOM_LEFT | BOTTOM_RIGHT | BOTTOM )
 #define NINE (TOP | TOP_LEFT | TOP_RIGHT | MIDDLE | BOTTOM_RIGHT )
+ 
+/* Pin mapping reference
+ * - Pins 3, 4, 5 are used as select lines for the 
+ *   first, second, and third displays respectively
+ * - Segments and pin associations are as follows
+ *
+ *    Diagram:              Segment:         Pin:
+ *     _____                Top Left         6
+ *    | 10  |               Top              10
+ *  6 |     | 11            Top Right        11
+ *    |__7__|               Middle           7
+ *    |     |               Bottom Left      8
+ *  8 |     | 13  _         Bottom           13
+ *    |_____|    |_|        Bottom Right     9
+ *       9        12        Dot              12
+ *
+ */ 
 
-
-
-/* Select lines: Pins 3,4,5 for displays 1,2,3
- * Segment lines:
-
-   10
-	 _
-6	|	| 11
-	 _ 7
-8	|	| 13
-   _
-   9
-Dot : 12
-		
-		*/
+/**
+ * Prepares a number to send to one of the displays.
+ * @param number the number to send
+ */
 void displayNum(float number);
+
+/**
+ * Selects which display to draw to and sets the appropriate segments.
+ */
 void draw(void);
-static uint16_t convertToGPIO(uint8_t num);
-static uint16_t convertToInt(char num);
+
