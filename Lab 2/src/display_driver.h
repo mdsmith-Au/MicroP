@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "gpio_example.h"
+#include "gpio_init.h"
 
 /* Bank displays are connected to */
 #define GPIO_BANK GPIOE

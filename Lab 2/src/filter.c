@@ -37,7 +37,7 @@ uint16_t processTemp(uint16_t temp) {
 }
 
 /* Set everything to 0 */
-void initializeBuffer(void) {
+void initFilterBuffer() {
 	memset(&filterBuffer, 0, sizeof(filterBuffer));
 	
 }

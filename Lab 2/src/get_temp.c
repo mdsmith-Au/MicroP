@@ -32,8 +32,8 @@ float convertToC(uint16_t temp) {
 	
 }
 
-/* Temperature calibration based on factory data stored in predefined mem locations */
-void calibrateTemp(void) {
+/* Temperature sensor calibration based on factory data stored in predefined mem locations */
+void calibrateTempSensor(void) {
 	uint16_t const * const tempLow = (uint16_t*)0x1FFF7A2C;
 	uint16_t const * const tempHigh = (uint16_t*)0x1FFF7A2E;
 	

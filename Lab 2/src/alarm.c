@@ -15,7 +15,7 @@ int8_t increaseBrightness = 1;
 // we turn off the LED gracefully
 int8_t alarmOn = 0;
 
-void initPWM() {
+void PWM_configure() {
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
 	TIM_OCInitTypeDef TIM_OCInitStruct;
 	

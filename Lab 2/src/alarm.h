@@ -18,7 +18,7 @@
 /**
  * Configures the Pulse Width Modulator.
  */
-void initPWM(void);
+void PWM_configure(void);
 void alarmCheckTemp(float temp);
 static void increasePWMDutyCycle(void);
 static void decreasePWMDutyCycle(void);

@@ -16,6 +16,6 @@
 uint16_t processTemp(uint16_t temp);
 
 /**
- * Zeros out the filter buffer.
+ * Fills the filter buffer with zeroes.
  */ 
-void initializeBuffer(void);
+void initFilterBuffer(void);

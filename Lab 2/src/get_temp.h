@@ -9,5 +9,5 @@
 #define TEMP_DIFF_FACTORY    80     /* 80C between points, from above document */
 
 uint16_t getTemp(void);
-void calibrateTemp(void);
+void calibrateTempSensor(void);
 float convertToC(uint16_t temp);

@@ -8,4 +8,4 @@
 /**
  * Enables and configures the ADC to work with the temperature sensors.
  */
-void ADCConfig(void);
+void ADC_configure(void);

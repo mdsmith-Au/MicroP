@@ -10,7 +10,7 @@
 #include "adc_init.h"
 #include "alarm.h"
 #include "display_driver.h"
-#include "gpio_example.h"
+#include "gpio_init.h"
 #include "temp_processing.h"
 
 /** 
@@ -42,17 +42,16 @@ static volatile uint_fast16_t delay;
  * and controls the main time loop for the SysTick timer.
  */
 int main() {
-	GPIO_example_config();               // Set up GPIO
-
-	ADCConfig();                         // Configure ADC (temp sensor @ ADC1_IN16)
-	calibrateTemp();                     // Calibrate temp sensor using factory data
-	initializeBuffer();                  // Ensure memory is clean in filter
+	GPIO_configure();                    // Set up GPIO
+	ADC_configure();                     // Configure ADC (temp sensor @ ADC1_IN16)
+	calibrateTempSensor();               // Calibrate temp sensor using factory data
+	initFilterBuffer();                  // Ensure memory is clean in filter
 	
 	ticks = 0;
 	delay = 0;
 	SysTick_Config(TICK_DELAY);          // Set up SysTick timer to interrupt every TICK_DELAY
 	
-	initPWM();                           // Configure the Pulse Width Modulator
+	PWM_configure();                     // Configure the Pulse Width Modulator
 	
 	while(1) {		
 		// Loop until SysTick generates an interrupt
