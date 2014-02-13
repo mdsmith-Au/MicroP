@@ -15,26 +15,35 @@
 
 /** 
  * The interval at which the SysTick timer will generate interrupts.
- * Computed as 1/freq * Core_Clock, where freq = 25Hz, Core_Clock = 168MHz.
+ * Computed as 1/sampling_freq * system_core_clock, where...
+ *   sampling_freq     = 25Hz
+ *   system_core_clock = 168MHz
  */
 #define TICK_DELAY 6720000 
+
+void turnOnGreenLED(void);
 
 /** 
  * Software flag set by the SysTick timer when an interrupt is generated 
  * at a fixed interval.
  * @c uint_fast16_t is used so the compiler uses the max speed implementation 
- * dependent on processor architecture 
+ * dependent on processor architecture. The interrupt service routine should 
+ * be as fast as possible, hence the use of this "fast" type.
  */
 static volatile uint_fast16_t ticks;
+
+/**
+ * Controls the rate of how often the LED 7-segment displays are updated.
+ */
 static volatile uint_fast16_t delay;
 
 /**
  * Main entry point. Calls various external functions to set up the hardware
  * and controls the main time loop for the SysTick timer.
  */
-int main() {	
+int main() {
 	GPIO_example_config();               // Set up GPIO
-	GPIO_SetBits(GPIOD, GPIO_Pin_12);    // Light up green LED
+
 	ADCConfig();                         // Configure ADC (temp sensor @ ADC1_IN16)
 	calibrateTemp();                     // Calibrate temp sensor using factory data
 	initializeBuffer();                  // Ensure memory is clean in filter
@@ -61,13 +70,16 @@ int main() {
 		ticks = 0;
 		
 		float temp = getAndAverageTemp();
+        
 		alarmCheckTemp(temp);
 		printf("Temp: %f\n", temp);
 		
+        // Update the LED displays only if the delay time control has elapsed.
 		if (delay == 0) {
 			displayNum(temp);
 		}
 		
+        // Increment the delay time control. 32 was determined by trial-and-error.
 		delay = (delay + 1) % 32;
 	}
 }
@@ -80,4 +92,8 @@ void SysTick_Handler() {
 	ticks = 1;
 }
 
+/* Turns on the green LED light. For testing purposes only. */
+void turnOnGreenLED() {
+    GPIO_SetBits(GPIOD, GPIO_Pin_12);
+}
 
