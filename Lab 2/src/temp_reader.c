@@ -5,10 +5,10 @@
 
 #include "temp_reader.h"
 
-/** Flag to denote if the GLB has been calibrated. */
+/** Flag to denote if the temperature sensor has been calibrated. */
 uint8_t isCalibrated = 0;
 
-/** Slope of the GLB. */
+/** Stores the temperature vs voltage slope. */
 float tempVsVoltageSlope = 0;
 
 uint16_t getTemp() {
