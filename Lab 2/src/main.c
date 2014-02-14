@@ -77,14 +77,14 @@ int main() {
 		alarmCheckTemp(temp);
 		printf("Temp: %f\n", temp);
 		
-    // Update the (number shown on) LED displays only if the delay time control has elapsed.
+        // Update the (number shown on) LED displays only if the delay time control has elapsed.
 		if (delay == 0) {
 			displayNum(temp);
 		}
 		
-    /** Increment the delay time control. 
-     *  32 was determined by trial-and-error; gives about 1.28 seconds between updates
-     */
+        /* Increment the delay time control. 
+         * 32 was determined by trial-and-error; gives about 1.28 seconds between updates
+         */
 		delay = (delay + 1) % 32;
 	}
 }
