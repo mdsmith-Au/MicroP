@@ -9,7 +9,7 @@ void ADC_configure(void) {
 	ADC_InitTypeDef InitStruct;                                            /* Init struct for single ADC */
 	ADC_CommonInitTypeDef InitStructCommon;                                /* Init struct for multiple ADCs */
 	
-  /* Enable clock (using ADC1 because it's the only one tied to the sensor) */
+    /* Enable clock (using ADC1 because it's the only one tied to the sensor) */
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE); 
 	
 	InitStruct.ADC_Resolution             = ADC_Resolution_12b;            /* Set max resolution */

@@ -39,7 +39,7 @@
 void PWM_configure(void);
 
 /**
- * Checks the temperature and triggers the alarm if @var temp is over 
+ * Checks the temperature and triggers the alarm if temp is over 
  * the temperature threshold, or deactivates the alarm if 
  * below the threshold.
  * @param temp the current temperature
