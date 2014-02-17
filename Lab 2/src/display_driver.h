@@ -50,8 +50,8 @@
  *  6 |     | 11            Top Right        11
  *    |__7__|               Middle           7
  *    |     |               Bottom Left      8
- *  8 |     | 13  _         Bottom           13
- *    |_____|    |_|        Bottom Right     9
+ *  8 |     | 13  _         Bottom           9
+ *    |_____|    |_|        Bottom Right     13
  *       9        12        Dot              12
  *
  */ 
