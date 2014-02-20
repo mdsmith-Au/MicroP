@@ -59,7 +59,7 @@ void PWM_configure() {
 	TIM_OCInitStruct.TIM_OCMode               = TIM_OCMode_PWM1;
     TIM_OCInitStruct.TIM_OutputState          = TIM_OutputState_Enable;
 	// By default, leave LED disabled -> no pulse (0% duty cycle)
-    TIM_OCInitStruct.TIM_Pulse                = 0;
+    TIM_OCInitStruct.TIM_Pulse                = 2000;
 	// Polarity_high means active high on (3V). Polarity low would be off when 100% duty cycle
     TIM_OCInitStruct.TIM_OCPolarity           = TIM_OCPolarity_High;
 	
