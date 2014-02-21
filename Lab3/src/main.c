@@ -30,7 +30,7 @@ int main()
 	GPIO_configure();
 	PWM_configure();
 	
-	//uint8_t test = 0;
+	uint8_t test = 0;
   
   ticks = 0;
 	SysTick_Config(TICK_DELAY);    
@@ -38,15 +38,15 @@ int main()
 	Accelerometer_configure();
   
 	while(1){
-    /*(
-    int buffer[3];
+    
+    /*int buffer[3];
     LIS302DL_ReadACC(buffer);
     
     for (int i = 0; i < sizeof(buffer)/sizeof(int); i++) {
       printf("buf[%i] = %i\n", i, buffer[i]);
     }*/
-    
-	/*	if (test == 0)
+    /*
+		if (test == 0)
 		{
 			TIM1 -> CCR4 = 1500;
 			test = 1;
@@ -68,7 +68,6 @@ int main()
 		ticks = 0;
 		
 
-    Accelerometer_calibrate();
   
   
   }

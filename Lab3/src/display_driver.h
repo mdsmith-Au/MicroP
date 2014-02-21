@@ -13,7 +13,7 @@
 #define GPIO_BANK GPIOE
 
 /* Which display is on which pin */
-#define DISPLAY_ONE GPIO_Pin_3
+#define DISPLAY_ONE GPIO_Pin_2
 #define DISPLAY_TWO GPIO_Pin_4
 #define DISPLAY_THREE GPIO_Pin_5
 

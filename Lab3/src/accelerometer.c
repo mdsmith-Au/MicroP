@@ -1,5 +1,7 @@
 #include "accelerometer.h"
 
+void Accelerometer_set_data_ready(uint8_t state);
+
 void Accelerometer_configure() {
 
 	LIS302DL_InitTypeDef initStruct;
@@ -39,6 +41,8 @@ void Accelerometer_configure() {
 	filterStruct.HighPassFilter_Interrupt = LIS302DL_HIGHPASSFILTERINTERRUPT_OFF;
 	LIS302DL_FilterConfig(&filterStruct);
   
+  //Enable data ready
+  Accelerometer_set_data_ready(1);
 }
 
 /* Used once to calibrate the accelerometer in debug mode.
@@ -55,5 +59,26 @@ void Accelerometer_calibrate(){
     printf("%i,%i,%i\n", buffer[0],buffer[1],buffer[2]);
 }
 
+
+/* Set the data ready bit.
+ * State = 1 : set data ready on INT1
+ * State = 0 : disable data ready on INT1
+ */
+void Accelerometer_set_data_ready(uint8_t state) {
+  
+  uint8_t reg_value;
+  
+  // Data ready on INT1
+  if (state == 1) {
+    reg_value = 0x4;
+  }
+  // No data ready interrupts
+  else {
+    reg_value = 0x0;
+  }
+  
+  // Write setting to register
+  LIS302DL_Write(&reg_value, LIS302DL_CTRL_REG3_ADDR, sizeof(uint8_t));
+}
 
 

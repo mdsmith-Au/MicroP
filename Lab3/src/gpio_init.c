@@ -20,7 +20,7 @@
  * GPIO_Speed : Slew rate - how hard GPIO drives the pin (rise time).
  */
 void GPIO_configure() {
-	GPIO_InitTypeDef GPIO_InitStructure, GPIO_InitStructure2, GPIO_InitStructure3;
+	GPIO_InitTypeDef GPIO_InitStructure, GPIO_InitStructure2, GPIO_InitStructure3, GPIO_InitStructure4;
 	
 	// Enable clock to power GPIOD and GPIOE bank
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_GPIOE, ENABLE);
@@ -41,10 +41,10 @@ void GPIO_configure() {
 	GPIO_InitStructure2.GPIO_PuPd  = GPIO_PuPd_NOPULL;
 	GPIO_Init(GPIOD, &GPIO_InitStructure2);
 	
-    /* Pins 3 - 5  : select
+    /* Pins 2, 4 - 5  : select
        Pins 6 - 13 : segment
        Let them be used for powering display */
-	GPIO_InitStructure3.GPIO_Pin   = GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13;
+	GPIO_InitStructure3.GPIO_Pin   = GPIO_Pin_2 | GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13;
 	GPIO_InitStructure3.GPIO_Mode  = GPIO_Mode_OUT;
 	GPIO_InitStructure3.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStructure3.GPIO_Speed = GPIO_Speed_100MHz;      // Output should change as fast as possible (max: 100MHz)
@@ -54,4 +54,13 @@ void GPIO_configure() {
 	// Connect GPIODE Pin 14 to TIM 1 for PWM (TIM1 because it (and only it) is wired to that pin
 	// See STM32F4 Discovery manual, Hardware and Layout, Table 5 (MCU pin description versus board function)
 	GPIO_PinAFConfig(GPIOE, GPIO_PinSource14, GPIO_AF_TIM1);
+  
+  
+  // Pin E0 is INT1 (for data ready) on MEMS sensor
+  GPIO_InitStructure4.GPIO_Pin   = GPIO_Pin_0;
+	GPIO_InitStructure4.GPIO_Mode  = GPIO_Mode_IN; 
+	GPIO_InitStructure4.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure4.GPIO_Speed = GPIO_Speed_100MHz; 
+	GPIO_InitStructure4.GPIO_PuPd  = GPIO_PuPd_NOPULL;
+	GPIO_Init(GPIOE, &GPIO_InitStructure4);
 }
