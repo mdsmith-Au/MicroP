@@ -7,7 +7,7 @@ void Accelerometer_configure() {
 	LIS302DL_FilterConfigTypeDef filterStruct;
 	
 	/* Basic configuration */
-	// Want to use all axes
+	// Want to use all axes (enable Data Ready for all)
 	initStruct.Axes_Enable = LIS302DL_XYZ_ENABLE;
 	// Use lower scale for more precision (18 vs 72 mg/digit when reading)
 	initStruct.Full_Scale = LIS302DL_FULLSCALE_2_3;
@@ -32,9 +32,9 @@ void Accelerometer_configure() {
 	// @ 100Hz -> filter out anything that moves > 2Hz
 	filterStruct.HighPassFilter_CutOff_Frequency = LIS302DL_HIGHPASSFILTER_LEVEL_0;
 	// Actually use filter
-	//filterStruct.HighPassFilter_Data_Selection = LIS302DL_FILTEREDDATASELECTION_OUTPUTREGISTER;
+	filterStruct.HighPassFilter_Data_Selection = LIS302DL_FILTEREDDATASELECTION_OUTPUTREGISTER;
   // ** Or, if it should be disabled during testing, replace with the below **
-  filterStruct.HighPassFilter_Data_Selection = LIS302DL_FILTEREDDATASELECTION_BYPASSED;
+  //filterStruct.HighPassFilter_Data_Selection = LIS302DL_FILTEREDDATASELECTION_BYPASSED;
 	// Don't need Free-Fall/Wake-Up
 	filterStruct.HighPassFilter_Interrupt = LIS302DL_HIGHPASSFILTERINTERRUPT_OFF;
 	LIS302DL_FilterConfig(&filterStruct);
