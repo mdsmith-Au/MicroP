@@ -17,8 +17,17 @@ int main()
 	
 	Accelerometer_configure();
 	
+  
 	while(1){
-		if (test == 0)
+    
+    int buffer[3];
+    LIS302DL_ReadACC(buffer);
+    
+    for (int i = 0; i < sizeof(buffer)/sizeof(int); i++) {
+      printf("buf[%i] = %i\n", i, buffer[i]);
+    }
+    
+	/*	if (test == 0)
 		{
 			TIM1 -> CCR4 = 1500;
 			test = 1;
@@ -32,7 +41,7 @@ int main()
 		
 		TIM1 -> CCR4 = 1500+(2*400);
 		test = 0;
-	}
+	}*/
 }
 }
 

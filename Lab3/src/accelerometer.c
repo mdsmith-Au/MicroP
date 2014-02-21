@@ -34,9 +34,10 @@ void Accelerometer_configure() {
 	filterStruct.HighPassFilter_CutOff_Frequency = LIS302DL_HIGHPASSFILTER_LEVEL_0;
 	// Actually use filter
 	filterStruct.HighPassFilter_Data_Selection = LIS302DL_FILTEREDDATASELECTION_OUTPUTREGISTER;
-	
-	filterStruct.HighPassFilter_Interrupt
-	
+	// Don't need Free-Fall/Wake-Up
+	filterStruct.HighPassFilter_Interrupt = LIS302DL_HIGHPASSFILTERINTERRUPT_OFF;
+	LIS302DL_FilterConfig(&filterStruct);
+  
 }
 
 
