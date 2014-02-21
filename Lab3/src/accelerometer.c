@@ -1,6 +1,5 @@
 #include "accelerometer.h"
 
-
 void Accelerometer_configure() {
 
 	LIS302DL_InitTypeDef initStruct;
@@ -33,11 +32,27 @@ void Accelerometer_configure() {
 	// @ 100Hz -> filter out anything that moves > 2Hz
 	filterStruct.HighPassFilter_CutOff_Frequency = LIS302DL_HIGHPASSFILTER_LEVEL_0;
 	// Actually use filter
-	filterStruct.HighPassFilter_Data_Selection = LIS302DL_FILTEREDDATASELECTION_OUTPUTREGISTER;
+	//filterStruct.HighPassFilter_Data_Selection = LIS302DL_FILTEREDDATASELECTION_OUTPUTREGISTER;
+  // ** Or, if it should be disabled during testing, replace with the below **
+  filterStruct.HighPassFilter_Data_Selection = LIS302DL_FILTEREDDATASELECTION_BYPASSED;
 	// Don't need Free-Fall/Wake-Up
 	filterStruct.HighPassFilter_Interrupt = LIS302DL_HIGHPASSFILTERINTERRUPT_OFF;
 	LIS302DL_FilterConfig(&filterStruct);
   
+}
+
+/* Used once to calibrate the accelerometer in debug mode.
+ * Run for 5 - 10 seconds in each position from Table 2
+ * in ST Doc ID 17289 Rev 1 manually.  Should be called
+ * at a frequency of 100Hz.  Additionally, the high pass
+ * filter should be disabled to allow for raw data
+ * collection. */
+void Accelerometer_calibrate(){
+ 
+    int buffer[3];
+    LIS302DL_ReadACC(buffer);
+      
+    printf("%i,%i,%i\n", buffer[0],buffer[1],buffer[2]);
 }
 
 
