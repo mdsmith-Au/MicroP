@@ -6,6 +6,7 @@
 #include "stm32f4xx_rcc.h"
 // NVIC 
 #include "misc.h"
+#include "accelerometer.h"
 
 void Interrupts_configure(void);
 #endif

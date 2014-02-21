@@ -66,19 +66,35 @@ void Accelerometer_calibrate(){
  */
 void Accelerometer_set_data_ready(uint8_t state) {
   
-  uint8_t reg_value;
+  uint8_t ctrl_reg_value;
   
   // Data ready on INT1
   if (state == 1) {
-    reg_value = 0x4;
+    ctrl_reg_value = 0x4;
   }
   // No data ready interrupts
   else {
-    reg_value = 0x0;
+    ctrl_reg_value = 0x0;
   }
   
   // Write setting to register
-  LIS302DL_Write(&reg_value, LIS302DL_CTRL_REG3_ADDR, sizeof(uint8_t));
+  LIS302DL_Write(&ctrl_reg_value, LIS302DL_CTRL_REG3_ADDR, sizeof(uint8_t));
+
+ 
 }
+
+void Accelerometer_clear_data_ready() {
+  
+  // Read existing data
+  uint8_t status_reg_value;
+  LIS302DL_Read(&status_reg_value, LIS302DL_STATUS_REG_ADDR, sizeof(uint8_t));
+  
+  // Clear last 4 bits (i.e. only the ready ones)
+  status_reg_value &= 0xF0;
+  LIS302DL_Write(&status_reg_value, LIS302DL_STATUS_REG_ADDR, sizeof(uint8_t));
+}
+
+
+ 
 
 

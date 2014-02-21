@@ -7,6 +7,7 @@
 #include "motor.h"
 #include "gpio_init.h"
 #include "accelerometer.h"
+#include "interrupts.h"
 
 /** 
  * The interval at which the SysTick timer will generate interrupts.
@@ -36,10 +37,14 @@ int main()
 	SysTick_Config(TICK_DELAY);    
 	
 	Accelerometer_configure();
+  Interrupts_configure();
   
-	while(1){
+  //int buffer[3];
+  //LIS302DL_ReadACC(buffer);
+  
+	/*while(1){
     
-    /*int buffer[3];
+    int buffer[3];
     LIS302DL_ReadACC(buffer);
     
     for (int i = 0; i < sizeof(buffer)/sizeof(int); i++) {
@@ -65,12 +70,8 @@ int main()
   while(!ticks);
 		
 		// Reset the tick flag after interrupt is handled.
-		ticks = 0;
-		
+	ticks = 0;	
 
-  
-  
-  }
 }
 
 
@@ -81,7 +82,6 @@ int main()
 void SysTick_Handler() {
 	ticks = 1;
 }
-
 
 
 

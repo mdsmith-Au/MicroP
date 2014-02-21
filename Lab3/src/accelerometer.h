@@ -8,4 +8,5 @@
 
 void Accelerometer_configure(void);
 void Accelerometer_calibrate(void);
+void Accelerometer_clear_data_ready(void);
 #endif
