@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include "gpio_init.h"
+#include "math.h"
 
 /* Bank displays are connected to */
 #define GPIO_BANK GPIOE

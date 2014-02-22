@@ -1,6 +1,10 @@
 #include "accelerometer.h"
 
-void Accelerometer_set_data_ready(uint8_t state);
+void Accelerometer_data_ready(uint8_t state);
+
+// Filter structs
+FilterStruct rollFilter;
+FilterStruct pitchFilter;
 
 void Accelerometer_configure() {
 
@@ -42,7 +46,11 @@ void Accelerometer_configure() {
 	LIS302DL_FilterConfig(&filterStruct);
   
   //Enable data ready
-  Accelerometer_set_data_ready(1);
+  Accelerometer_data_ready(1);
+  
+  // Clear filter
+  initFilterBuffer(&rollFilter);
+  initFilterBuffer(&pitchFilter);
 }
 
 /* Used once to calibrate the accelerometer in debug mode.
@@ -63,10 +71,12 @@ void Accelerometer_calibrate(){
 /* Set the data ready bit.
  * State = 1 : set data ready on INT1
  * State = 0 : disable data ready on INT1
+ * This tells the sensor whether or not to send interrupts
+ * when it has collected new data.
  */
-void Accelerometer_set_data_ready(uint8_t state) {
+void Accelerometer_data_ready(uint8_t state) {
   
-  uint8_t ctrl_reg_value;
+  uint8_t ctrl_reg_value = 0x0;
   
   // Data ready on INT1
   if (state == 1) {
@@ -83,15 +93,30 @@ void Accelerometer_set_data_ready(uint8_t state) {
  
 }
 
-void Accelerometer_clear_data_ready() {
+/* Equations 8 and 9 in ST Doc ID 17289 Rev. 1
+ * Tilt Angle Application Notes
+ * Makes use of the three axes to calculate pitch and roll
+ * Runs data through an SMA filter before returning it */
+int Accelerometer_get_pitch(int x, int y, int z) {
+  return filterSMA((int)atan_table( x / sqrt( pow(y,2) + pow(z,2))), &pitchFilter);
+}
+
+int Accelerometer_get_roll(int x, int y, int z) {
+  return filterSMA((int)atan_table( y / sqrt( pow(x,2) + pow(z,2))), &rollFilter);
+}
+
+
+/* Get acceleration.  */
+// TODO: Add calibration matrix
+void Accelerometer_get_data(int* x, int* y, int* z) {
   
-  // Read existing data
-  uint8_t status_reg_value;
-  LIS302DL_Read(&status_reg_value, LIS302DL_STATUS_REG_ADDR, sizeof(uint8_t));
+  // Get data from sensor
+  int buffer[3];
+  LIS302DL_ReadACC(buffer);
+  *x = buffer[0];
+  *y = buffer[1];
+  *z = buffer[2];
   
-  // Clear last 4 bits (i.e. only the ready ones)
-  status_reg_value &= 0xF0;
-  LIS302DL_Write(&status_reg_value, LIS302DL_STATUS_REG_ADDR, sizeof(uint8_t));
 }
 
 

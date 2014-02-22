@@ -59,7 +59,7 @@ void PWM_configure() {
 	TIM_OCInitStruct.TIM_OCMode               = TIM_OCMode_PWM1;
     TIM_OCInitStruct.TIM_OutputState          = TIM_OutputState_Enable;
 	// By default, leave LED disabled -> no pulse (0% duty cycle)
-    TIM_OCInitStruct.TIM_Pulse                = 2000;
+    TIM_OCInitStruct.TIM_Pulse                = 0;
 	// Polarity_high means active high on (3V). Polarity low would be off when 100% duty cycle
     TIM_OCInitStruct.TIM_OCPolarity           = TIM_OCPolarity_High;
 	
@@ -74,4 +74,12 @@ void PWM_configure() {
 	TIM_CtrlPWMOutputs(TIM1, ENABLE);
 	/* Enable counter -> start */
 	TIM_Cmd(TIM1, ENABLE);
+}
+
+void motor_move_to_angle(int angle) {
+  // Calculate duty cycle
+  uint16_t duty = NEUTRAL + (angle*DEGREE_INCREMENT);
+  // Write to register
+  TIM1->CCR4 = duty;
+  
 }

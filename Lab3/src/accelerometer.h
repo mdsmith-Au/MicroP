@@ -6,7 +6,18 @@
 // printf
 #include <stdio.h>
 
+// Math + lookup table arctan
+#include "math.h"
+#include "atan_LUT.h"
+
+// SMA filter
+#include "filter.h"
+
 void Accelerometer_configure(void);
 void Accelerometer_calibrate(void);
-void Accelerometer_clear_data_ready(void);
+int Accelerometer_get_pitch(int x, int y, int z);
+int Accelerometer_get_roll(int x, int y, int z);
+void Accelerometer_get_data(int* x, int* y, int* z);
+
+
 #endif

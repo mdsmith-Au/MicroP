@@ -1,0 +1,125 @@
+#include "interrupts_config.h"
+
+void mems_interrupt_config(void);
+void tim3_interrupt_config(void);
+void set_nvic_priority(void);
+
+uint8_t NVIC_PRIORITY_SET = 0;
+
+/* Configure interrupts to work with TIM3 and MEMS sensor.
+ * Note that the accelerometer must have been already set up. */
+void Interrupts_configure() {
+  
+  mems_interrupt_config();
+  tim3_interrupt_config();
+}
+
+
+void mems_interrupt_config() {
+  
+  // Enable SYSCFG
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+  // Enable interrupt on E0 for MEMS (INT1)
+  SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource0);
+  
+  // Configure interrupts
+  EXTI_InitTypeDef EXTI_InitStruct;
+  
+  // Pin E0
+  EXTI_InitStruct.EXTI_Line = EXTI_Line0;
+  // Use interrupts (as opposed to events)
+  EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
+  // Trigger interrupt on rising edge -> data ready.  But could also use falling
+  EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising;
+  // Enable interrupt
+  EXTI_InitStruct.EXTI_LineCmd = ENABLE;
+  EXTI_Init(&EXTI_InitStruct);
+  
+  // Configure NVIC
+  set_nvic_priority();
+  NVIC_InitTypeDef NVIC_InitStruct;
+  // Use external interrupt channel 0 -> for pin 0
+  NVIC_InitStruct.NVIC_IRQChannel = EXTI0_IRQn;
+  // Priority settings. Give 4 .. not the highest, but fair
+  NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 4;
+  // Don't need sub priority
+  NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0;
+  // Enable it
+  NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStruct);
+  
+  /* Dummy read (via interrupt) to get interrupts going.
+   * Otherwise, MEMS never generates one */
+  EXTI_GenerateSWInterrupt(EXTI_Line0);
+}
+
+void tim3_interrupt_config() {
+  
+/* APB1 Max 142 Mhz
+ * We know
+ * TIM3CLK = 2 * PCLK1  (PCLK1 = APB1 clock -> clock of bus TIM3 is on)
+ * but  PCLK1 = HCLK / 4
+ * thus TIM3CLK = HCLK / 2 = SystemCoreClock /2
+ * There is also the counter clock (CC), output clock and prescaler
+ 
+ * Prescaler = (TIM4CLK / TIM4 counter clock) - 1
+ * Prescaler = ((SystemCoreClock /2) / TIM4 counter clock) - 1
+
+ * Output clock period = (TIM4 counter clock / TIM4 output clock) - 1
+ 
+ * We chose 10Mhz counter clock, 10Khz output clock (desired) -> period = 100
+ 
+ * For details, see Doc ID 018909 Rev 6 and Doc ID 022152 Rev 4
+ */
+	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
+	
+	// Enable clock to TIM4
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+	
+	// Prescaler set dynamically based on Clock Freq, useful if we change it later
+  // According to Doc 018909 rev 6 (p. 627), sec 18.4.11:
+  // Counter clock frequency CK_CNT = fCK_PSC / (PSC[15:0] + 1).
+  // Hence, we must subtract 1 so that our prescaler value is simply fCK_PSC / PSC[15:0]
+	uint16_t PrescalerValue                   = (uint16_t)((SystemCoreClock/2)/1000000) - 1;
+	
+	TIM_TimeBaseInitStruct.TIM_Period         = PERIOD;
+  TIM_TimeBaseInitStruct.TIM_Prescaler      = PrescalerValue;
+  
+	/* No need to further divide the clock in our case */   
+  TIM_TimeBaseInitStruct.TIM_ClockDivision  = 0;
+  TIM_TimeBaseInitStruct.TIM_CounterMode    = TIM_CounterMode_Up;
+	/* Note: TIM_RepetitionCounter does not apply to TIM4 */
+	
+	/* Send struct to be processed */
+	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseInitStruct);
+	
+	/* Enable the period preload just in case */
+	TIM_ARRPreloadConfig(TIM3, ENABLE);
+  
+  // NVIC config
+  set_nvic_priority();
+  NVIC_InitTypeDef NVIC_InitStruct;
+  // Use TIM3 interrupt
+  NVIC_InitStruct.NVIC_IRQChannel = TIM3_IRQn;
+  // Priority settings. Give 5 .. below accelerometer
+  NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 5;
+  // Don't really need sub priority
+  NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0;
+  // Enable it
+  NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStruct);
+  
+  // Now tell the timer to enable interrupts
+  TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
+  
+	/* Enable counter -> start */
+	TIM_Cmd(TIM3, ENABLE);
+}
+
+void set_nvic_priority() {
+  if (!NVIC_PRIORITY_SET) {
+    // Priority group: 3 bits for pre-emption priority, 1 bit for subpriority
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_3);
+    NVIC_PRIORITY_SET = 1;
+  }
+}

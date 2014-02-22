@@ -9,7 +9,6 @@
 #include "display_driver.h"
 
 static uint16_t convertToGPIO(uint8_t num);
-static uint16_t convertToInt(char num);
 
 // Numbers to be drawn on display
 uint16_t first_GBL, second_GBL, third_GBL;
@@ -20,25 +19,19 @@ uint8_t turn = 0;
 /* Takes a float and prepares it for display.
  * Does not actually drive the display */
 void displayNum(float number) {
-	char string[4];
+
+  // Remove -ve if present since we can't display it
+  number = fabs(number);
   
-	/* Converts the float to a string where we can extract individual digits
-	 * .1 specifies only 1 digit after decimal
-	 * Output ex. : 38.1 
-	 * Note:  sprintf automatically rounds */
-	sprintf(string, "%.1f", number);
-	
-    // Decimal point @ 2 is not an integer
-	uint8_t first    = convertToInt(string[0]);
-	uint8_t second   = convertToInt(string[1]);
-	uint8_t third    = convertToInt(string[3]);
+	uint8_t first    = number/10;
+	uint8_t second   = (int)number % 10;
+	uint8_t third    = ((int)number * 10) % 10;
 	
 	// Convert to pin setting	
 	first_GBL        = convertToGPIO(first);
 	second_GBL       = convertToGPIO(second);
 	third_GBL        = convertToGPIO(third);
 	
-	/* @TODO: Why when using optimization does the code freeze at the line below (literally at the bracket)? */
 }
 
 /* Sends a number previously given in displayNum() to the display */
@@ -96,16 +89,4 @@ static uint16_t convertToGPIO(uint8_t num) {
 		return NINE;
 	}
 	return ZERO;         // Invalid number, just set to zero
-}
-
-/**
- * Returns 8-bit integer representation of a character
- * if the char is between 0 and 9 only. 
- * Can simply subtract 48 from the char due to ASCII ordering
- * (char '0' has ASCII code 48, char '1' has ASCII code 49, etc...)
- * @param num a numeric character
- * @return the integer equivalent of @var num
- */
-static uint16_t convertToInt(char num) {
-	return num - 48;
 }

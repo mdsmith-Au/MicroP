@@ -5,7 +5,7 @@
  * @file filter.h
  * Header file for the filter.
  * The filter is used to smooth out the noisy components that may be 
- * introduced while the temperature sensor is reading values.
+ * introduced while reading sensor data..
  */
 
 /* @TODO #ifndef */
@@ -27,20 +27,20 @@
 typedef struct {
   uint8_t position;                   ///< Index pointing to next position to be filled
 	uint8_t num_samples;                ///< Number of samples in buffer.  Used when filling for the first time up to FILTER_DEPTH
-	uint16_t buffer[FILTER_DEPTH];      ///< Buffer storing old (and new) temperature values for averaging
+	int buffer[FILTER_DEPTH];      ///< Buffer storing old (and new) temperature values for averaging
 	int sum;                            ///< Sum of all values in buffer
 } FilterStruct;
 
 /**
- * Temperature filtering algorithm.
- * @param temp a temperature data point
+ * Sensor data filtering algorithm.
+ * @param data New data point to be filterd
  * @return the filtered data point (averaged)
  */
-uint16_t filterTemperature(uint16_t temp);
+int filterSMA(int data, FilterStruct *filterBuffer);
 
 /**
  * Fills the filter buffer with zeroes.
  */ 
-void initFilterBuffer(void);
+void initFilterBuffer(FilterStruct *filterBuffer);
 
 #endif
