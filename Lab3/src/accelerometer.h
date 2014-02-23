@@ -1,12 +1,14 @@
 #ifndef _ACCELEROMETER_H
 #define _ACCELEROMETER_H
 
-// Accelerometer driver
+/* Accelerometer driver
+ * Note that #define USE_DEFAULT_TIMEOUT_CALLBACK  was uncommented in the driver
+   per instructions included with it */
 #include "stm32f4_discovery_lis302dl.h"
-// printf
+// For print statements
 #include <stdio.h>
 
-// Math + lookup table arctan
+// Math libraries + lookup table version of the arctan function
 #include "math.h"
 #include "atan_LUT.h"
 
@@ -15,7 +17,7 @@
 
 /* Calibration settings
  * Derived manually for this board using Appendix A
- * in ST Doc ID 17289 Rev 1
+ * in ST Doc ID 17289 Rev 1 via MATLAB
  * Using floats because extreme accuracy is not the
  * most critical and they are faster than doubles */
 #define ACC11 (float)1.003550281724753
@@ -32,10 +34,15 @@
 #define ACC20 (float)15.741238837260321
 #define ACC30 (float)99.380766695848592
 
+// Sets up the accelerometer to standard settings
 void Accelerometer_configure(void);
+// A debug method to calibrate the accelerometer and print raw data.  Do not
+// use during normal runtime
 void Accelerometer_calibrate(void);
+// Return pitch and roll based on accelerometer x,y and z data in mg.
 int Accelerometer_get_pitch(int x, int y, int z);
 int Accelerometer_get_roll(int x, int y, int z);
+// Writes x/y/z acceleration in mg to parameters
 void Accelerometer_get_data(int* x, int* y, int* z);
 
 

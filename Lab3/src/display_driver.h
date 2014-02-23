@@ -41,7 +41,7 @@
 #define NINE (TOP | TOP_LEFT | TOP_RIGHT | MIDDLE | BOTTOM_RIGHT )
  
 /* Pin mapping reference
- * - Pins 3, 4, 5 are used as select lines for the 
+ * - Pins 2, 4, 5 are used as select lines for the 
  *   first, second, and third displays respectively
  * - Segments and pin associations are as follows
  *

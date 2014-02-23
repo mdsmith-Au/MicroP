@@ -30,21 +30,20 @@ void PWM_configure() {
 	TIM_OCInitTypeDef TIM_OCInitStruct;
 	
 	// Enable clock to TIM1
-	
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
 	
 	// Prescaler set dynamically based on Clock Freq, useful if we change it later
-    // According to Doc 018909 rev 6 (p. 627), sec 18.4.11:
-    // Counter clock frequency CK_CNT = fCK_PSC / (PSC[15:0] + 1).
-    // Hence, we must subtract 1 so that our prescaler value is simply fCK_PSC / PSC[15:0]
+  // According to Doc 018909 rev 6 (p. 627), sec 18.4.11:
+  // Counter clock frequency CK_CNT = fCK_PSC / (PSC[15:0] + 1).
+  // Hence, we must subtract 1 so that our prescaler value is simply fCK_PSC / PSC[15:0]
 	uint16_t PrescalerValue                   = (uint16_t)((SystemCoreClock)/1000000) - 1;
 	
 	TIM_TimeBaseInitStruct.TIM_Period         = ARR;
-    TIM_TimeBaseInitStruct.TIM_Prescaler      = PrescalerValue;
+  TIM_TimeBaseInitStruct.TIM_Prescaler      = PrescalerValue;
   
 	/* No need to further divide the clock in our case */   
-    TIM_TimeBaseInitStruct.TIM_ClockDivision  = 0;
-    TIM_TimeBaseInitStruct.TIM_CounterMode    = TIM_CounterMode_Up;
+  TIM_TimeBaseInitStruct.TIM_ClockDivision  = 0;
+  TIM_TimeBaseInitStruct.TIM_CounterMode    = TIM_CounterMode_Up;
 	/* Note: TIM_RepetitionCounter does not apply in our case */
 	
 	/* Send struct to be processed */
@@ -52,16 +51,16 @@ void PWM_configure() {
 	
 	/* Now set up PWM1 for the specific channel we need - CH 4 */
 	
-    /* PWM has two modes:
-     * Mode 1 - while the counter is TIMx_CNT < TIMx_CCRx, the PWM output is high.
-     * Mode 2 - while the counter is TIMx_CNT < TIMx_CCRx, the PWM output is low.
-     */
+  /* PWM has two modes:
+   * Mode 1 - while the counter is TIMx_CNT < TIMx_CCRx, the PWM output is high.
+   * Mode 2 - while the counter is TIMx_CNT < TIMx_CCRx, the PWM output is low.
+   */
 	TIM_OCInitStruct.TIM_OCMode               = TIM_OCMode_PWM1;
-    TIM_OCInitStruct.TIM_OutputState          = TIM_OutputState_Enable;
+  TIM_OCInitStruct.TIM_OutputState          = TIM_OutputState_Enable;
 	// By default, leave LED disabled -> no pulse (0% duty cycle)
-    TIM_OCInitStruct.TIM_Pulse                = 0;
+  TIM_OCInitStruct.TIM_Pulse                = 0;
 	// Polarity_high means active high on (3V). Polarity low would be off when 100% duty cycle
-    TIM_OCInitStruct.TIM_OCPolarity           = TIM_OCPolarity_High;
+  TIM_OCInitStruct.TIM_OCPolarity           = TIM_OCPolarity_High;
 	
 	/* Process struct for channel 4 */
 	TIM_OC4Init(TIM1, &TIM_OCInitStruct);

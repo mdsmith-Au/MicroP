@@ -15,4 +15,7 @@
 #define PERIOD 6250
 
 void Interrupts_configure(void);
+
+// Set NVIC priority group, but only if not already set
+void set_nvic_priority(void);
 #endif

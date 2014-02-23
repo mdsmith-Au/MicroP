@@ -1,12 +1,16 @@
 #include "interrupts_config.h"
 
-void mems_interrupt_config(void);
-void tim3_interrupt_config(void);
-void set_nvic_priority(void);
+// Private methods
 
+// Set up (external) interrupt for accelerometer
+void mems_interrupt_config(void);
+// Set up TIM3 interrupt
+void tim3_interrupt_config(void);
+
+// Global variable used to define whether or not NVIC prio. group has already been set
 uint8_t NVIC_PRIORITY_SET = 0;
 
-/* Configure interrupts to work with TIM3 and MEMS sensor.
+/* Configure interrupts to work with both TIM3 and MEMS sensor.
  * Note that the accelerometer must have been already set up. */
 void Interrupts_configure() {
   
@@ -48,8 +52,10 @@ void mems_interrupt_config() {
   NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStruct);
   
-  /* Dummy read (via interrupt) to get interrupts going.
-   * Otherwise, MEMS never generates one */
+  /* Execute a read (via interrupt) to get interrupts going.
+   * Otherwise, it is already high, thus no interrupt is
+   * generated on the rising edge. Reads clear the bit holding
+   * the line high.   */
   EXTI_GenerateSWInterrupt(EXTI_Line0);
 }
 
@@ -68,12 +74,13 @@ void tim3_interrupt_config() {
  * Output clock period = (TIM4 counter clock / TIM4 output clock) - 1
  
  * We chose 1Mhz counter clock, 160Hz output clock (desired) -> period = 6250
- 
- * For details, see Doc ID 018909 Rev 6 and Doc ID 022152 Rev 4
+ * 160Hz tested to work well with the display by trial and error.
+  
+ * For details about the equations, see Doc ID 018909 Rev 6 and Doc ID 022152 Rev 4
  */
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
 	
-	// Enable clock to TIM4
+	// Enable clock to TIM3
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 	
 	// Prescaler set dynamically based on Clock Freq, useful if we change it later
@@ -88,7 +95,7 @@ void tim3_interrupt_config() {
 	/* No need to further divide the clock in our case */   
   TIM_TimeBaseInitStruct.TIM_ClockDivision  = 0;
   TIM_TimeBaseInitStruct.TIM_CounterMode    = TIM_CounterMode_Up;
-	/* Note: TIM_RepetitionCounter does not apply to TIM4 */
+	/* Note: TIM_RepetitionCounter does not apply to TIM3 */
 	
 	/* Send struct to be processed */
 	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseInitStruct);
@@ -116,7 +123,12 @@ void tim3_interrupt_config() {
 	TIM_Cmd(TIM3, ENABLE);
 }
 
+/* NVIC priority bits should be set before using NVIC, but we don't want to set
+ * them manually if different parts of the code use the NVIC, since we could have one
+ * piece of code setting it to one value and another setting it to another value.
+ * Hence, this method which sets it once and only once. */
 void set_nvic_priority() {
+
   if (!NVIC_PRIORITY_SET) {
     // Priority group: 3 bits for pre-emption priority, 1 bit for subpriority
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_3);

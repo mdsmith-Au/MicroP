@@ -1,8 +1,9 @@
 #include "accelerometer.h"
 
+// Private method to enable/disable interrupts on the accelerometer
 void Accelerometer_data_ready(uint8_t state);
 
-// Filter structs
+// Filter structs for both roll and pitch
 FilterStruct rollFilter;
 FilterStruct pitchFilter;
 
@@ -23,7 +24,7 @@ void Accelerometer_configure() {
 	initStruct.Power_Mode = LIS302DL_LOWPOWERMODE_ACTIVE;
 	// Self test not used
 	initStruct.Self_Test = LIS302DL_SELFTEST_NORMAL;
-	// Send struct for processing
+
 	LIS302DL_Init(&initStruct);
 	
 	/* Interrupt configuration */
@@ -32,6 +33,7 @@ void Accelerometer_configure() {
 	interruptStruct.SingleClick_Axes = LIS302DL_CLICKINTERRUPT_XYZ_DISABLE;
 	// Don't need to latch interrupts
 	interruptStruct.Latch_Request = LIS302DL_INTERRUPTREQUEST_NOTLATCHED;
+  
 	LIS302DL_InterruptConfig(&interruptStruct);
 	
 	/* Filter Config */
@@ -43,9 +45,10 @@ void Accelerometer_configure() {
   //filterStruct.HighPassFilter_Data_Selection = LIS302DL_FILTEREDDATASELECTION_BYPASSED;
 	// Don't need Free-Fall/Wake-Up
 	filterStruct.HighPassFilter_Interrupt = LIS302DL_HIGHPASSFILTERINTERRUPT_OFF;
+  
 	LIS302DL_FilterConfig(&filterStruct);
   
-  //Enable data ready
+  // Enable data ready interrupts
   Accelerometer_data_ready(1);
   
   // Clear filter
@@ -68,7 +71,7 @@ void Accelerometer_calibrate(){
 }
 
 
-/* Set the data ready bit.
+/* Set the data ready bit on the sensor
  * State = 1 : set data ready on INT1
  * State = 0 : disable data ready on INT1
  * This tells the sensor whether or not to send interrupts
@@ -78,7 +81,7 @@ void Accelerometer_data_ready(uint8_t state) {
   
   uint8_t ctrl_reg_value = 0x0;
   
-  // Data ready on INT1
+  // Data ready on INT1 = 4
   if (state == 1) {
     ctrl_reg_value = 0x4;
   }
@@ -107,19 +110,18 @@ int Accelerometer_get_roll(int x, int y, int z) {
 
 
 /* Get acceleration.  */
-// TODO: Add calibration matrix
 void Accelerometer_get_data(int* x, int* y, int* z) {
   
   // Get data from sensor
   int buffer[3];
   LIS302DL_ReadACC(buffer);
   
-  
   /* Apply calibration matrix (convert ints to float ahead
    * of time to save on converting to FP from int again and again */
   float raw_x = buffer[0];
   float raw_y = buffer[1];
   float raw_z = buffer[2];
+ 
   
   float x_temp = ACC11*raw_x+ ACC12*raw_y + ACC13*raw_z;
   float y_temp = ACC21*raw_x+ ACC22*raw_y + ACC23*raw_z;
@@ -131,10 +133,3 @@ void Accelerometer_get_data(int* x, int* y, int* z) {
   *y = (int)(y_temp + ACC20);
   *z = (int)(z_temp + ACC30);
 }
-
-
-
-
- 
-
-

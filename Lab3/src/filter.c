@@ -9,7 +9,7 @@
  * any outliers in the temperature data.
  */
 int filterSMA(int data, FilterStruct *filterBuffer) {
-    /* Data at next position to be used */
+  /* Data at next position to be used */
 	const int lastData = filterBuffer->buffer[filterBuffer->position]; 
 	
 	/* If the next position already has a non-zero value 

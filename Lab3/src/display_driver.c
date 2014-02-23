@@ -23,6 +23,7 @@ void displayNum(float number) {
   // Remove -ve if present since we can't display it
   number = fabs(number);
   
+  // Split into first, second, third digit using some math
 	uint8_t first    = number/10;
 	uint8_t second   = (int)number % 10;
 	uint8_t third    = ((int)number * 10) % 10;

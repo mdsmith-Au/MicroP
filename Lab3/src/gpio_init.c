@@ -16,7 +16,8 @@
  *     PP (Push-Pull) - 0 activates NMOS, 1 activates PMOS.
  * GPIO_PuPd  : Push-pull resistors for GPIO_PuPd activates weak pull up/down resistors that 
  *              set the default value - low or high when not being driven.  When using output,
- *              we don't want to be connected to Vdd or GND, hence NO_PULL.
+ *              we don't want to be connected to Vdd or GND, hence NO_PULL. Input is the same -
+                we don't want to force input to some level.
  * GPIO_Speed : Slew rate - how hard GPIO drives the pin (rise time).
  */
 void GPIO_configure() {
@@ -56,7 +57,7 @@ void GPIO_configure() {
 	GPIO_PinAFConfig(GPIOE, GPIO_PinSource14, GPIO_AF_TIM1);
   
   
-  // Pin E0 is INT1 (for data ready) on MEMS sensor
+  // Pin E0 is INT1 (for data ready) on MEMS sensor.  We want to wait for interrupts there
   GPIO_InitStructure4.GPIO_Pin   = GPIO_Pin_0;
 	GPIO_InitStructure4.GPIO_Mode  = GPIO_Mode_IN; 
 	GPIO_InitStructure4.GPIO_OType = GPIO_OType_PP;
