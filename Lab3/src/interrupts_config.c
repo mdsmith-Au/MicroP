@@ -67,7 +67,7 @@ void tim3_interrupt_config() {
 
  * Output clock period = (TIM4 counter clock / TIM4 output clock) - 1
  
- * We chose 10Mhz counter clock, 10Khz output clock (desired) -> period = 100
+ * We chose 1Mhz counter clock, 160Hz output clock (desired) -> period = 6250
  
  * For details, see Doc ID 018909 Rev 6 and Doc ID 022152 Rev 4
  */

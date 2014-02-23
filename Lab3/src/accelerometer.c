@@ -113,11 +113,26 @@ void Accelerometer_get_data(int* x, int* y, int* z) {
   // Get data from sensor
   int buffer[3];
   LIS302DL_ReadACC(buffer);
-  *x = buffer[0];
-  *y = buffer[1];
-  *z = buffer[2];
   
+  
+  /* Apply calibration matrix (convert ints to float ahead
+   * of time to save on converting to FP from int again and again */
+  float raw_x = buffer[0];
+  float raw_y = buffer[1];
+  float raw_z = buffer[2];
+  
+  float x_temp = ACC11*raw_x+ ACC12*raw_y + ACC13*raw_z;
+  float y_temp = ACC21*raw_x+ ACC22*raw_y + ACC23*raw_z;
+  float z_temp = ACC31*raw_x+ ACC32*raw_y + ACC33*raw_z;
+  
+  
+  // Apply offset and return.  Float precision no longer needed
+  *x = (int)(x_temp + ACC10);
+  *y = (int)(y_temp + ACC20);
+  *z = (int)(z_temp + ACC30);
 }
+
+
 
 
  

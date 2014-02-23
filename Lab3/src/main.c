@@ -17,6 +17,11 @@
 static volatile uint_fast16_t ext_interrupt;
 static volatile uint_fast16_t tim3_interrupt;
 
+/**
+ * Controls the rate of how often the LED 7-segment displays are updated.
+ */
+static volatile uint_fast16_t delay;
+
 int main()
 {
 	GPIO_configure();
@@ -27,6 +32,11 @@ int main()
 	
   Accelerometer_configure();
   Interrupts_configure();
+  
+  //Reset motor to 0 deg
+  motor_move_to_angle(0);
+  
+  delay = 0;
   
   while(1) {
     
@@ -47,10 +57,16 @@ int main()
       // Set roll to control motor
       motor_move_to_angle(roll);
       
-      // Display pitch
-      displayNum(pitch);
       
-      
+      // Update the (number shown on) LED displays only if the delay time control has elapsed.
+      if (delay == 0) {
+        displayNum(pitch);
+      }
+		
+      /* Increment the delay time control. 
+       */
+      delay = (delay + 1) % 8;
+
       printf("Roll: %i, Pitch: %i\n", roll, pitch);
     }
     else {
