@@ -68,14 +68,15 @@ void tim3_interrupt_config() {
  * thus TIM3CLK = HCLK / 2 = SystemCoreClock /2
  * There is also the counter clock (CC), output clock and prescaler
  
- * Prescaler = (TIM4CLK / TIM4 counter clock) - 1
- * Prescaler = ((SystemCoreClock /2) / TIM4 counter clock) - 1
+ * Prescaler = (TIM3CLK / TIM3 counter clock) - 1
+ * Prescaler = ((SystemCoreClock/2) / TIM3 counter clock) - 1
 
- * Output clock period = (TIM4 counter clock / TIM4 output clock) - 1
+ * Output clock period = (TIM3 counter clock / TIM3 output clock) - 1
  
- * We chose 1Mhz counter clock, 160Hz output clock (desired) -> period = 6250
+ * We chose 1Mhz counter clock, 160Hz output clock (desired) -> period = 1MHz/160Hz - 1 = 6249
  * 160Hz tested to work well with the display by trial and error.
-  
+ * Changing the period does not seem to affect display brightness.
+ * 
  * For details about the equations, see Doc ID 018909 Rev 6 and Doc ID 022152 Rev 4
  */
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;

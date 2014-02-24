@@ -39,7 +39,14 @@ int main()
   
   //Reset motor to 0 deg
   motor_move_to_angle(0);
-  
+	
+	displayNum(0);
+	int i = 0;
+	while(i < 7000000) {
+		draw();
+		i++;
+	}
+      
   while(1) {
     
     // Do nothing while waiting for an interrupt
