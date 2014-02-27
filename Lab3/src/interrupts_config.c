@@ -74,6 +74,7 @@ void tim3_interrupt_config() {
  * Output clock period = (TIM3 counter clock / TIM3 output clock) - 1
  
  * We chose 1Mhz counter clock, 160Hz output clock (desired) -> period = 1MHz/160Hz - 1 = 6249
+ * Also keeps prescaler within unsigned 16 bit prescaler limit (65536)
  * 160Hz tested to work well with the display by trial and error.
  * Changing the period does not seem to affect display brightness.
  * 

@@ -17,6 +17,8 @@ void Accelerometer_configure() {
 	// Want to use all axes (enable Data Ready for all)
 	initStruct.Axes_Enable = LIS302DL_XYZ_ENABLE;
 	// Use lower scale for more precision (18 vs 72 mg/digit when reading)
+  // We don't plan on subjecting the board to > 2g of acceleration,
+  // so more precision is better vs being able to represent values > 2g.
 	initStruct.Full_Scale = LIS302DL_FULLSCALE_2_3;
 	// 100Hz requirement for this lab
 	initStruct.Output_DataRate = LIS302DL_DATARATE_100;
