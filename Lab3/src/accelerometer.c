@@ -27,7 +27,7 @@ void Accelerometer_configure() {
 
 	LIS302DL_Init(&initStruct);
 	
-	/* Interrupt configuration */
+	/* (Click) Interrupt configuration */
 	// Disable mouse click capability
 	interruptStruct.DoubleClick_Axes = LIS302DL_DOUBLECLICKINTERRUPT_XYZ_DISABLE;
 	interruptStruct.SingleClick_Axes = LIS302DL_CLICKINTERRUPT_XYZ_DISABLE;
@@ -38,6 +38,7 @@ void Accelerometer_configure() {
 	
 	/* Filter Config */
 	// @ 100Hz -> filter out anything that moves > 2Hz
+	// See LIS302DL datasheet, sec 7.3, Table 22
 	filterStruct.HighPassFilter_CutOff_Frequency = LIS302DL_HIGHPASSFILTER_LEVEL_0;
 	// Actually use filter
 	filterStruct.HighPassFilter_Data_Selection = LIS302DL_FILTEREDDATASELECTION_OUTPUTREGISTER;
@@ -76,6 +77,7 @@ void Accelerometer_calibrate(){
  * State = 0 : disable data ready on INT1
  * This tells the sensor whether or not to send interrupts
  * when it has collected new data.
+ * See LIS302DL datasheet, sec 7.4, pg 28
  */
 void Accelerometer_data_ready(uint8_t state) {
   

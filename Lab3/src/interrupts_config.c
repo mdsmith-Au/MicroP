@@ -33,7 +33,7 @@ void mems_interrupt_config() {
   EXTI_InitStruct.EXTI_Line = EXTI_Line0;
   // Use interrupts (as opposed to events)
   EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
-  // Trigger interrupt on rising edge -> data ready.  But could also use falling
+  // Trigger interrupt on rising edge -> data ready.
   EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising;
   // Enable interrupt
   EXTI_InitStruct.EXTI_LineCmd = ENABLE;
@@ -45,7 +45,7 @@ void mems_interrupt_config() {
   // Use external interrupt channel 0 -> for pin 0
   NVIC_InitStruct.NVIC_IRQChannel = EXTI0_IRQn;
   // Priority settings. Give 4 .. not the highest, but fair
-  NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 4;
+  NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 4;   // arbitrary
   // Don't need sub priority
   NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0;
   // Enable it
@@ -132,7 +132,7 @@ void set_nvic_priority() {
 
   if (!NVIC_PRIORITY_SET) {
     // Priority group: 3 bits for pre-emption priority, 1 bit for subpriority
-    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_3);
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_3); // chosen arbitrarily
     NVIC_PRIORITY_SET = 1;
   }
 }

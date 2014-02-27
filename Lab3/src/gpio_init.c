@@ -44,6 +44,7 @@ void GPIO_configure() {
 	
     /* Pins 2, 4 - 5  : select
        Pins 6 - 13 : segment
+			 Pin 3 hooked up to SPI of sensor
        Let them be used for powering display */
 	GPIO_InitStructure3.GPIO_Pin   = GPIO_Pin_2 | GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13;
 	GPIO_InitStructure3.GPIO_Mode  = GPIO_Mode_OUT;

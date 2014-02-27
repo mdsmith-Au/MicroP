@@ -8,10 +8,10 @@
  * thus TIM1CLK = HCLK = SystemCoreClock
  * There is also the counter clock (CC), output clock and prescaler
  
- * Prescaler = (TIM4CLK / TIM4 counter clock) - 1
- * Prescaler = ((SystemCoreClock) / TIM4 counter clock) - 1
+ * Prescaler = (TIM1CLK / TIM1 counter clock) - 1
+ * Prescaler = ((SystemCoreClock) / TIM1 counter clock) - 1
 
- * Output clock period ARR = (TIM4 counter clock / TIM4 output clock) - 1
+ * Output clock period ARR = (TIM1 counter clock / TIM1 output clock) - 1
  
  * Duty cycle = CC register / ARR
 

@@ -40,6 +40,7 @@ int main()
   //Reset motor to 0 deg
   motor_move_to_angle(0);
 	
+	// Software delay run on reset button press
 	displayNum(0);
 	int i = 0;
 	while(i < 7000000) {
@@ -55,7 +56,7 @@ int main()
     // External interrupt happened
     if (ext_interrupt == 1) {
       
-      // Reset the software interrupt flag after interrupt is handled.
+      // Reset the software interrupt flag after sensor interrupt is handled.
       ext_interrupt = 0;	
       
       // Get acclerometer data
@@ -74,7 +75,7 @@ int main()
         displayNum(pitch);
       }
 		
-      // Increment the delay time control. 
+      // Increment the delay time control (refresh rate of display)
       delay = (delay + 1) % 8;
 
       printf("Roll: %i, Pitch: %i\n", roll, pitch);
