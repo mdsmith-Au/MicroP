@@ -43,7 +43,7 @@ int main()
 	// Software delay run on reset button press
 	displayNum(0);
 	int i = 0;
-	while(i < 7000000) {
+	while(i < 10000000) {
 		draw();
 		i++;
 	}
