@@ -1,63 +1,126 @@
-#include "arm_math.h"
+//#include "arm_math.h"
 
-#include "stm32f4xx.h"
-#include "cmsis_os.h"
+// System includes
 #include <stdio.h>
+#include "cmsis_os.h"
+#include "stm32f4xx.h"
 
-// Custom code includes
+// Project includes
+#include "accelerometer.h"
 #include "adc_init.h"
+#include "alarm.h"
+#include "interrupts_config.h"
+#include "motor.h"
 #include "temp_processing.h"
 #include "LCD_Driver.h"
 
-/*!
- @brief Thread to perform menial tasks such as switching LEDs
- @param argument Unused
+#define TEMP_INT_SIGNAL 0x01
+#define ALARM_INT_SIGNAL 0x02
+#define ACC_INT_SIGNAL 0x04
+
+/**
+ * Thread to perform menial tasks such as switching LEDs.
+ * @param arg unused
  */
-void getTempThread(void const *argument);
+void temperature_thread(const void* arg);
+void alarm_thread(const void* arg);
+void accelerometer_thread(const void* arg);
+void signalAlarm(void);
 
 FilterStruct tempFilterBuffer;
 
-//! Thread structure for above thread
-osThreadDef(getTempThread, osPriorityNormal, 1, 0);
+/* Thread structure for above threads */
+osThreadDef(temperature_thread, osPriorityNormal, 1, 0);
+osThreadDef(alarm_thread, osPriorityNormal, 1, 0);
+osThreadDef(accelerometer_thread, osPriorityNormal, 1, 0);
 
-/*!
- @brief Program entry point
+osThreadId tid_temperature, tid_alarm, tid_accelerometer;
+/**
+ * Program entry point.
  */
-int main (void) {
-	// ID for thread
-	osThreadId tid_getTempThread;
-
-  ADC_configure();
-  calibrateTempSensor();
-  initFilterBuffer(&tempFilterBuffer);
+int main() {
+	//osThreadId tid_temperatureThread;
+    ADC_configure();
+    calibrateTempSensor();
+    initFilterBuffer(&tempFilterBuffer);
+    tid_temperature = osThreadCreate(osThread(temperature_thread), NULL);
 	
-	LCD_configure();
-
-	// Start thread
-  tid_getTempThread = osThreadCreate(osThread(getTempThread), NULL);
+	
+	//osThreadId tid_alarmThread;
+	Alarm_PWM_configure();
+	tid_alarm = osThreadCreate(osThread(alarm_thread), NULL);
+	
+	
+	//osThreadId tid_accelerometerThread;
+	Motor_PWM_configure();
+	Accelerometer_configure();
+	Interrupts_configure();
+	tid_accelerometer = osThreadCreate(osThread(accelerometer_thread), NULL);
+	
+	
 }
 
 
-void getTempThread(void const *argument) {
-  while (1) {
-     printf("Temp: %f\n", getAndAverageTemp(&tempFilterBuffer));
-     osDelay(500);
-  }
+void temperature_thread(const void* arg) {
+    while(1) {
+        
+        osSignalWait(TEMP_INT_SIGNAL, osWaitForever);
+        
+        // TODO put mutex
+        float temperature = getAndAverageTemp(&tempFilterBuffer);
+        
+        
+        signalAlarm();
+        printf("Temp: %f\n", temperature);
+        
+    }
 }
 
-/*
- Notes:
-  For LCD:
-  B0 = Reg select
-  B1 = read/write
-  B2 = enable
-  B4 = data 0
-  B5 = data 1
-  B7 = data 2
-  B8 = data 3
-  B11 = data 4
-  B12 = data 5
-  B13 = data 6
-  B14 = data 7
+void signalAlarm() {
+    osSignalSet(tid_alarm, ALARM_INT_SIGNAL);
+}
 
-*/
+void alarm_thread(const void* arg) {
+	while(1) {
+		osSignalWait(ALARM_INT_SIGNAL, osWaitForever);
+        
+        printf("blabh ablabhrebh\n");
+        // do stuff!
+	}
+}
+
+void accelerometer_thread(const void* arg) {
+	while(1) {
+        // Wait forever for accelerometer interrupt
+        osSignalWait(ACC_INT_SIGNAL, osWaitForever);
+        
+		int x, y, z;
+		Accelerometer_get_data(&x, &y, &z);
+		
+        int roll = Accelerometer_get_roll(x, y, z);
+        int pitch = Accelerometer_get_pitch(x, y, z);
+		motor_move_to_angle(roll);
+		
+		printf("Pitch: %i, Roll: %i\n", pitch, roll);
+	}
+}
+
+// External interrupt on line 1 : INT2 on acclerometer
+void EXTI1_IRQHandler() {
+    
+    osSignalSet(tid_accelerometer, ACC_INT_SIGNAL);
+    
+    EXTI_ClearITPendingBit(EXTI_Line1);
+    // Note that the interrupt on the accelerometer is cleared 
+    // if, and ONLY if, data is read from it.  The status
+    // registers that hold the interrupt line high cannot be modified manually
+  
+}
+
+// Timer 3 interrupt for temperature)
+void TIM3_IRQHandler() {
+    
+    osSignalSet(tid_temperature, TEMP_INT_SIGNAL);
+    
+    TIM_ClearITPendingBit( TIM3, TIM_IT_Update);
+}

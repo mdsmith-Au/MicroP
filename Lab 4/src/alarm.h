@@ -18,7 +18,7 @@
 /**
  * The ARR register is used to store the desired period of the PWM.
  */
-#define ARR 2500
+#define ALARM_ARR 2500
 
 /**
  * The temperature threshold value (in degrees Celsius) which will trigger 
@@ -36,7 +36,7 @@
 /**
  * Configures the Pulse Width Modulator.
  */
-void PWM_configure(void);
+void Alarm_PWM_configure(void);
 
 /**
  * Checks the temperature and triggers the alarm if temp is over 

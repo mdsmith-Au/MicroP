@@ -18,7 +18,7 @@
  * Note that calculations are based on an ARR of 
  * 20000 for simplicity, but the difference is negligible
  */
-#define ARR 19999
+#define MOTOR_ARR 19999
 
 #define NEUTRAL 1500
 // Neutral -> +90 deg : 1500 -> 2500 duty cycle
@@ -27,6 +27,6 @@
 /**
  * Configures the Pulse Width Modulator.
  */
-void PWM_configure(void);
+void Motor_PWM_configure(void);
 void motor_move_to_angle(int angle);
 #endif

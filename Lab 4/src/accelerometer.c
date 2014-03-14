@@ -1,6 +1,7 @@
 #include "accelerometer.h"
 
 // Private method to enable/disable interrupts on the accelerometer
+void Accelerometer_GPIO_setup(void);
 void Accelerometer_data_ready(uint8_t state);
 
 // Filter structs for both roll and pitch
@@ -8,6 +9,7 @@ FilterStruct rollFilter;
 FilterStruct pitchFilter;
 
 void Accelerometer_configure() {
+	Accelerometer_GPIO_setup();
 
 	LIS302DL_InitTypeDef initStruct;
 	LIS302DL_InterruptConfigTypeDef interruptStruct;
@@ -59,6 +61,18 @@ void Accelerometer_configure() {
   initFilterBuffer(&pitchFilter);
 }
 
+void Accelerometer_GPIO_setup() {
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
+	
+	GPIO_InitTypeDef Acc_GPIO_InitStruct;
+    Acc_GPIO_InitStruct.GPIO_Pin   = GPIO_Pin_1;
+	Acc_GPIO_InitStruct.GPIO_Mode  = GPIO_Mode_IN; 
+	Acc_GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+	Acc_GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz; 
+	Acc_GPIO_InitStruct.GPIO_PuPd  = GPIO_PuPd_NOPULL;
+	GPIO_Init(GPIOE, &Acc_GPIO_InitStruct);
+}
+
 /* Used once to calibrate the accelerometer in debug mode.
  * Run for 5 - 10 seconds in each position from Table 2
  * in ST Doc ID 17289 Rev 1 manually.  Should be called
@@ -75,8 +89,8 @@ void Accelerometer_calibrate(){
 
 
 /* Set the data ready bit on the sensor
- * State = 1 : set data ready on INT1
- * State = 0 : disable data ready on INT1
+ * State = 1 : set data ready on INT2
+ * State = 0 : disable data ready on INT2
  * This tells the sensor whether or not to send interrupts
  * when it has collected new data.
  * See LIS302DL datasheet, sec 7.4, pg 28
@@ -85,9 +99,9 @@ void Accelerometer_data_ready(uint8_t state) {
   
   uint8_t ctrl_reg_value = 0x0;
   
-  // Data ready on INT1 = 4
+  // Data ready on INT1 = 0b100000
   if (state == 1) {
-    ctrl_reg_value = 0x4;
+    ctrl_reg_value = 0x20;
   }
   // No data ready interrupts
   else {
