@@ -21,7 +21,8 @@ void Interrupts_configure() {
 
 void mems_interrupt_config() {
   
-  // Enable SYSCFG
+  // Enable SYSCFG, GPIOE
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
   // Enable interrupt on E1 for MEMS (INT2)
   SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource1);

@@ -95,12 +95,12 @@ void accelerometer_thread(const void* arg) {
         
 		int x, y, z;
 		Accelerometer_get_data(&x, &y, &z);
-		/*
+		
         int roll = Accelerometer_get_roll(x, y, z);
         int pitch = Accelerometer_get_pitch(x, y, z);
 		motor_move_to_angle(roll);
 		
-		printf("Pitch: %i, Roll: %i\n", pitch, roll);*/
+		printf("Pitch: %i, Roll: %i\n", pitch, roll);
 	}
 }
 

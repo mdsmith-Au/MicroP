@@ -99,7 +99,7 @@ void Accelerometer_data_ready(uint8_t state) {
   
   uint8_t ctrl_reg_value = 0x0;
   
-  // Data ready on INT1 = 4
+  // Data ready on INT1 = 0b100000
   if (state == 1) {
     ctrl_reg_value = 0x20;
   }
