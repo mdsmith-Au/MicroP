@@ -12,6 +12,6 @@
  * 2. Filter the data
  * 3. Convert the filtered data to degrees Celsius 
  */
-float getAndAverageTemp(void) {
-	return convertToC(filterTemperature(getTemp()));
+float getAndAverageTemp(FilterStruct *filter) {
+	return convertToC(filterSMA(getTemp(), filter));
 }

@@ -47,7 +47,7 @@ int8_t alarmOn = 0;
  
  * For details, see Doc ID 018909 Rev 6 and Doc ID 022152 Rev 4
  */
-void PWM_configure() {
+void PWM_configure_alarm() {
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
 	TIM_OCInitTypeDef TIM_OCInitStruct;
 	

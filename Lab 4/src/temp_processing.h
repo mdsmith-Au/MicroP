@@ -13,6 +13,6 @@
  * Makes calls to other functions to appropriate capture, 
  * filter, and convert temperature data.
  */
-float getAndAverageTemp(void);
+float getAndAverageTemp(FilterStruct *filter);
 
 #endif
