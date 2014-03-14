@@ -12,13 +12,11 @@
  @brief Thread to perform menial tasks such as switching LEDs
  @param argument Unused
  */
-void thread(void const * argument);
 void getTempThread(void const *argument);
 
 FilterStruct tempFilterBuffer;
 
 //! Thread structure for above thread
-osThreadDef(thread, osPriorityNormal, 1, 0);
 osThreadDef(getTempThread, osPriorityNormal, 1, 0);
 
 /*!
@@ -26,35 +24,16 @@ osThreadDef(getTempThread, osPriorityNormal, 1, 0);
  */
 int main (void) {
 	// ID for thread
-	osThreadId tid_thread1, tid_getTempThread;
-	GPIO_InitTypeDef  GPIO_InitStructure;
-
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+	osThreadId tid_getTempThread;
 
   ADC_configure();
   calibrateTempSensor();
   initFilterBuffer(&tempFilterBuffer);
-  
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-	GPIO_Init(GPIOD, &GPIO_InitStructure);
 
 	// Start thread
-	tid_thread1 = osThreadCreate(osThread(thread), NULL);
   tid_getTempThread = osThreadCreate(osThread(getTempThread), NULL);
 }
 
-void thread (void const *argument) {
-	while(1){
-		osDelay(1000);
-		GPIOD->BSRRL = GPIO_Pin_12;
-		osDelay(1000);
-		GPIOD->BSRRH = GPIO_Pin_12;
-	}
-}
 
 void getTempThread(void const *argument) {
   while (1) {
