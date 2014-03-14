@@ -7,6 +7,7 @@
 // Custom code includes
 #include "adc_init.h"
 #include "temp_processing.h"
+#include "LCD_Driver.h"
 
 /*!
  @brief Thread to perform menial tasks such as switching LEDs
@@ -29,6 +30,8 @@ int main (void) {
   ADC_configure();
   calibrateTempSensor();
   initFilterBuffer(&tempFilterBuffer);
+	
+	LCD_configure();
 
 	// Start thread
   tid_getTempThread = osThreadCreate(osThread(getTempThread), NULL);
