@@ -1,5 +1,7 @@
 #include "motor.h"
 
+void Motor_GPIO_setup(void);
+
 /*
  * From the PWM Ouput example from ST,
  * we know in this case 
@@ -25,7 +27,9 @@
  
  * For details, see Doc ID 018909 Rev 6 and Doc ID 022152 Rev 4
  */
-void PWM_configure() {
+void Motor_PWM_configure() {
+	Motor_GPIO_setup();
+	
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
 	TIM_OCInitTypeDef TIM_OCInitStruct;
 	
@@ -38,7 +42,7 @@ void PWM_configure() {
   // Hence, we must subtract 1 so that our prescaler value is simply fCK_PSC / PSC[15:0]
 	uint16_t PrescalerValue                   = (uint16_t)((SystemCoreClock)/1000000) - 1;
 	
-	TIM_TimeBaseInitStruct.TIM_Period         = ARR;
+	TIM_TimeBaseInitStruct.TIM_Period         = MOTOR_ARR;
   TIM_TimeBaseInitStruct.TIM_Prescaler      = PrescalerValue;
   
 	/* No need to further divide the clock in our case */   
@@ -73,6 +77,21 @@ void PWM_configure() {
 	TIM_CtrlPWMOutputs(TIM1, ENABLE);
 	/* Enable counter -> start */
 	TIM_Cmd(TIM1, ENABLE);
+}
+
+void Motor_GPIO_setup() {
+	GPIO_InitTypeDef Motor_GPIO_InitStruct;
+	
+	Motor_GPIO_InitStruct.GPIO_Pin    = GPIO_Pin_14;
+	Motor_GPIO_InitStruct.GPIO_Mode   = GPIO_Mode_AF;            // Alternate Function (PWM)
+	Motor_GPIO_InitStruct.GPIO_OType  = GPIO_OType_PP;           // Operating output type: push-pull
+	Motor_GPIO_InitStruct.GPIO_Speed  = GPIO_Speed_100MHz;       
+	Motor_GPIO_InitStruct.GPIO_PuPd   = GPIO_PuPd_NOPULL;
+	GPIO_Init(GPIOE, &Motor_GPIO_InitStruct);
+	
+	// Connect GPIODE Pin 14 to TIM 1 for PWM (TIM1 because it (and only it) is wired to that pin
+	// See STM32F4 Discovery manual, Hardware and Layout, Table 5 (MCU pin description versus board function)
+	GPIO_PinAFConfig(GPIOE, GPIO_PinSource14, GPIO_AF_TIM1);
 }
 
 void motor_move_to_angle(int angle) {

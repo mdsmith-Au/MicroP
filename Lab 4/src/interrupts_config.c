@@ -23,14 +23,14 @@ void mems_interrupt_config() {
   
   // Enable SYSCFG
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
-  // Enable interrupt on E0 for MEMS (INT1)
-  SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource0);
+  // Enable interrupt on E1 for MEMS (INT2)
+  SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource1);
   
   // Configure interrupts
   EXTI_InitTypeDef EXTI_InitStruct;
   
-  // Pin E0
-  EXTI_InitStruct.EXTI_Line = EXTI_Line0;
+  // Pin E1
+  EXTI_InitStruct.EXTI_Line = EXTI_Line1;
   // Use interrupts (as opposed to events)
   EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
   // Trigger interrupt on rising edge -> data ready.
@@ -42,8 +42,8 @@ void mems_interrupt_config() {
   // Configure NVIC
   set_nvic_priority();
   NVIC_InitTypeDef NVIC_InitStruct;
-  // Use external interrupt channel 0 -> for pin 0
-  NVIC_InitStruct.NVIC_IRQChannel = EXTI0_IRQn;
+  // Use external interrupt channel 1 -> for pin 1
+  NVIC_InitStruct.NVIC_IRQChannel = EXTI1_IRQn;
   // Priority settings. Give 4 .. not the highest, but fair
   NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 4;   // arbitrary
   // Don't need sub priority
@@ -56,7 +56,7 @@ void mems_interrupt_config() {
    * Otherwise, it is already high, thus no interrupt is
    * generated on the rising edge. Reads clear the bit holding
    * the line high.   */
-  EXTI_GenerateSWInterrupt(EXTI_Line0);
+  EXTI_GenerateSWInterrupt(EXTI_Line1);
 }
 
 void tim3_interrupt_config() {
@@ -73,10 +73,8 @@ void tim3_interrupt_config() {
 
  * Output clock period = (TIM3 counter clock / TIM3 output clock) - 1
  
- * We chose 1Mhz counter clock, 160Hz output clock (desired) -> period = 1MHz/160Hz - 1 = 6249
+ * We chose 1Mhz counter clock, 25Hz output clock (desired) -> period = 1MHz/25Hz - 1 = 39999
  * Also keeps prescaler within unsigned 16 bit prescaler limit (65536)
- * 160Hz tested to work well with the display by trial and error.
- * Changing the period does not seem to affect display brightness.
  * 
  * For details about the equations, see Doc ID 018909 Rev 6 and Doc ID 022152 Rev 4
  */

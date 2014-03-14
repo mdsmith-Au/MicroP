@@ -12,7 +12,7 @@
 #include "stm32f4xx_tim.h"
 
 // TIM3 Period.  See comments in .c file
-#define PERIOD 6249
+#define PERIOD 39999
 
 void Interrupts_configure(void);
 

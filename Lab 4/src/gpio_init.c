@@ -26,13 +26,15 @@ void GPIO_configure() {
 	// Enable clock to power GPIOD and GPIOE bank
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_GPIOE, ENABLE);
 	
-	/* Set motor (Pin 14) to PWM */
+	/*
+	// Set motor (Pin 14) to PWM 
 	GPIO_InitStructure.GPIO_Pin    = GPIO_Pin_14;
 	GPIO_InitStructure.GPIO_Mode   = GPIO_Mode_AF;            // Alternate Function (PWM)
 	GPIO_InitStructure.GPIO_OType  = GPIO_OType_PP;           // Operating output type: push-pull
 	GPIO_InitStructure.GPIO_Speed  = GPIO_Speed_100MHz;       
 	GPIO_InitStructure.GPIO_PuPd   = GPIO_PuPd_NOPULL;
 	GPIO_Init(GPIOE, &GPIO_InitStructure);
+	*/
 	
 	/* Drive green LED (Pin 12), normal output. For debug use. */
 	GPIO_InitStructure2.GPIO_Pin   = GPIO_Pin_12;
@@ -55,14 +57,15 @@ void GPIO_configure() {
 	
 	// Connect GPIODE Pin 14 to TIM 1 for PWM (TIM1 because it (and only it) is wired to that pin
 	// See STM32F4 Discovery manual, Hardware and Layout, Table 5 (MCU pin description versus board function)
-	GPIO_PinAFConfig(GPIOE, GPIO_PinSource14, GPIO_AF_TIM1);
+	//GPIO_PinAFConfig(GPIOE, GPIO_PinSource14, GPIO_AF_TIM1);
   
-  
-  // Pin E0 is INT1 (for data ready) on MEMS sensor.  We want to wait for interrupts there
-  GPIO_InitStructure4.GPIO_Pin   = GPIO_Pin_0;
+  /*
+  // Pin E1 is INT2 (for data ready) on MEMS sensor.  We want to wait for interrupts there
+  GPIO_InitStructure4.GPIO_Pin   = GPIO_Pin_1;
 	GPIO_InitStructure4.GPIO_Mode  = GPIO_Mode_IN; 
 	GPIO_InitStructure4.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStructure4.GPIO_Speed = GPIO_Speed_100MHz; 
 	GPIO_InitStructure4.GPIO_PuPd  = GPIO_PuPd_NOPULL;
 	GPIO_Init(GPIOE, &GPIO_InitStructure4);
+	*/
 }

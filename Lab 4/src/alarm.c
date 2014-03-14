@@ -47,7 +47,7 @@ int8_t alarmOn = 0;
  
  * For details, see Doc ID 018909 Rev 6 and Doc ID 022152 Rev 4
  */
-void PWM_configure_alarm() {
+void Alarm_PWM_configure() {
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
 	TIM_OCInitTypeDef TIM_OCInitStruct;
 	
@@ -60,7 +60,7 @@ void PWM_configure_alarm() {
     // Hence, we must subtract 1 so that our prescaler value is simply fCK_PSC / PSC[15:0]
 	uint16_t PrescalerValue                   = (uint16_t)((SystemCoreClock/2)/50000000) - 1;
 	
-	TIM_TimeBaseInitStruct.TIM_Period         = ARR;
+	TIM_TimeBaseInitStruct.TIM_Period         = ALARM_ARR;
     TIM_TimeBaseInitStruct.TIM_Prescaler      = PrescalerValue;
   
 	/* No need to further divide the clock in our case */   
@@ -131,7 +131,7 @@ static void increasePWMDutyCycle(){
 	TIM4->CCR3 = (TIM4->CCR3 + 100);    // 100 determined by trial-and-error
 	
 	// At max brightness -> decrease next time
-	if (TIM4->CCR3 == ARR) {
+	if (TIM4->CCR3 == ALARM_ARR) {
 		increaseBrightness = 0;
 	}
 }
