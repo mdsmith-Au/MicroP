@@ -59,7 +59,11 @@ int main() {
 	Interrupts_configure();
 	tid_accelerometer = osThreadCreate(osThread(accelerometer_thread), NULL);
 	
-  
+  printLCDString("Row 1 test", 10, 1);
+  printLCDToPos("Row 2 test, pos 5", 17, 2, 5);
+  printLCDToPos("5", 1, 2, 5);
+  clearLCD();
+  printLCDToPos("Row 1!!!", 8, 1, 6);
 }
 
 

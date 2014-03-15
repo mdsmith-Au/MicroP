@@ -37,13 +37,6 @@
 #define BIT7 (uint8_t)0x40
 #define BIT8 (uint8_t)0x80
 
-typedef enum
-{ 
-  LCD_FIRST_ROW = 0,
-  LCD_SECOND_ROW = 1
-}LCD_Row;
-
-
 	/*
 		Notes:
 		For LCD, GPIO:
@@ -62,7 +55,8 @@ typedef enum
 
 
 void LCD_configure(void);
-void printLCDString(char* string, int length, LCD_Row row);
-void printLCDToPos(char* string, int length, LCD_Row row, int col);
+void printLCDString(char* string, int length, int row);
+void printLCDToPos(char* string, int length, int row, int col);
+void clearLCD(void);
 
 #endif
