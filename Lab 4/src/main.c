@@ -40,11 +40,13 @@ osThreadId tid_temperature, tid_alarm, tid_accelerometer;
  */
 int main() {
 	//osThreadId tid_temperatureThread;
-    ADC_configure();
-    calibrateTempSensor();
-    initFilterBuffer(&tempFilterBuffer);
-    tid_temperature = osThreadCreate(osThread(temperature_thread), NULL);
-	
+   ADC_configure();
+   calibrateTempSensor();
+   initFilterBuffer(&tempFilterBuffer);
+  
+  LCD_configure();
+  
+  tid_temperature = osThreadCreate(osThread(temperature_thread), NULL);
 	
 	//osThreadId tid_alarmThread;
 	Alarm_PWM_configure();
@@ -57,7 +59,7 @@ int main() {
 	Interrupts_configure();
 	tid_accelerometer = osThreadCreate(osThread(accelerometer_thread), NULL);
 	
-	
+  
 }
 
 

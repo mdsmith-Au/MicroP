@@ -2,6 +2,8 @@
 #define _LCD_DRIVER_H_
 
 #include "stm32f4xx_conf.h"
+// For OS functions like delay
+#include "cmsis_os.h"
 
 #define LCD_GPIO_BANK GPIOB
 #define LCD_REG_SEL GPIO_Pin_0
