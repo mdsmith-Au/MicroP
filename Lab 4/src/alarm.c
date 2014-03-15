@@ -9,10 +9,12 @@
 
 #include "alarm.h"
 
-static void increasePWMDutyCycle(void);
-static void decreasePWMDutyCycle(void);
-static void resetPWMDutyCycle(void);
-static void triggerAlarm(void);
+void increasePWMDutyCycle(void);
+void decreasePWMDutyCycle(void);
+void resetPWMDutyCycle(void);
+void triggerAlarm(void);
+void Alarm_GPIO_configure(void);
+void Alarm_PWM_configure(void);
 
 /** Flag to track the LED brightness should increase or decrease. */
 int8_t increaseBrightness = 1;
@@ -22,6 +24,33 @@ int8_t increaseBrightness = 1;
  * the LED turns off gracefully.
  */
 int8_t alarmOn = 0;
+
+
+void Alarm_configure() {
+  
+  Alarm_GPIO_configure();
+  Alarm_PWM_configure();
+}
+
+void Alarm_GPIO_configure() {
+  
+  GPIO_InitTypeDef Alarm_GPIO;
+  
+  // Enable clock to power GPIOD bank
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+	
+	/* Set red LED (Pin 14) to PWM */
+	Alarm_GPIO.GPIO_Pin    = GPIO_Pin_14;
+	Alarm_GPIO.GPIO_Mode   = GPIO_Mode_AF;            // Alternate Function (PWM)
+	Alarm_GPIO.GPIO_OType  = GPIO_OType_PP;           // Operating output type: push-pull
+	Alarm_GPIO.GPIO_Speed  = GPIO_Speed_100MHz;       
+	Alarm_GPIO.GPIO_PuPd   = GPIO_PuPd_NOPULL;
+	GPIO_Init(GPIOD, &Alarm_GPIO);
+  
+  // Connect GPIOD Pin 14 to TIM 4 for PWM (TIM4 because that pin for the red LED is connected to it
+	// See STM32F4 Discovery manual, Hardware and Layout, Table 5 (MCU pin description versus board function)
+	GPIO_PinAFConfig(GPIOD, GPIO_PinSource14, GPIO_AF_TIM4);
+}
 
 
 /* APB Max 142 Mhz
@@ -112,7 +141,7 @@ void alarmCheckTemp(float temp) {
 }
 
 /* Activate alarm fade in/fade out effects */
-static void triggerAlarm(){
+void triggerAlarm(){
 	alarmOn = 1;                        // Set alarm flag
 	if (increaseBrightness) {
 		increasePWMDutyCycle();         // Fade in
@@ -127,7 +156,7 @@ static void triggerAlarm(){
  * Otherwise, the checks for max or min brightness will fail */
 
 // Increases PWM duty cycle for fade in
-static void increasePWMDutyCycle(){
+void increasePWMDutyCycle(){
 	TIM4->CCR3 = (TIM4->CCR3 + 100);    // 100 determined by trial-and-error
 	
 	// At max brightness -> decrease next time
@@ -137,7 +166,7 @@ static void increasePWMDutyCycle(){
 }
 
 // Decreases PWM duty cycle for fade out
-static void decreasePWMDutyCycle() {
+void decreasePWMDutyCycle() {
 	TIM4->CCR3 = (TIM4->CCR3 - 100);
 		
 	// Min brightness (i.e. off) -> increase next time
@@ -147,7 +176,7 @@ static void decreasePWMDutyCycle() {
 }
 
 // Resets PWM Duty cycle to 0 if not already set
-static void resetPWMDutyCycle() {
+void resetPWMDutyCycle() {
 	if (TIM4->CCR3 != 0) {
 		TIM4->CCR3 = 0;
 		increaseBrightness = 1;

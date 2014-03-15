@@ -60,7 +60,7 @@ void clearLCD() {
 // Private method: print a string to a position using the LCD's address format spec
 void printToAddress(char* string, int length, uint8_t address) {
 	
-  // Address commands have a 1 in the 8th bit, followed by the address
+  // Address commands have a 1 in the 8th bit, followed by the address -> OR with 0x80
   // This sets the cursor to that position
   sendCommand(0x80 | address);
 	

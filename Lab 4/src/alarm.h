@@ -33,10 +33,6 @@
  */
 #define TEMP_ERROR 1
 
-/**
- * Configures the Pulse Width Modulator.
- */
-void Alarm_PWM_configure(void);
 
 /**
  * Checks the temperature and triggers the alarm if temp is over 
@@ -45,5 +41,7 @@ void Alarm_PWM_configure(void);
  * @param temp the current temperature
  */
 void alarmCheckTemp(float temp);
+
+void Alarm_configure(void);
 
 #endif

@@ -81,6 +81,8 @@ void Motor_PWM_configure() {
 
 void Motor_GPIO_setup() {
 	GPIO_InitTypeDef Motor_GPIO_InitStruct;
+  
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
 	
 	Motor_GPIO_InitStruct.GPIO_Pin    = GPIO_Pin_14;
 	Motor_GPIO_InitStruct.GPIO_Mode   = GPIO_Mode_AF;            // Alternate Function (PWM)

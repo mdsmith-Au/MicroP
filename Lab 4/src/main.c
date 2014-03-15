@@ -23,7 +23,6 @@
  * @param arg unused
  */
 void temperature_thread(const void* arg);
-void alarm_thread(const void* arg);
 void accelerometer_thread(const void* arg);
 void signalAlarm(void);
 
@@ -31,36 +30,31 @@ FilterStruct tempFilterBuffer;
 
 /* Thread structure for above threads */
 osThreadDef(temperature_thread, osPriorityNormal, 1, 0);
-osThreadDef(alarm_thread, osPriorityNormal, 1, 0);
 osThreadDef(accelerometer_thread, osPriorityNormal, 1, 0);
 
-osThreadId tid_temperature, tid_alarm, tid_accelerometer;
+osThreadId tid_temperature, tid_accelerometer;
 /**
  * Program entry point.
  */
 int main() {
-	//osThreadId tid_temperatureThread;
-   ADC_configure();
-   calibrateTempSensor();
-   initFilterBuffer(&tempFilterBuffer);
+
+  ADC_configure();
+  calibrateTempSensor();
+  initFilterBuffer(&tempFilterBuffer); 
   
-  LCD_configure();
-  printLCDString("Temperature:", 11, 1);
-  
-  tid_temperature = osThreadCreate(osThread(temperature_thread), NULL);
-	
-	//osThreadId tid_alarmThread;
-	Alarm_PWM_configure();
-	tid_alarm = osThreadCreate(osThread(alarm_thread), NULL);
-	
-	
-	//osThreadId tid_accelerometerThread;
+  Alarm_configure();
 	Motor_PWM_configure();
 	Accelerometer_configure();
-	Interrupts_configure();
+  
+  LCD_configure();
+  printLCDString("Temperature:    C", 17, 1);
+  
+  tid_temperature = osThreadCreate(osThread(temperature_thread), NULL);
 	tid_accelerometer = osThreadCreate(osThread(accelerometer_thread), NULL);
 	
-
+  // Configure interrupts last so as to avoid a deadlock situation with
+  // the signaling for the temperature
+	Interrupts_configure();
   
 }
 
@@ -77,35 +71,23 @@ void temperature_thread(const void* arg) {
         sprintf(tempAsString, "%.1f", temperature);
       
 
-        signalAlarm();
+        alarmCheckTemp(temperature);
         printLCDToPos(tempAsString, 4, 1, 13);
         
     }
 }
 
-void signalAlarm() {
-    osSignalSet(tid_alarm, ALARM_INT_SIGNAL);
-}
-
-void alarm_thread(const void* arg) {
-	while(1) {
-		osSignalWait(ALARM_INT_SIGNAL, osWaitForever);
-        
-        printf("blabh ablabhrebh\n");
-        // do stuff!
-	}
-}
 
 void accelerometer_thread(const void* arg) {
 	while(1) {
-        // Wait forever for accelerometer interrupt
-        osSignalWait(ACC_INT_SIGNAL, osWaitForever);
+    // Wait forever for accelerometer interrupt
+    osSignalWait(ACC_INT_SIGNAL, osWaitForever);
         
 		int x, y, z;
 		Accelerometer_get_data(&x, &y, &z);
 		
-        int roll = Accelerometer_get_roll(x, y, z);
-        int pitch = Accelerometer_get_pitch(x, y, z);
+    int roll = Accelerometer_get_roll(x, y, z);
+    int pitch = Accelerometer_get_pitch(x, y, z);
 		motor_move_to_angle(roll);
 		
 		printf("Pitch: %i, Roll: %i\n", pitch, roll);
