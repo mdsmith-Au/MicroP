@@ -5,7 +5,7 @@ void LCD_GPIO_setup(void);
 void printToAddress(char* string, int length, uint8_t address);
 void sendASCII(char data);
 void sendCommand(uint8_t command);
-int convertToBCD(int num);
+unsigned int convertToBCD(unsigned int num);
 
 // Perform initial LCD configuration, such as GPIO commands
 void LCD_configure(void) {
@@ -13,47 +13,47 @@ void LCD_configure(void) {
 }
 
 // Print a string to the LCD, starting at the beginning of a specified row
-// Rows start from 1
+// Rows start from 1; only 2 rows
+// Length limited to 24 characters
 void printLCDString(char* string, int length, int row) {
   printLCDToPos(string, length, row, 1);
 }
 
 // Print a string to the LCD starting at a given row/column
-// Rows and columns start from 1
+// Rows and columns start from 1; 2 rows, 24 columns
+// Length limited to 24 characters
 void printLCDToPos(char* string, int length, int row, int col) {
 	
-  //Prevent users from printing into the second row without explicitely specifying it
-  if (length >= 40) {
-    length = 39;
+  //Prevent users from printing past visible area (i.e. into second row)
+  if (length > 24) {
+    length = 24;
   }
   
   // Row limited to only 1 or 2
-  if (row > 2 || row < 1) {
-    row = 1;
+  if ((row > 2) || (row < 1)) {
+    return;
   }
   
-  if (col < 1 || col > 24) {
-    col = 1;
+  // Columns limited from 1 to 24
+  if ((col < 1) || (col > 24)) {
+    return;
+  }
+  // Exceptional situation: a high column number with a moderate length string
+  // could ALSO go into the second row -> limit length to max visible area
+  if ((col > 16) && (length > 8)) {
+    length = 8;
   }
   
   // Addresses start from 0, columns from 1
-  // First row is from address 0, second is from address 40
-	printToAddress(string, length, convertToBCD((col-1) + (row-1)*40));
+  // Address starts from 0: row 1, col 1.  Columns in increasing order, max visible is col 24
+  // Addresses are in decimal, although when accessing row 2, the addresses start at BCD 40 = 0x40
+	printToAddress(string, length, (col-1) + (row-1)*0x40);
 	
 }
 
 // Clears the LCD screen
 void clearLCD() {
   sendCommand(clearDisplay);
-}
-
-// Private method:
-// BCD conversion; limited to a 2 digit positive # (max of LCD = 64 so this is OK)
-int convertToBCD(int num) {
-  int firstDigit = num / 10;
-  int secondDigit = num % 10;
-  return (secondDigit | (firstDigit << 4));
-
 }
 
 

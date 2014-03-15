@@ -45,6 +45,7 @@ int main() {
    initFilterBuffer(&tempFilterBuffer);
   
   LCD_configure();
+  printLCDString("Temperature:", 11, 1);
   
   tid_temperature = osThreadCreate(osThread(temperature_thread), NULL);
 	
@@ -59,11 +60,8 @@ int main() {
 	Interrupts_configure();
 	tid_accelerometer = osThreadCreate(osThread(accelerometer_thread), NULL);
 	
-  printLCDString("Row 1 test", 10, 1);
-  printLCDToPos("Row 2 test, pos 5", 17, 2, 5);
-  printLCDToPos("5", 1, 2, 5);
-  clearLCD();
-  printLCDToPos("Row 1!!!", 8, 1, 6);
+
+  
 }
 
 
@@ -75,9 +73,12 @@ void temperature_thread(const void* arg) {
         // TODO put mutex
         float temperature = getAndAverageTemp(&tempFilterBuffer);
         
-        
+        char tempAsString[4];
+        sprintf(tempAsString, "%.1f", temperature);
+      
+
         signalAlarm();
-        printf("Temp: %f\n", temperature);
+        printLCDToPos(tempAsString, 4, 1, 13);
         
     }
 }
