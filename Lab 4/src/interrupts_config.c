@@ -6,6 +6,8 @@
 void mems_interrupt_config(void);
 // Set up TIM3 interrupt
 void tim3_interrupt_config(void);
+// External interrupt for button
+void button_interrupt_config(void);
 
 // Global variable used to define whether or not NVIC prio. group has already been set
 uint8_t NVIC_PRIORITY_SET = 0;
@@ -15,6 +17,7 @@ uint8_t NVIC_PRIORITY_SET = 0;
 void Interrupts_configure() {
   
   mems_interrupt_config();
+  button_interrupt_config();
   tim3_interrupt_config();
 }
 
@@ -123,6 +126,44 @@ void tim3_interrupt_config() {
 	/* Enable counter -> start */
 	TIM_Cmd(TIM3, ENABLE);
 }
+
+
+void button_interrupt_config() {
+  
+  // Enable SYSCFG, GPIOA for button
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+  // Enable interrupt on A0 for button
+  SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA, EXTI_PinSource0);
+  
+  // Configure interrupts
+  EXTI_InitTypeDef EXTI_InitStruct;
+  
+  // Pin A0
+  EXTI_InitStruct.EXTI_Line = EXTI_Line0;
+  // Use interrupts (as opposed to events)
+  EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
+  // Trigger interrupt on rising edge -> button push.
+  EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising;
+  // Enable interrupt
+  EXTI_InitStruct.EXTI_LineCmd = ENABLE;
+  EXTI_Init(&EXTI_InitStruct);
+  
+  // Configure NVIC
+  set_nvic_priority();
+  NVIC_InitTypeDef NVIC_InitStruct;
+  // Use external interrupt channel 0 -> for pin 0
+  NVIC_InitStruct.NVIC_IRQChannel = EXTI0_IRQn;
+  // Priority settings. Give 3 .. higher than accelerometer
+  NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 3;   // arbitrary
+  // Don't need sub priority
+  NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0;
+  // Enable it
+  NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStruct);
+  
+}
+
 
 /* NVIC priority bits should be set before using NVIC, but we don't want to set
  * them manually if different parts of the code use the NVIC, since we could have one

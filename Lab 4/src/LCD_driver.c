@@ -5,11 +5,25 @@ void LCD_GPIO_setup(void);
 void printToAddress(char* string, int length, uint8_t address);
 void sendASCII(char data);
 void sendCommand(uint8_t command);
-unsigned int convertToBCD(unsigned int num);
+
+// Mutex to prevent conflicting singals
+// being sent to the LCD (i.e. start sending data, send command halfway through)
+osMutexDef (MutexLCD);
+osMutexId Mutex_LCD_id;
 
 // Perform initial LCD configuration, such as GPIO commands
 void LCD_configure(void) {
 	LCD_GPIO_setup();
+  
+  // Send initial setup commands to the display, such as enabling the second row,
+  // ensuring the display is on, clearing it and resetting the cursor.
+	sendCommand(functionSet);
+	sendCommand(displayOn);
+	sendCommand(clearDisplay);
+	sendCommand(displayCursorHome);
+  
+  // Create Mutex
+  Mutex_LCD_id = osMutexCreate(osMutex(MutexLCD));
 }
 
 // Print a string to the LCD, starting at the beginning of a specified row
@@ -53,13 +67,16 @@ void printLCDToPos(char* string, int length, int row, int col) {
 
 // Clears the LCD screen
 void clearLCD() {
+  osMutexWait(Mutex_LCD_id, osWaitForever);
   sendCommand(clearDisplay);
+  osMutexRelease(Mutex_LCD_id);
 }
 
 
 // Private method: print a string to a position using the LCD's address format spec
 void printToAddress(char* string, int length, uint8_t address) {
 	
+  osMutexWait(Mutex_LCD_id, osWaitForever);
   // Address commands have a 1 in the 8th bit, followed by the address -> OR with 0x80
   // This sets the cursor to that position
   sendCommand(0x80 | address);
@@ -69,13 +86,14 @@ void printToAddress(char* string, int length, uint8_t address) {
   for (int i = 0; i < length; i++) {
     sendASCII(string[i]);
   }
+  osMutexRelease(Mutex_LCD_id);
 }
 
 // Private method: send a command with the bits as specified in the argument
 // Signals that identify the bits as a command are handled automatically, as 
 // are proper delays
 void sendCommand(uint8_t command) {
-	
+  
 	// Place command on data lines, one bit at a time
 	GPIO_WriteBit(LCD_GPIO_BANK, LCD_DATA_0, (BitAction)(command & BIT1));
 	GPIO_WriteBit(LCD_GPIO_BANK, LCD_DATA_1, (BitAction)(command & BIT2));
@@ -94,7 +112,7 @@ void sendCommand(uint8_t command) {
   // Give LCD time to process
   osDelay(1);
   GPIO_ResetBits(LCD_GPIO_BANK, LCD_EN);
-
+ 
 }
 
 // Private method: send a single character to the display
@@ -140,12 +158,5 @@ void LCD_GPIO_setup() {
 	LCD_GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz; 
 	LCD_GPIO_InitStruct.GPIO_PuPd  = GPIO_PuPd_NOPULL;
 	GPIO_Init(LCD_GPIO_BANK, &LCD_GPIO_InitStruct);
-	
-  // Send initial setup commands to the display, such as enabling the second row,
-  // ensuring the display is on, clearing it and resetting the cursor.
-	sendCommand(functionSet);
-	sendCommand(displayOn);
-	sendCommand(clearDisplay);
-	sendCommand(displayCursorHome);
 	
 }
