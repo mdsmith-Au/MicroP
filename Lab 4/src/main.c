@@ -91,7 +91,8 @@ void switch_display_thread(const void* arg) {
       printLCDString("Temperature:    C", 17, 1);
     }
     else {
-      printLCDString("Pitch:    Roll:   ", 18, 1);
+      printLCDString("Pitch:", 6, 1);
+      printLCDString("Roll:", 5, 2); 
     }
   }
 }
@@ -138,7 +139,7 @@ void accelerometer_thread(const void* arg) {
       
       motor_move_to_angle(roll);
       printLCDToPos(pitchAsString, 3, 1, 7);
-      printLCDToPos(rollAsString, 3, 1, 16);
+      printLCDToPos(rollAsString, 3, 2, 6);
     }
     else {
       // Move to 0 when not in acceleration mode
