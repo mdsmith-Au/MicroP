@@ -99,8 +99,8 @@ void switch_display_thread(const void* arg) {
           printLCDString("Pitch:", 1);
           printLCDString("Roll:", 2); 
         }
-        // Wait half a second, then re-enable the button
-        osDelay(500);
+        // Wait a bit then re-enable the button
+        osDelay(300);
         enable_button_interrupt();
         //osMutexRelease(Mutex_Mode_id);
     }
