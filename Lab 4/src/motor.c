@@ -6,12 +6,9 @@ void Motor_GPIO_setup(void);
  * From the PWM Ouput example from ST,
  * we know in this case 
  * TIM1CLK = 2 * PCLK2  (PCLK1 = APB2 clock -> clock of bus TIM1 is on)
- * but  PCLK1 = HCLK / 2
- * thus TIM1CLK = HCLK = SystemCoreClock
  * There is also the counter clock (CC), output clock and prescaler
  
  * Prescaler = (TIM1CLK / TIM1 counter clock) - 1
- * Prescaler = ((SystemCoreClock) / TIM1 counter clock) - 1
 
  * Output clock period ARR = (TIM1 counter clock / TIM1 output clock) - 1
  
@@ -32,6 +29,10 @@ void Motor_PWM_configure() {
 	
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
 	TIM_OCInitTypeDef TIM_OCInitStruct;
+  
+  // Get bus clock
+  RCC_ClocksTypeDef clock_data;
+  RCC_GetClocksFreq(&clock_data);
 	
 	// Enable clock to TIM1
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
@@ -40,7 +41,7 @@ void Motor_PWM_configure() {
   // According to Doc 018909 rev 6 (p. 627), sec 18.4.11:
   // Counter clock frequency CK_CNT = fCK_PSC / (PSC[15:0] + 1).
   // Hence, we must subtract 1 so that our prescaler value is simply fCK_PSC / PSC[15:0]
-	uint16_t PrescalerValue                   = (uint16_t)((SystemCoreClock)/1000000) - 1;
+	uint16_t PrescalerValue                   = (uint16_t)((2*clock_data.PCLK2_Frequency)/1000000) - 1;
 	
 	TIM_TimeBaseInitStruct.TIM_Period         = MOTOR_ARR;
   TIM_TimeBaseInitStruct.TIM_Prescaler      = PrescalerValue;

@@ -41,7 +41,7 @@ typedef enum {
   ACCEL_MODE = 0
 } DISPLAY_MODE;
 
-static volatile DISPLAY_MODE mode = TEMP_MODE;
+DISPLAY_MODE mode = TEMP_MODE;
 
 /**
  * Program entry point.
@@ -77,21 +77,20 @@ void switch_display_thread(const void* arg) {
     while(1) {
         osSignalWait(BUTTON_INT_SIGNAL, osWaitForever);
         
-        // Switch mode
+        // Switch mode; use mutex to prevent other threads from
+        // printing to screen when they shouldn't if we change mode 
+        // and clear the screen halfway through their thread
+        osMutexWait(Mutex_Mode_id, osWaitForever);
         if (mode == TEMP_MODE) {
-            //osMutexWait(Mutex_Mode_id, osWaitForever);
+            
             mode = ACCEL_MODE;
-            //osMutexRelease(Mutex_Mode_id);
         }
         else {
-            //osMutexWait(Mutex_Mode_id, osWaitForever);
             mode = TEMP_MODE;
-            //osMutexRelease(Mutex_Mode_id);
         }
-            
-            
+        
         clearLCD();
-        //osMutexWait(Mutex_Mode_id, osWaitForever);
+        
         if (mode == TEMP_MODE) {
             printLCDString("Temperature:    C", 1);
         }
@@ -99,10 +98,11 @@ void switch_display_thread(const void* arg) {
           printLCDString("Pitch:", 1);
           printLCDString("Roll:", 2); 
         }
+        osMutexRelease(Mutex_Mode_id);
+        
         // Wait a bit then re-enable the button
         osDelay(300);
         enable_button_interrupt();
-        //osMutexRelease(Mutex_Mode_id);
     }
 }
 
@@ -119,11 +119,11 @@ void temperature_thread(const void* arg) {
 
         alarmCheckTemp(temperature);
         
-        //osMutexWait(Mutex_Mode_id, osWaitForever);
+        osMutexWait(Mutex_Mode_id, osWaitForever);
         if (mode == TEMP_MODE) {
            printLCDToPos(tempAsString, 1, 13);
         }
-        //osMutexRelease(Mutex_Mode_id);
+        osMutexRelease(Mutex_Mode_id);
     }
 }
 
@@ -139,7 +139,7 @@ void accelerometer_thread(const void* arg) {
         int roll = Accelerometer_get_roll(x, y, z);
         int pitch = Accelerometer_get_pitch(x, y, z);
         
-        //osMutexWait(Mutex_Mode_id, osWaitForever);
+        osMutexWait(Mutex_Mode_id, osWaitForever);
         if (mode == ACCEL_MODE) {
             char rollAsString[3];
             char pitchAsString[3];
@@ -155,7 +155,7 @@ void accelerometer_thread(const void* arg) {
             // Move to 0 when not in acceleration mode
             motor_move_to_angle(0);
         }
-        //osMutexRelease(Mutex_Mode_id);
+        osMutexRelease(Mutex_Mode_id);
     }
 }
 

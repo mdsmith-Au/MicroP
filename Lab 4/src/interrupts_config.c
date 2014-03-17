@@ -68,12 +68,9 @@ void tim3_interrupt_config() {
 /* APB1 Max 142 Mhz
  * We know
  * TIM3CLK = 2 * PCLK1  (PCLK1 = APB1 clock -> clock of bus TIM3 is on)
- * but  PCLK1 = HCLK / 4
- * thus TIM3CLK = HCLK / 2 = SystemCoreClock /2
  * There is also the counter clock (CC), output clock and prescaler
  
  * Prescaler = (TIM3CLK / TIM3 counter clock) - 1
- * Prescaler = ((SystemCoreClock/2) / TIM3 counter clock) - 1
 
  * Output clock period = (TIM3 counter clock / TIM3 output clock) - 1
  
@@ -82,6 +79,11 @@ void tim3_interrupt_config() {
  * 
  * For details about the equations, see Doc ID 018909 Rev 6 and Doc ID 022152 Rev 4
  */
+  
+  // Get bus clock
+  RCC_ClocksTypeDef clock_data;
+  RCC_GetClocksFreq(&clock_data);
+  
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
 	
 	// Enable clock to TIM3
@@ -91,8 +93,7 @@ void tim3_interrupt_config() {
   // According to Doc 018909 rev 6 (p. 627), sec 18.4.11:
   // Counter clock frequency CK_CNT = fCK_PSC / (PSC[15:0] + 1).
   // Hence, we must subtract 1 so that our prescaler value is simply fCK_PSC / PSC[15:0]
-	uint16_t PrescalerValue                   = (uint16_t)((SystemCoreClock/2)/1000000) - 1;
-  // USE void RCC_GetClocksFreq(RCC_ClocksTypeDef* RCC_Clocks);
+	uint16_t PrescalerValue                   = (uint16_t)((2*clock_data.PCLK1_Frequency)/1000000) - 1;
   
 	TIM_TimeBaseInitStruct.TIM_Period         = PERIOD;
   TIM_TimeBaseInitStruct.TIM_Prescaler      = PrescalerValue;

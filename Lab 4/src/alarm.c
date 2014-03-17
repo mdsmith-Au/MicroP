@@ -57,12 +57,9 @@ void Alarm_GPIO_configure() {
  * From the PWM Ouput example from ST,
  * we know in this case 
  * TIM4CLK = 2 * PCLK1  (PCLK1 = APB1 clock -> clock of bus TIM4 is on)
- * but  PCLK1 = HCLK / 4
- * thus TIM4CLK = HCLK / 2 = SystemCoreClock /2
  * There is also the counter clock (CC), output clock and prescaler
  
  * Prescaler = (TIM4CLK / TIM4 counter clock) - 1
- * Prescaler = ((SystemCoreClock /2) / TIM4 counter clock) - 1
 
  * Output clock period ARR = (TIM4 counter clock / TIM4 output clock) - 1
  
@@ -80,6 +77,10 @@ void Alarm_PWM_configure() {
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
 	TIM_OCInitTypeDef TIM_OCInitStruct;
 	
+  // Get bus clock
+  RCC_ClocksTypeDef clock_data;
+  RCC_GetClocksFreq(&clock_data);
+  
 	// Enable clock to TIM4
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
 	
@@ -87,7 +88,7 @@ void Alarm_PWM_configure() {
     // According to Doc 018909 rev 6 (p. 627), sec 18.4.11:
     // Counter clock frequency CK_CNT = fCK_PSC / (PSC[15:0] + 1).
     // Hence, we must subtract 1 so that our prescaler value is simply fCK_PSC / PSC[15:0]
-	uint16_t PrescalerValue                   = (uint16_t)((SystemCoreClock/2)/50000000) - 1;
+	uint16_t PrescalerValue                   = (uint16_t)((2*clock_data.PCLK1_Frequency)/50000000) - 1;
 	
 	TIM_TimeBaseInitStruct.TIM_Period         = ALARM_ARR;
     TIM_TimeBaseInitStruct.TIM_Prescaler      = PrescalerValue;
