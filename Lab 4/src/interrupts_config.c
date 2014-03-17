@@ -92,7 +92,8 @@ void tim3_interrupt_config() {
   // Counter clock frequency CK_CNT = fCK_PSC / (PSC[15:0] + 1).
   // Hence, we must subtract 1 so that our prescaler value is simply fCK_PSC / PSC[15:0]
 	uint16_t PrescalerValue                   = (uint16_t)((SystemCoreClock/2)/1000000) - 1;
-	
+  // USE void RCC_GetClocksFreq(RCC_ClocksTypeDef* RCC_Clocks);
+  
 	TIM_TimeBaseInitStruct.TIM_Period         = PERIOD;
   TIM_TimeBaseInitStruct.TIM_Prescaler      = PrescalerValue;
   
@@ -176,4 +177,22 @@ void set_nvic_priority() {
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_3); // chosen arbitrarily
     NVIC_PRIORITY_SET = 1;
   }
+}
+
+// Disables the external interrupt for the button; 
+// ANDs the interrupt register with the NOT of the value of the interrupt line (masking)
+void disable_button_interrupt() {
+  
+  uint32_t interr_reg = (uint32_t)EXTI_BASE;
+  
+  // TODO: What is *(_IO. ... ??????
+  *(__IO uint32_t *) interr_reg &= ~EXTI_Line0;
+}
+
+// Enables the interrupt.  
+// Same as disable, except the interrupt register is ORed with the value of the interrupt line
+void enable_button_interrupt() {
+  uint32_t interr_reg = (uint32_t)EXTI_BASE;
+  *(__IO uint32_t *) interr_reg |= EXTI_Line0;
+  
 }

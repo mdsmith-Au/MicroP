@@ -25,6 +25,9 @@ void switch_display_thread(const void* arg);
 
 FilterStruct tempFilterBuffer;
 
+osMutexDef (Mutex_Mode);
+osMutexId Mutex_Mode_id;
+
 /* Thread structure for above threads */
 osThreadDef(temperature_thread, osPriorityNormal, 1, 0);
 osThreadDef(accelerometer_thread, osPriorityNormal, 1, 0);
@@ -38,16 +41,12 @@ typedef enum {
   ACCEL_MODE = 0
 } DISPLAY_MODE;
 
-osMutexDef (MutexMode);
-osMutexId Mutex_Mode_id;
-
 static volatile DISPLAY_MODE mode = TEMP_MODE;
 
 /**
  * Program entry point.
  */
 int main() {
-    Mutex_Mode_id = osMutexCreate(osMutex(MutexMode));
     
     ADC_configure();
     calibrateTempSensor();
@@ -59,6 +58,8 @@ int main() {
 
     LCD_configure();
 
+    Mutex_Mode_id = osMutexCreate(osMutex(Mutex_Mode));
+  
     tid_temperature = osThreadCreate(osThread(temperature_thread), NULL);
     tid_accelerometer = osThreadCreate(osThread(accelerometer_thread), NULL);
     tid_switch_display = osThreadCreate(osThread(switch_display_thread), NULL);
@@ -73,37 +74,35 @@ int main() {
 }
 
 void switch_display_thread(const void* arg) {
-    int delay = 0;
     while(1) {
         osSignalWait(BUTTON_INT_SIGNAL, osWaitForever);
         
-        if (delay <= 0) {
-            // Switch mode
-            if (mode == TEMP_MODE) {
-                osMutexWait(Mutex_Mode_id, osWaitForever);
-                mode = ACCEL_MODE;
-                osMutexRelease(Mutex_Mode_id);
-            }
-            else {
-                osMutexWait(Mutex_Mode_id, osWaitForever);
-                mode = TEMP_MODE;
-                osMutexRelease(Mutex_Mode_id);
-            }
-            
-            
-            clearLCD();
-            osMutexWait(Mutex_Mode_id, osWaitForever);
-            if (mode == TEMP_MODE) {
-                printLCDString("Temperature:    C", 1);
-            }
-            else {           
-                printLCDString("Pitch:", 1);
-                printLCDString("Roll:", 2); 
-            }
-            osMutexRelease(Mutex_Mode_id);
-            delay = 5;
+        // Switch mode
+        if (mode == TEMP_MODE) {
+            //osMutexWait(Mutex_Mode_id, osWaitForever);
+            mode = ACCEL_MODE;
+            //osMutexRelease(Mutex_Mode_id);
         }
-        delay = delay - 1;
+        else {
+            //osMutexWait(Mutex_Mode_id, osWaitForever);
+            mode = TEMP_MODE;
+            //osMutexRelease(Mutex_Mode_id);
+        }
+            
+            
+        clearLCD();
+        //osMutexWait(Mutex_Mode_id, osWaitForever);
+        if (mode == TEMP_MODE) {
+            printLCDString("Temperature:    C", 1);
+        }
+        else {           
+          printLCDString("Pitch:", 1);
+          printLCDString("Roll:", 2); 
+        }
+        // Wait half a second, then re-enable the button
+        osDelay(500);
+        enable_button_interrupt();
+        //osMutexRelease(Mutex_Mode_id);
     }
 }
 
@@ -120,11 +119,11 @@ void temperature_thread(const void* arg) {
 
         alarmCheckTemp(temperature);
         
-        osMutexWait(Mutex_Mode_id, osWaitForever);
+        //osMutexWait(Mutex_Mode_id, osWaitForever);
         if (mode == TEMP_MODE) {
            printLCDToPos(tempAsString, 1, 13);
         }
-        osMutexRelease(Mutex_Mode_id);
+        //osMutexRelease(Mutex_Mode_id);
     }
 }
 
@@ -140,7 +139,7 @@ void accelerometer_thread(const void* arg) {
         int roll = Accelerometer_get_roll(x, y, z);
         int pitch = Accelerometer_get_pitch(x, y, z);
         
-		osMutexWait(Mutex_Mode_id, osWaitForever);
+        //osMutexWait(Mutex_Mode_id, osWaitForever);
         if (mode == ACCEL_MODE) {
             char rollAsString[3];
             char pitchAsString[3];
@@ -156,7 +155,7 @@ void accelerometer_thread(const void* arg) {
             // Move to 0 when not in acceleration mode
             motor_move_to_angle(0);
         }
-        osMutexRelease(Mutex_Mode_id);
+        //osMutexRelease(Mutex_Mode_id);
     }
 }
 
@@ -179,7 +178,11 @@ void TIM3_IRQHandler() {
 
 // User Button interrupt handler
 void EXTI0_IRQHandler() {
-    osSignalSet(tid_switch_display, BUTTON_INT_SIGNAL);
   
+    // Disable interrupt to prevent multiple interrupts from one button press
+    disable_button_interrupt();
+  
+    osSignalSet(tid_switch_display, BUTTON_INT_SIGNAL);
+    
     EXTI_ClearITPendingBit(EXTI_Line0);
 }

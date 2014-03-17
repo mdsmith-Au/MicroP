@@ -18,4 +18,7 @@ void Interrupts_configure(void);
 
 // Set NVIC priority group, but only if not already set
 void set_nvic_priority(void);
+
+void disable_button_interrupt(void);
+void enable_button_interrupt(void);
 #endif
