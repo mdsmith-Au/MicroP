@@ -54,8 +54,8 @@
 #define BIT8 (uint8_t)0x80
 
 void LCD_configure(void);
-void printLCDString(char* string, int length, int row);
-void printLCDToPos(char* string, int length, int row, int col);
+void printLCDString(char* string, int row);
+void printLCDToPos(char* string, int row, int col);
 void clearLCD(void);
 
 #endif

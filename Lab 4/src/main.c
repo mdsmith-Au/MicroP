@@ -15,14 +15,10 @@
 #include "LCD_Driver.h"
 
 #define TEMP_INT_SIGNAL 0x01
-#define ALARM_INT_SIGNAL 0x02
-#define ACC_INT_SIGNAL 0x04
-#define BUTTON_INT_SIGNAL 0x08
+#define ACC_INT_SIGNAL 0x02
+#define BUTTON_INT_SIGNAL 0x04
 
-/**
- * Thread to perform menial tasks such as switching LEDs.
- * @param arg unused
- */
+/* Thread function prototypes */
 void temperature_thread(const void* arg);
 void accelerometer_thread(const void* arg);
 void switch_display_thread(const void* arg);
@@ -38,9 +34,12 @@ osThreadId tid_temperature, tid_accelerometer, tid_switch_display;
 
 // Display mode switching
 typedef enum {
-  TEMP_MODE = 1,
-  ACCEL_MODE = 0, 
-}DISPLAY_MODE;
+  TEMP_MODE = 1, 
+  ACCEL_MODE = 0
+} DISPLAY_MODE;
+
+osMutexDef (MutexMode);
+osMutexId Mutex_Mode_id;
 
 static volatile DISPLAY_MODE mode = TEMP_MODE;
 
@@ -48,53 +47,64 @@ static volatile DISPLAY_MODE mode = TEMP_MODE;
  * Program entry point.
  */
 int main() {
+    Mutex_Mode_id = osMutexCreate(osMutex(MutexMode));
+    
+    ADC_configure();
+    calibrateTempSensor();
+    initFilterBuffer(&tempFilterBuffer); 
 
-  ADC_configure();
-  calibrateTempSensor();
-  initFilterBuffer(&tempFilterBuffer); 
-  
-  Alarm_configure();
-	Motor_PWM_configure();
-	Accelerometer_configure();
-  
-  LCD_configure();
-  
-  tid_temperature = osThreadCreate(osThread(temperature_thread), NULL);
-	tid_accelerometer = osThreadCreate(osThread(accelerometer_thread), NULL);
-  tid_switch_display = osThreadCreate(osThread(switch_display_thread), NULL);
-	
-  // Configure interrupts last so as to avoid a deadlock situation with
-  // the signaling for the temperature
-	Interrupts_configure();
-  
-  // Run the switch display thread once to get a complete string on screen
-  // (this will be the opposite of the default set initially as a global variable for mode)
-  EXTI_GenerateSWInterrupt(EXTI_Line0);
+    Alarm_configure();
+    Motor_PWM_configure();
+    Accelerometer_configure();
+
+    LCD_configure();
+
+    tid_temperature = osThreadCreate(osThread(temperature_thread), NULL);
+    tid_accelerometer = osThreadCreate(osThread(accelerometer_thread), NULL);
+    tid_switch_display = osThreadCreate(osThread(switch_display_thread), NULL);
+
+    // Configure interrupts last so as to avoid a deadlock situation with
+    // the signaling for the temperature
+    Interrupts_configure();
+
+    // Run the switch display thread once to get a complete string on screen
+    // (this will be the opposite of the default set initially as a global variable for mode)
+    EXTI_GenerateSWInterrupt(EXTI_Line0);
 }
 
 void switch_display_thread(const void* arg) {
-  
-  while(1) {
-    
-    osSignalWait(BUTTON_INT_SIGNAL, osWaitForever);
-    
-    // Switch mode
-    if (mode == TEMP_MODE) {
-      mode = ACCEL_MODE;
+    int delay = 0;
+    while(1) {
+        osSignalWait(BUTTON_INT_SIGNAL, osWaitForever);
+        
+        if (delay <= 0) {
+            // Switch mode
+            if (mode == TEMP_MODE) {
+                osMutexWait(Mutex_Mode_id, osWaitForever);
+                mode = ACCEL_MODE;
+                osMutexRelease(Mutex_Mode_id);
+            }
+            else {
+                osMutexWait(Mutex_Mode_id, osWaitForever);
+                mode = TEMP_MODE;
+                osMutexRelease(Mutex_Mode_id);
+            }
+            
+            
+            clearLCD();
+            osMutexWait(Mutex_Mode_id, osWaitForever);
+            if (mode == TEMP_MODE) {
+                printLCDString("Temperature:    C", 1);
+            }
+            else {           
+                printLCDString("Pitch:", 1);
+                printLCDString("Roll:", 2); 
+            }
+            osMutexRelease(Mutex_Mode_id);
+            delay = 5;
+        }
+        delay = delay - 1;
     }
-    else {
-      mode = TEMP_MODE;
-    }
-    
-    clearLCD();
-    if (mode == TEMP_MODE) {
-      printLCDString("Temperature:    C", 17, 1);
-    }
-    else {
-      printLCDString("Pitch:", 6, 1);
-      printLCDString("Roll:", 5, 2); 
-    }
-  }
 }
 
 
@@ -110,67 +120,65 @@ void temperature_thread(const void* arg) {
 
         alarmCheckTemp(temperature);
         
+        osMutexWait(Mutex_Mode_id, osWaitForever);
         if (mode == TEMP_MODE) {
-           printLCDToPos(tempAsString, 4, 1, 13);
+           printLCDToPos(tempAsString, 1, 13);
         }
+        osMutexRelease(Mutex_Mode_id);
     }
 }
 
 
 void accelerometer_thread(const void* arg) {
-	while(1) {
-    // Wait forever for accelerometer interrupt
-    osSignalWait(ACC_INT_SIGNAL, osWaitForever);
+    while(1) {
+        // Wait forever for accelerometer interrupt
+        osSignalWait(ACC_INT_SIGNAL, osWaitForever);
+            
+        int x, y, z;
+        Accelerometer_get_data(&x, &y, &z);
+            
+        int roll = Accelerometer_get_roll(x, y, z);
+        int pitch = Accelerometer_get_pitch(x, y, z);
         
-		int x, y, z;
-		Accelerometer_get_data(&x, &y, &z);
-		
-    int roll = Accelerometer_get_roll(x, y, z);
-    int pitch = Accelerometer_get_pitch(x, y, z);
-		
-    
-		if (mode == ACCEL_MODE) {
-      
-      char rollAsString[3];
-      char pitchAsString[3];
-      // 3 specifies minimum width, since we leave a fixed space for it on the display
-      sprintf(rollAsString, "%3i", roll);
-      sprintf(pitchAsString, "%3i", pitch);
-      
-      motor_move_to_angle(roll);
-      printLCDToPos(pitchAsString, 3, 1, 7);
-      printLCDToPos(rollAsString, 3, 2, 6);
+		osMutexWait(Mutex_Mode_id, osWaitForever);
+        if (mode == ACCEL_MODE) {
+            char rollAsString[3];
+            char pitchAsString[3];
+            // 3 specifies minimum width, since we leave a fixed space for it on the display
+            sprintf(rollAsString, "%3i", roll);
+            sprintf(pitchAsString, "%3i", pitch);
+
+            motor_move_to_angle(roll);
+            printLCDToPos(pitchAsString, 1, 7);
+            printLCDToPos(rollAsString, 2, 6);
+        }
+        else {
+            // Move to 0 when not in acceleration mode
+            motor_move_to_angle(0);
+        }
+        osMutexRelease(Mutex_Mode_id);
     }
-    else {
-      // Move to 0 when not in acceleration mode
-      motor_move_to_angle(0);
-      
-    }
-	}
 }
 
 // External interrupt on line 1 : INT2 on acclerometer
 void EXTI1_IRQHandler() {
-    
     osSignalSet(tid_accelerometer, ACC_INT_SIGNAL);
     
-    EXTI_ClearITPendingBit(EXTI_Line1);
     // Note that the interrupt on the accelerometer is cleared 
     // if, and ONLY if, data is read from it.  The status
     // registers that hold the interrupt line high cannot be modified manually
-  
+    EXTI_ClearITPendingBit(EXTI_Line1);
 }
 
 // Timer 3 interrupt for temperature)
 void TIM3_IRQHandler() {
-    
     osSignalSet(tid_temperature, TEMP_INT_SIGNAL);
     
-    TIM_ClearITPendingBit( TIM3, TIM_IT_Update);
+    TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
 }
 
+// User Button interrupt handler
 void EXTI0_IRQHandler() {
-  
     osSignalSet(tid_switch_display, BUTTON_INT_SIGNAL);
   
     EXTI_ClearITPendingBit(EXTI_Line0);
