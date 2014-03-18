@@ -186,7 +186,7 @@ void disable_button_interrupt() {
   
   uint32_t interr_reg = (uint32_t)EXTI_BASE;
   
-  // TODO: What is *(_IO. ... ??????
+  // Note: Use __IO here for volatile follwing ST driver convention
   *(__IO uint32_t *) interr_reg &= ~EXTI_Line0;
 }
 
