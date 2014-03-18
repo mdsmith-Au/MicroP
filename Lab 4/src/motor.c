@@ -46,7 +46,7 @@ void Motor_PWM_configure() {
 	TIM_TimeBaseInitStruct.TIM_Period         = MOTOR_ARR;
   TIM_TimeBaseInitStruct.TIM_Prescaler      = PrescalerValue;
   
-	/* No need to further divide the clock in our case */   
+	/* No need to divide the clock in our case */   
   TIM_TimeBaseInitStruct.TIM_ClockDivision  = 0;
   TIM_TimeBaseInitStruct.TIM_CounterMode    = TIM_CounterMode_Up;
 	/* Note: TIM_RepetitionCounter does not apply in our case */
@@ -92,7 +92,7 @@ void Motor_GPIO_setup() {
 	Motor_GPIO_InitStruct.GPIO_PuPd   = GPIO_PuPd_NOPULL;
 	GPIO_Init(GPIOE, &Motor_GPIO_InitStruct);
 	
-	// Connect GPIODE Pin 14 to TIM 1 for PWM (TIM1 because it (and only it) is wired to that pin
+	// Connect GPIOE Pin 14 to TIM 1 for PWM (TIM1 because it (and only it) is wired to that pin
 	// See STM32F4 Discovery manual, Hardware and Layout, Table 5 (MCU pin description versus board function)
 	GPIO_PinAFConfig(GPIOE, GPIO_PinSource14, GPIO_AF_TIM1);
 }

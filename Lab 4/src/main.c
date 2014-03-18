@@ -1,5 +1,3 @@
-//#include "arm_math.h"
-
 // System includes
 #include <stdio.h>
 #include "cmsis_os.h"
@@ -14,6 +12,7 @@
 #include "temp_processing.h"
 #include "LCD_Driver.h"
 
+// Signal values
 #define TEMP_INT_SIGNAL 0x01
 #define ACC_INT_SIGNAL 0x02
 #define BUTTON_INT_SIGNAL 0x04
@@ -23,10 +22,10 @@ void temperature_thread(const void* arg);
 void accelerometer_thread(const void* arg);
 void switch_display_thread(const void* arg);
 
+// Temperature filter buffer
 FilterStruct tempFilterBuffer;
 
-osMutexDef (Mutex_Mode);
-osMutexId Mutex_Mode_id;
+
 
 /* Thread structure for above threads */
 osThreadDef(temperature_thread, osPriorityNormal, 1, 0);
@@ -41,13 +40,19 @@ typedef enum {
   ACCEL_MODE = 0
 } DISPLAY_MODE;
 
+// Mode the board is in; see above
 DISPLAY_MODE mode = TEMP_MODE;
+
+// Mutex for accessing the Display Mode
+osMutexDef (Mutex_Mode);
+osMutexId Mutex_Mode_id;
 
 /**
  * Program entry point.
  */
 int main() {
     
+    // Configuration of all devices/parameters
     ADC_configure();
     calibrateTempSensor();
     initFilterBuffer(&tempFilterBuffer); 
@@ -56,10 +61,14 @@ int main() {
     Motor_PWM_configure();
     Accelerometer_configure();
 
+    // Configure LCD, but wait for it to power up in case we just plugged in
+    osDelay(200);
     LCD_configure();
 
+    // Create the mode mutex
     Mutex_Mode_id = osMutexCreate(osMutex(Mutex_Mode));
   
+    // Create + start all threads
     tid_temperature = osThreadCreate(osThread(temperature_thread), NULL);
     tid_accelerometer = osThreadCreate(osThread(accelerometer_thread), NULL);
     tid_switch_display = osThreadCreate(osThread(switch_display_thread), NULL);
@@ -73,8 +82,10 @@ int main() {
     EXTI_GenerateSWInterrupt(EXTI_Line0);
 }
 
+// Thread responsible for switching modes and taking care of necessary LCD printing
 void switch_display_thread(const void* arg) {
     while(1) {
+        // Wait for the button to be pushed
         osSignalWait(BUTTON_INT_SIGNAL, osWaitForever);
         
         // Switch mode; use mutex to prevent other threads from
@@ -91,6 +102,7 @@ void switch_display_thread(const void* arg) {
         
         clearLCD();
         
+        // Print appropriate string to LCD based on mode
         if (mode == TEMP_MODE) {
             printLCDString("Temperature:    C", 1);
         }
@@ -100,25 +112,30 @@ void switch_display_thread(const void* arg) {
         }
         osMutexRelease(Mutex_Mode_id);
         
-        // Wait a bit then re-enable the button
+        // Wait a bit then re-enable the button; prvents multiple switches
+        // from one button press
         osDelay(300);
         enable_button_interrupt();
     }
 }
 
 
+// Thread responsible for handling temperature acquisition and printing to LCD
 void temperature_thread(const void* arg) {
     while(1) {
         
+        // Wait until timer says its OK (25hz)
         osSignalWait(TEMP_INT_SIGNAL, osWaitForever);
         
         float temperature = getAndAverageTemp(&tempFilterBuffer);
         
         char tempAsString[4];
         sprintf(tempAsString, "%.1f", temperature);
-
+        
+        // Send temp to alarm to be checked
         alarmCheckTemp(temperature);
         
+        // Print to LCD
         osMutexWait(Mutex_Mode_id, osWaitForever);
         if (mode == TEMP_MODE) {
            printLCDToPos(tempAsString, 1, 13);
@@ -128,6 +145,7 @@ void temperature_thread(const void* arg) {
 }
 
 
+// Thread responsible for getting roll/pitch and printing to LCD
 void accelerometer_thread(const void* arg) {
     while(1) {
         // Wait forever for accelerometer interrupt
@@ -140,14 +158,19 @@ void accelerometer_thread(const void* arg) {
         int pitch = Accelerometer_get_pitch(x, y, z);
         
         osMutexWait(Mutex_Mode_id, osWaitForever);
+        // Print to LCD if in correct mode
         if (mode == ACCEL_MODE) {
+            
+            // Convert to string
             char rollAsString[3];
             char pitchAsString[3];
             // 3 specifies minimum width, since we leave a fixed space for it on the display
             sprintf(rollAsString, "%3i", roll);
             sprintf(pitchAsString, "%3i", pitch);
-
+            
+            // Move motor to correct angle
             motor_move_to_angle(roll);
+            
             printLCDToPos(pitchAsString, 1, 7);
             printLCDToPos(rollAsString, 2, 6);
         }
@@ -161,11 +184,11 @@ void accelerometer_thread(const void* arg) {
 
 // External interrupt on line 1 : INT2 on acclerometer
 void EXTI1_IRQHandler() {
-    osSignalSet(tid_accelerometer, ACC_INT_SIGNAL);
-    
     // Note that the interrupt on the accelerometer is cleared 
     // if, and ONLY if, data is read from it.  The status
     // registers that hold the interrupt line high cannot be modified manually
+    osSignalSet(tid_accelerometer, ACC_INT_SIGNAL);
+    
     EXTI_ClearITPendingBit(EXTI_Line1);
 }
 

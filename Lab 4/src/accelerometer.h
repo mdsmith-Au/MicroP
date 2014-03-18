@@ -9,7 +9,7 @@
 #include <stdio.h>
 
 // Math libraries + lookup table version of the arctan function
-#include "math.h"
+#include "arm_math.h"
 #include "atan_LUT.h"
 
 // SMA filter

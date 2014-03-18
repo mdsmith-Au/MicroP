@@ -41,13 +41,10 @@ void Accelerometer_configure() {
 	LIS302DL_InterruptConfig(&interruptStruct);
 	
 	/* Filter Config */
-	// @ 100Hz -> filter out anything that moves > 2Hz
 	// See LIS302DL datasheet, sec 7.3, Table 22
 	filterStruct.HighPassFilter_CutOff_Frequency = LIS302DL_HIGHPASSFILTER_LEVEL_0;
-	// Actually use filter
-	filterStruct.HighPassFilter_Data_Selection = LIS302DL_FILTEREDDATASELECTION_OUTPUTREGISTER;
-  // ** Or, if it should be disabled during testing, replace with the below **
-  //filterStruct.HighPassFilter_Data_Selection = LIS302DL_FILTEREDDATASELECTION_BYPASSED;
+  // Disable filter
+  filterStruct.HighPassFilter_Data_Selection = LIS302DL_FILTEREDDATASELECTION_BYPASSED;
 	// Don't need Free-Fall/Wake-Up
 	filterStruct.HighPassFilter_Interrupt = LIS302DL_HIGHPASSFILTERINTERRUPT_OFF;
   
@@ -61,11 +58,12 @@ void Accelerometer_configure() {
   initFilterBuffer(&pitchFilter);
 }
 
+// GPIO Settings for accelerometer
 void Accelerometer_GPIO_setup() {
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
 	
 	GPIO_InitTypeDef Acc_GPIO_InitStruct;
-    Acc_GPIO_InitStruct.GPIO_Pin   = GPIO_Pin_1;
+  Acc_GPIO_InitStruct.GPIO_Pin   = GPIO_Pin_1;
 	Acc_GPIO_InitStruct.GPIO_Mode  = GPIO_Mode_IN; 
 	Acc_GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
 	Acc_GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz; 

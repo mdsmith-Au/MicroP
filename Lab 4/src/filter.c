@@ -6,7 +6,7 @@
 #include "filter.h"
 
 /* This uses a simple moving average algorithm to smooth out 
- * any outliers in the temperature data.
+ * any outliers in data.
  */
 int filterSMA(int data, FilterStruct *filterBuffer) {
   /* Data at next position to be used */

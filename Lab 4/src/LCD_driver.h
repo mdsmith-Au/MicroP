@@ -7,7 +7,7 @@
 #include "cmsis_os.h"
 
 
-	/* Pin mapping:
+/* Pin mapping (GPIOB):
   B0 = Reg select
 	B1 = read/write
 	B2 = enable

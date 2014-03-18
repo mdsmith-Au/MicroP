@@ -85,17 +85,17 @@ void Alarm_PWM_configure() {
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
 	
 	// Prescaler set dynamically based on Clock Freq, useful if we change it later
-    // According to Doc 018909 rev 6 (p. 627), sec 18.4.11:
-    // Counter clock frequency CK_CNT = fCK_PSC / (PSC[15:0] + 1).
-    // Hence, we must subtract 1 so that our prescaler value is simply fCK_PSC / PSC[15:0]
+  // According to Doc 018909 rev 6 (p. 627), sec 18.4.11:
+  // Counter clock frequency CK_CNT = fCK_PSC / (PSC[15:0] + 1).
+  // Hence, we must subtract 1 so that our prescaler value is simply fCK_PSC / PSC[15:0]
 	uint16_t PrescalerValue                   = (uint16_t)((2*clock_data.PCLK1_Frequency)/50000000) - 1;
 	
 	TIM_TimeBaseInitStruct.TIM_Period         = ALARM_ARR;
-    TIM_TimeBaseInitStruct.TIM_Prescaler      = PrescalerValue;
+  TIM_TimeBaseInitStruct.TIM_Prescaler      = PrescalerValue;
   
-	/* No need to further divide the clock in our case */   
-    TIM_TimeBaseInitStruct.TIM_ClockDivision  = 0;
-    TIM_TimeBaseInitStruct.TIM_CounterMode    = TIM_CounterMode_Up;
+	/* No need to divide the clock */
+  TIM_TimeBaseInitStruct.TIM_ClockDivision  = 0;
+  TIM_TimeBaseInitStruct.TIM_CounterMode    = TIM_CounterMode_Up;
 	/* Note: TIM_RepetitionCounter does not apply to TIM4 */
 	
 	/* Send struct to be processed */
@@ -108,11 +108,11 @@ void Alarm_PWM_configure() {
      * Mode 2 - while the counter is TIMx_CNT < TIMx_CCRx, the PWM output is low.
      */
 	TIM_OCInitStruct.TIM_OCMode               = TIM_OCMode_PWM1;
-    TIM_OCInitStruct.TIM_OutputState          = TIM_OutputState_Enable;
+  TIM_OCInitStruct.TIM_OutputState          = TIM_OutputState_Enable;
 	// By default, leave LED disabled -> no pulse (0% duty cycle)
-    TIM_OCInitStruct.TIM_Pulse                = 0;
+  TIM_OCInitStruct.TIM_Pulse                = 0;
 	// Polarity_high means active high on (3V). Polarity low would be off when 100% duty cycle
-    TIM_OCInitStruct.TIM_OCPolarity           = TIM_OCPolarity_High;
+  TIM_OCInitStruct.TIM_OCPolarity           = TIM_OCPolarity_High;
 	
 	/* Process struct for channel 3 */
 	TIM_OC3Init(TIM4, &TIM_OCInitStruct);

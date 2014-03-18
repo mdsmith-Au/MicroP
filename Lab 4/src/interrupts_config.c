@@ -12,7 +12,7 @@ void button_interrupt_config(void);
 // Global variable used to define whether or not NVIC prio. group has already been set
 uint8_t NVIC_PRIORITY_SET = 0;
 
-/* Configure interrupts to work with both TIM3 and MEMS sensor.
+/* Configure interrupts to work with TIM3, button and MEMS sensor.
  * Note that the accelerometer must have been already set up. */
 void Interrupts_configure() {
   
