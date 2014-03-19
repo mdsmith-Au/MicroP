@@ -5,8 +5,6 @@ void LCD_GPIO_setup(void);
 void printToAddress(char* string, int length, uint8_t address);
 void sendASCII(char data);
 void sendCommand(uint8_t command);
-//void delay(int microseconds);
-//void calc_delay(void);
 
 // Mutex to prevent conflicting singals
 // being sent to the LCD (i.e. start sending data, send command halfway through)
@@ -15,10 +13,6 @@ osMutexId Mutex_LCD_id;
 
 // Perform initial LCD configuration, such as GPIO commands
 void LCD_configure(void) {
-    
-    // Perform calculations for microsecond delay calculations later
-    //calc_delay();
-  
     LCD_GPIO_setup();
   
     // Send initial setup commands to the display, such as enabling the second row,
@@ -86,7 +80,7 @@ void clearLCD() {
 // Private method: print a string to a position using the LCD's address format spec
 void printToAddress(char* string, int length, uint8_t address) {
     osMutexWait(Mutex_LCD_id, osWaitForever);
-    // Address commands have a 1 in the 8th bit, followed by the address -> OR with 0x80
+    // Address commands have a 1 in the 8th bit (MSB), followed by the address -> OR with 0x80
     // This sets the cursor to that position
     sendCommand(0x80 | address);
     
@@ -101,6 +95,7 @@ void printToAddress(char* string, int length, uint8_t address) {
 // Private method: send a command with the bits as specified in the argument
 // Signals that identify the bits as a command are handled automatically, as 
 // are proper delays
+// See Generic Keypad and LCD Tutorial, p.2
 void sendCommand(uint8_t command) {
   
     // Place command on data lines, one bit at a time
@@ -141,7 +136,7 @@ void sendASCII(char data) {
     GPIO_WriteBit(LCD_GPIO_BANK, LCD_DATA_7, (BitAction)(data & BIT8));
   
     // ASCII write has REG_SEL = 1, Read/Write = 0, Enable 0
-    GPIO_ResetBits(LCD_GPIO_BANK, LCD_RW |  LCD_EN);
+    GPIO_ResetBits(LCD_GPIO_BANK, LCD_RW | LCD_EN);
     GPIO_SetBits(LCD_GPIO_BANK, LCD_REG_SEL);
 	
     // Bring enable up/down -> trig on falling edge
@@ -167,24 +162,3 @@ void LCD_GPIO_setup() {
     GPIO_Init(LCD_GPIO_BANK, &LCD_GPIO_InitStruct);
 }
 
-/*
-// Software delay, in microseconds
-void delay(int microseconds) {
-
-  int start_tick = SysTick->VAL;
-  // Cast to int, since floating point has no meaning anymore
-  int num_ticks_needed = microseconds/us_for_single_tick;
-  // Do nothing while waiting.  May not be the exact value if SysTick overflows, but
-  // taking that into consideration would be too expensive CPU time-wise for it to be worth it
-  while ((SysTick->VAL - start_tick) < num_ticks_needed) {
-    ;
-  }
-}
-
-// Calculate the us for a single SysTick tick, for use in software delay calculation
-void calc_delay() {
-  // Reverse engineered from line 200 of RTX_Conf_CM.c
-  int period = SysTick->LOAD;
-  float us_for_tick = ((period + 1)*1E6)/(float)SystemCoreClock;
-  us_for_single_tick = us_for_tick/(period);
-}*/

@@ -122,7 +122,6 @@ void switch_display_thread(const void* arg) {
 // Thread responsible for handling temperature acquisition and printing to LCD
 void temperature_thread(const void* arg) {
     while(1) {
-        
         // Wait until timer says its OK (25hz)
         osSignalWait(TEMP_INT_SIGNAL, osWaitForever);
         
@@ -133,14 +132,15 @@ void temperature_thread(const void* arg) {
         
         // Print to LCD, but skip if we can't get the LCD in time for the next sample
         // 33 msec to be safe (sample every 40ms, 2*33 < 2*40 in worst case of 2x timeout)
-        // Note we use short circuit evaluation here
         osStatus event = osMutexWait(Mutex_Mode_id, 33);
-        if ((event != osErrorTimeoutResource) && (mode == TEMP_MODE)) {
-           char tempAsString[4];
-           sprintf(tempAsString, "%.1f", temperature);
-           printLCDToPos(tempAsString, 1, 13);
+        if (event != osErrorTimeoutResource) {
+            if (mode == TEMP_MODE) {
+                char tempAsString[4];
+                sprintf(tempAsString, "%.1f", temperature);
+                printLCDToPos(tempAsString, 1, 13);
+            }
+            osMutexRelease(Mutex_Mode_id);
         }
-        osMutexRelease(Mutex_Mode_id);
     }
 }
 
@@ -157,32 +157,34 @@ void accelerometer_thread(const void* arg) {
         int roll = Accelerometer_get_roll(x, y, z);
         int pitch = Accelerometer_get_pitch(x, y, z);
         
-        // Print to LCD if in correct mode (take advantage  of short circuit eval)
+        // Print to LCD if in correct mode
         // Note: timout of 9ms ensures we skip and go wait for another sample if we can't get the LCD in time
         // as the LCD takes ~8msec to print two strings
         // Worst case: timeout twice in a row = 18msec < 20msec for 2 samples, so we get both
         // If we timeout once/run once, 8+9 is also < 20msec
         osStatus event = osMutexWait(Mutex_Mode_id, 9);
-        if ((event != osErrorTimeoutResource) && (mode == ACCEL_MODE)) {
+        if (event != osErrorTimeoutResource) {
+            if (mode == ACCEL_MODE) {
+                // Convert to string
+                char rollAsString[3];
+                char pitchAsString[3];
+                // 3 specifies minimum width, since we leave a fixed space for it on the display
+                sprintf(rollAsString, "%3i", roll);
+                sprintf(pitchAsString, "%3i", pitch);
             
-            // Convert to string
-            char rollAsString[3];
-            char pitchAsString[3];
-            // 3 specifies minimum width, since we leave a fixed space for it on the display
-            sprintf(rollAsString, "%3i", roll);
-            sprintf(pitchAsString, "%3i", pitch);
+                // Move motor to correct angle
+                motor_move_to_angle(roll);
             
-            // Move motor to correct angle
-            motor_move_to_angle(roll);
-            
-            printLCDToPos(pitchAsString, 1, 7);
-            printLCDToPos(rollAsString, 2, 6);
+                printLCDToPos(pitchAsString, 1, 7);
+                printLCDToPos(rollAsString, 2, 6);
+            }
+            else {
+                // Move to 0 when not in acceleration mode
+                motor_move_to_angle(0);
+            }
+        
+            osMutexRelease(Mutex_Mode_id);
         }
-        else {
-            // Move to 0 when not in acceleration mode
-            motor_move_to_angle(0);
-        }
-        osMutexRelease(Mutex_Mode_id);
     }
 }
 
@@ -205,7 +207,6 @@ void TIM3_IRQHandler() {
 
 // User Button interrupt handler
 void EXTI0_IRQHandler() {
-  
     // Disable interrupt to prevent multiple interrupts from one button press
     disable_button_interrupt();
   

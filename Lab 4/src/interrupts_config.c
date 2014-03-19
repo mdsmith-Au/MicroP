@@ -182,8 +182,8 @@ void set_nvic_priority() {
 
 // Disables the external interrupt for the button; 
 // ANDs the interrupt register with the NOT of the value of the interrupt line (masking)
+// Ref: doc 018909 r1 sec 9.3.1 interrupt mask register
 void disable_button_interrupt() {
-  
   uint32_t interr_reg = (uint32_t)EXTI_BASE;
   
   // Note: Use __IO here for volatile follwing ST driver convention
@@ -195,5 +195,4 @@ void disable_button_interrupt() {
 void enable_button_interrupt() {
   uint32_t interr_reg = (uint32_t)EXTI_BASE;
   *(__IO uint32_t *) interr_reg |= EXTI_Line0;
-  
 }

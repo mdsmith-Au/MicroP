@@ -11,7 +11,7 @@
 
 
 /* Pin mapping (GPIOB):
-  B0 = Reg select
+    B0 = Reg select
 	B1 = read/write
 	B2 = enable
 	B4 = data 0
@@ -38,7 +38,7 @@
 #define LCD_DATA_7 GPIO_Pin_14
 
 
-// Commands in Hex.  From "A generic keypad and LCD tutorial"
+// Commands in Hex.  From "A generic keypad and LCD tutorial", p.3
 #define clearDisplay (uint8_t)0x01
 #define displayCursorHome (uint8_t)0x02
 #define displayOn (uint8_t)0xC
