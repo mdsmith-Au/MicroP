@@ -6,6 +6,9 @@
 // For OS functions like delay
 #include "cmsis_os.h"
 
+// String length
+#include <string.h>
+
 
 /* Pin mapping (GPIOB):
   B0 = Reg select
@@ -52,6 +55,7 @@
 #define BIT6 (uint8_t)0x20
 #define BIT7 (uint8_t)0x40
 #define BIT8 (uint8_t)0x80
+
 
 void LCD_configure(void);
 void printLCDString(char* string, int row);

@@ -1,4 +1,3 @@
-#include <string.h>
 #include "LCD_driver.h"
 
 // Private method definitions
@@ -6,6 +5,8 @@ void LCD_GPIO_setup(void);
 void printToAddress(char* string, int length, uint8_t address);
 void sendASCII(char data);
 void sendCommand(uint8_t command);
+//void delay(int microseconds);
+//void calc_delay(void);
 
 // Mutex to prevent conflicting singals
 // being sent to the LCD (i.e. start sending data, send command halfway through)
@@ -14,6 +15,10 @@ osMutexId Mutex_LCD_id;
 
 // Perform initial LCD configuration, such as GPIO commands
 void LCD_configure(void) {
+    
+    // Perform calculations for microsecond delay calculations later
+    //calc_delay();
+  
     LCD_GPIO_setup();
   
     // Send initial setup commands to the display, such as enabling the second row,
@@ -22,7 +27,7 @@ void LCD_configure(void) {
     sendCommand(displayOn);
     sendCommand(clearDisplay);
     sendCommand(displayCursorHome);
-  
+    
     // Create Mutex
     Mutex_LCD_id = osMutexCreate(osMutex(MutexLCD));
 }
@@ -30,6 +35,7 @@ void LCD_configure(void) {
 // Print a string to the LCD, starting at the beginning of a specified row
 // Rows start from 1; only 2 rows
 // Length limited to 24 characters
+// NOTE: time to execute is approx. 1msec/character in string + 1 msec
 void printLCDString(char* string, int row) {
     printLCDToPos(string, row, 1);
 }
@@ -37,6 +43,7 @@ void printLCDString(char* string, int row) {
 // Print a string to the LCD starting at a given row/column
 // Rows and columns start from 1; 2 rows, 24 columns
 // Length limited to 24 characters
+// NOTE: time to execute is approx. 1msec/character in string + 1 msec
 void printLCDToPos(char* string, int row, int col) {
 	int length = strlen(string);
     
@@ -60,19 +67,21 @@ void printLCDToPos(char* string, int row, int col) {
         length = 8;
     }
 
+    // Use printToAddress, with calculations:
     // Addresses start from 0, columns from 1
     // Address starts from 0: row 1, col 1.  Columns in increasing order, max visible is col 24
     // Addresses are in decimal, although when accessing row 2, the addresses start at BCD 40 = 0x40
     printToAddress(string, length, (col-1) + (row-1)*0x40);
+
 }
 
 // Clears the LCD screen
+// NOTE: Time to execute is approx. 1 msec
 void clearLCD() {
     osMutexWait(Mutex_LCD_id, osWaitForever);
     sendCommand(clearDisplay);
     osMutexRelease(Mutex_LCD_id);
 }
-
 
 // Private method: print a string to a position using the LCD's address format spec
 void printToAddress(char* string, int length, uint8_t address) {
@@ -157,3 +166,25 @@ void LCD_GPIO_setup() {
     LCD_GPIO_InitStruct.GPIO_PuPd  = GPIO_PuPd_NOPULL;
     GPIO_Init(LCD_GPIO_BANK, &LCD_GPIO_InitStruct);
 }
+
+/*
+// Software delay, in microseconds
+void delay(int microseconds) {
+
+  int start_tick = SysTick->VAL;
+  // Cast to int, since floating point has no meaning anymore
+  int num_ticks_needed = microseconds/us_for_single_tick;
+  // Do nothing while waiting.  May not be the exact value if SysTick overflows, but
+  // taking that into consideration would be too expensive CPU time-wise for it to be worth it
+  while ((SysTick->VAL - start_tick) < num_ticks_needed) {
+    ;
+  }
+}
+
+// Calculate the us for a single SysTick tick, for use in software delay calculation
+void calc_delay() {
+  // Reverse engineered from line 200 of RTX_Conf_CM.c
+  int period = SysTick->LOAD;
+  float us_for_tick = ((period + 1)*1E6)/(float)SystemCoreClock;
+  us_for_single_tick = us_for_tick/(period);
+}*/

@@ -26,10 +26,9 @@ void switch_display_thread(const void* arg);
 FilterStruct tempFilterBuffer;
 
 
-
 /* Thread structure for above threads */
-osThreadDef(temperature_thread, osPriorityNormal, 1, 0);
-osThreadDef(accelerometer_thread, osPriorityNormal, 1, 0);
+osThreadDef(temperature_thread, osPriorityHigh, 1, 0);
+osThreadDef(accelerometer_thread, osPriorityHigh, 1, 0);
 osThreadDef(switch_display_thread, osPriorityNormal, 1, 0);
 
 osThreadId tid_temperature, tid_accelerometer, tid_switch_display;
@@ -129,15 +128,16 @@ void temperature_thread(const void* arg) {
         
         float temperature = getAndAverageTemp(&tempFilterBuffer);
         
-        char tempAsString[4];
-        sprintf(tempAsString, "%.1f", temperature);
-        
         // Send temp to alarm to be checked
         alarmCheckTemp(temperature);
         
-        // Print to LCD
-        osMutexWait(Mutex_Mode_id, osWaitForever);
-        if (mode == TEMP_MODE) {
+        // Print to LCD, but skip if we can't get the LCD in time for the next sample
+        // 33 msec to be safe (sample every 40ms, 2*33 < 2*40 in worst case of 2x timeout)
+        // Note we use short circuit evaluation here
+        osStatus event = osMutexWait(Mutex_Mode_id, 33);
+        if ((event != osErrorTimeoutResource) && (mode == TEMP_MODE)) {
+           char tempAsString[4];
+           sprintf(tempAsString, "%.1f", temperature);
            printLCDToPos(tempAsString, 1, 13);
         }
         osMutexRelease(Mutex_Mode_id);
@@ -157,9 +157,13 @@ void accelerometer_thread(const void* arg) {
         int roll = Accelerometer_get_roll(x, y, z);
         int pitch = Accelerometer_get_pitch(x, y, z);
         
-        osMutexWait(Mutex_Mode_id, osWaitForever);
-        // Print to LCD if in correct mode
-        if (mode == ACCEL_MODE) {
+        // Print to LCD if in correct mode (take advantage  of short circuit eval)
+        // Note: timout of 9ms ensures we skip and go wait for another sample if we can't get the LCD in time
+        // as the LCD takes ~8msec to print two strings
+        // Worst case: timeout twice in a row = 18msec < 20msec for 2 samples, so we get both
+        // If we timeout once/run once, 8+9 is also < 20msec
+        osStatus event = osMutexWait(Mutex_Mode_id, 9);
+        if ((event != osErrorTimeoutResource) && (mode == ACCEL_MODE)) {
             
             // Convert to string
             char rollAsString[3];
