@@ -24,8 +24,8 @@
  * The temperature threshold value (in degrees Celsius) which will trigger 
  * alarm activation.
  */
-//#define TEMP_THRESHOLD 45
-#define TEMP_THRESHOLD 30
+#define TEMP_THRESHOLD 45
+//#define TEMP_THRESHOLD 30
 
 /**
  * Temperature threshold standard deviation value. Its main purpose is to 
