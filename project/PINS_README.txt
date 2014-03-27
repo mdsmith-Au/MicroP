@@ -2,12 +2,12 @@
 GPIO PINS:
 
 C8  - Roll motor PWM
-E14 - Pitch motor PWM
+A2 - Pitch motor PWM
 
 /* -------------------------------------------------------------
 TIMERS:
 
-TIM1 - Pitch motor PWM (channel 1)
+TIM9 - Pitch motor PWM (channel 1)
 TIM3 - Roll motor PWM (channel 3)
 
 /* -------------------------------------------------------------
