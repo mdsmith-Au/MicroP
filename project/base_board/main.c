@@ -2,7 +2,7 @@
 #include "stm32f4xx.h"
 #include "cmsis_os.h"
 
-#include "../common/motors_driver.h"
+#include "motors_driver.h"
 
 #define MOTOR_MOVE_SIGNAL 0x01
 
