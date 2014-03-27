@@ -432,6 +432,11 @@
               <FileType>1</FileType>
               <FilePath>../main.c</FilePath>
             </File>
+            <File>
+              <FileName>motors_driver.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\common\motors_driver.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
