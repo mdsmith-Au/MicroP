@@ -437,6 +437,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\common\motors_driver.c</FilePath>
             </File>
+            <File>
+              <FileName>base_board_interrupts_config.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\common\base_board_interrupts_config.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
