@@ -55,4 +55,14 @@
 #endif
 //! @} 
 
+typedef struct {
+	int test;
+}WirelessInitStruct;
+
+void WirelessInit(WirelessInitStruct* initStruct);
+
+void SendData(void* data, int size);
+void ReceiveData(void* data, int size);
+
+
 #endif
