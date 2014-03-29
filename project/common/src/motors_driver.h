@@ -51,4 +51,11 @@ void init_pitch_motor(void);
  */
  void pitch_move_to_angle(int angle);
 
+/*!
+ Move both motors to angles specified.
+ @param[in] roll The roll angle to move to (between -90 and 90)
+ @param[in] pitch The pitch angle to move to (between -90 and 90)
+ */
+void move_to_angles(int roll, int pitch);
+
 //! @} 

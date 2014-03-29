@@ -138,3 +138,9 @@ void pitch_move_to_angle(int angle)
 	float dutyCycle = ((PITCH_DUTY_CYCLE_AT_90_DEG - PITCH_DUTY_CYCLE_AT_0_DEG)/90.0f)*angle + PITCH_DUTY_CYCLE_AT_0_DEG;
 	TIM_SetCompare1(TIM9, (int)dutyCycle);
 }
+
+void move_to_angles(int roll, int pitch)
+{
+	roll_move_to_angle(roll);
+	pitch_move_to_angle(pitch);
+}
