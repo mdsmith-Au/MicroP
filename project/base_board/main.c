@@ -155,8 +155,6 @@ void wireless_thread(const void* arg)
 	{
 		//wait for wireless receive
 		
-		//if mode has changed indicate it in the global variable
-		
 		interpolator_m = osPoolAlloc(interpolator_pool);                     // Allocate memory for the message
 		interpolator_m->rollAngle = 0;
 		interpolator_m->pitchAngle = 0;
