@@ -11,15 +11,6 @@
 
 int motorPeriod = BASEBOARD_TIM2_PERIOD;
 
-// Display mode switching
-typedef enum {
-  KEYPAD_MODE = 1, 
-  REALTIME_MODE = 0
-} OPERATION_MODE;
-
-// Mode the board is in; see above
-OPERATION_MODE mode = REALTIME_MODE;
-
 typedef struct {                               
 	int rollAngle;
 	int pitchAngle;
@@ -34,6 +25,7 @@ typedef struct {
 	int rollAngle;
 	int pitchAngle;
 	int delta_t; //in seconds
+	int realtime; //is it realtime mode or not
 } Interpolator_message;
 
 osPoolDef(interpolator_pool, INTERPOLATOR_MESSAGE_QUEUE_SIZE, Interpolator_message);                    // Define memory pool queue size 16 for now
@@ -51,9 +43,6 @@ osThreadDef(wireless_thread, osPriorityNormal, 1, 0);
 
 osThreadId tid_motor, tid_interpolator, tid_wireless;
 
-osSemaphoreId modeSemaphore;   
-osSemaphoreDef(modeSemaphore);
-
 void TIM2_IRQHandler(void);
 
 /*!
@@ -66,8 +55,6 @@ int main (void)
 	
 	interpolator_pool = osPoolCreate(osPool(interpolator_pool));                 // create memory pool
   interpolator_message_box = osMessageCreate(osMessageQ(interpolator_message_box), NULL);  // create msg queue
-	
-	osSemaphoreCreate(osSemaphore(modeSemaphore), 1);
 	
 	tid_motor = osThreadCreate(osThread(motor_thread), NULL);
 	tid_interpolator = osThreadCreate(osThread(interpolator_thread), NULL);
@@ -118,8 +105,6 @@ void interpolator_thread(const void* arg)
 	float rollAngleIncrement;
 	float pitchAngleIncrement;
 	
-	int interpolate = 0;
-	
 	while(1)
 	{
 		event = osMessageGet(interpolator_message_box, osWaitForever);  // wait for message
@@ -128,12 +113,8 @@ void interpolator_thread(const void* arg)
 		{
       interpolator_m = event.value.p;
 			
-			osSemaphoreWait(modeSemaphore, osWaitForever);
-			interpolate = (mode == KEYPAD_MODE)? 1: 0;
-			osSemaphoreRelease(modeSemaphore);
-			
 			//If real time mode, ignore delta t and forward message to motor thread
-			if (!interpolate)
+			if (interpolator_m->realtime)
 			{
 				motor_m = osPoolAlloc(motor_pool);                     // Allocate memory for the message
 				motor_m->rollAngle = interpolator_m->rollAngle;
@@ -180,6 +161,7 @@ void wireless_thread(const void* arg)
 		interpolator_m->rollAngle = 0;
 		interpolator_m->pitchAngle = 0;
 		interpolator_m->delta_t = 0;
+		interpolator_m->realtime = 0;
 		osMessagePut(interpolator_message_box, (uint32_t)interpolator_m, osWaitForever);  // Send Message
 	}
 }
