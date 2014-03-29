@@ -13,11 +13,11 @@
 
 #include "stm32f4xx_tim.h"
 
-#define TIM2_PERIOD 5000	/*!< TIM2 period in us */
+#define BASEBOARD_TIM2_PERIOD 5000	/*!< TIM2 period in us */
 
 /*!
  Initialize interrupts for timer 2
  */
-void tim2_interrupt_config(void);
+void baseboard_tim2_interrupt_config(void);
 
 //! @} 

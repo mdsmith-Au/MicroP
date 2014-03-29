@@ -1,6 +1,6 @@
 #include "base_board_interrupts_config.h"
 
-void tim2_interrupt_config() {
+void baseboard_tim2_interrupt_config() {
   // Get bus clock
   RCC_ClocksTypeDef clock_data;
   RCC_GetClocksFreq(&clock_data);
@@ -16,7 +16,7 @@ void tim2_interrupt_config() {
   // Hence, we must subtract 1 so that our prescaler value is simply fCK_PSC / PSC[15:0]
 	uint16_t PrescalerValue                   = (uint16_t)((2*clock_data.PCLK1_Frequency)/1000000) - 1;
   
-	TIM_TimeBaseInitStruct.TIM_Period         = TIM2_PERIOD;
+	TIM_TimeBaseInitStruct.TIM_Period         = BASEBOARD_TIM2_PERIOD;
   TIM_TimeBaseInitStruct.TIM_Prescaler      = PrescalerValue;
   
 	/* No need to further divide the clock in our case */   

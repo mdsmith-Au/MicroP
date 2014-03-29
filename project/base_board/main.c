@@ -9,7 +9,7 @@
 #define MOTOR_MESSAGE_QUEUE_SIZE 16
 #define INTERPOLATOR_MESSAGE_QUEUE_SIZE 16
 
-int motorPeriod = TIM2_PERIOD;
+int motorPeriod = BASEBOARD_TIM2_PERIOD;
 
 // Display mode switching
 typedef enum {
@@ -54,7 +54,7 @@ osThreadId tid_motor, tid_interpolator, tid_wireless;
 osSemaphoreId modeSemaphore;   
 osSemaphoreDef(modeSemaphore);
 
-void TIM10_IRQHandler(void);
+void TIM2_IRQHandler(void);
 
 /*!
  @brief Program entry point
@@ -82,6 +82,7 @@ int main (void)
 void motor_thread(const void* arg)
 {
 	init_motors();
+	baseboard_tim2_interrupt_config();
 	
 	Motor_message  *motor_m;
   osEvent event;
