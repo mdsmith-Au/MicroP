@@ -607,6 +607,31 @@
               <FileType>1</FileType>
               <FilePath>..\..\common\src\motors_driver.c</FilePath>
             </File>
+            <File>
+              <FileName>atan_LUT.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\common\src\atan_LUT.c</FilePath>
+            </File>
+            <File>
+              <FileName>circular_queue.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\common\src\circular_queue.c</FilePath>
+            </File>
+            <File>
+              <FileName>filter.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\common\src\filter.c</FilePath>
+            </File>
+            <File>
+              <FileName>mems_controller.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\common\src\mems_controller.c</FilePath>
+            </File>
+            <File>
+              <FileName>wireless_cc2500.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\common\src\wireless_cc2500.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

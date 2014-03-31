@@ -33,8 +33,8 @@ OPERATION_MODE mode = REALTIME_MODE;
 typedef struct {                               
 	int rollAngle;
 	int pitchAngle;
-	int delta_t;
-	int realtime;	//is it realtime mode or not
+	int delta_t;						// 
+	int realtime;						// is it realtime mode or not
 } Wireless_message;
 
 static Filter rollFilter;

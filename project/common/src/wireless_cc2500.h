@@ -65,16 +65,16 @@ typedef struct {
 	int test;
 }WirelessInitStruct;
 
-void WirelessInit(WirelessInitStruct* initStruct);
+void CC2500_Init(WirelessInitStruct* initStruct);
 
 // Wireless data send/receive
-void SendData(void* data, uint8_t address, int size);
-void ReceiveData(void* data, uint8_t address, int size);
+void CC2500_SendData(void* data, uint8_t address, int size);
+void CC2500_ReceiveData(void* data, uint8_t address, int size);
 
 // SPI Interface Pins
 
 #define CC2500_SPI                       SPI2
-#define CC2500_SPI_CLK                   RCC_APB2Periph_SPI2
+#define CC2500_SPI_CLK                   RCC_APB1Periph_SPI2
 
 #define CC2500_SPI_SCK_PIN               GPIO_Pin_13                 
 #define CC2500_SPI_SCK_GPIO_PORT         GPIOB                       
@@ -100,12 +100,12 @@ void ReceiveData(void* data, uint8_t address, int size);
 #define CC2500_SPI_NSS_SOURCE            GPIO_PinSource12
 #define CC2500_SPI_NSS_AF                GPIO_AF_SPI2
 
-#define CC2500_SPI_INT1_PIN              GPIO_Pin_0                  
-#define CC2500_SPI_INT1_GPIO_PORT        GPIOE                       
-#define CC2500_SPI_INT1_GPIO_CLK         RCC_AHB1Periph_GPIOE
-#define CC2500_SPI_INT1_EXTI_LINE        EXTI_Line0
-#define CC2500_SPI_INT1_EXTI_PORT_SOURCE EXTI_PortSourceGPIOE
-#define CC2500_SPI_INT1_EXTI_PIN_SOURCE  EXTI_PinSource0
-#define CC2500_SPI_INT1_EXTI_IRQn        EXTI0_IRQn 
+#define CC2500_SPI_INT_PIN              GPIO_Pin_0                  
+#define CC2500_SPI_INT_GPIO_PORT        GPIOE                       
+#define CC2500_SPI_INT_GPIO_CLK         RCC_AHB1Periph_GPIOE
+#define CC2500_SPI_INT_EXTI_LINE        EXTI_Line0
+#define CC2500_SPI_INT_EXTI_PORT_SOURCE EXTI_PortSourceGPIOE
+#define CC2500_SPI_INT_EXTI_PIN_SOURCE  EXTI_PinSource0
+#define CC2500_SPI_INT_EXTI_IRQn        EXTI0_IRQn 
 
 #endif
