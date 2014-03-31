@@ -90,10 +90,6 @@ void ReceiveData(void* data, uint8_t address, int size);
 #define CC2500_SPI_MOSI_SOURCE           GPIO_PinSource15
 #define CC2500_SPI_MOSI_AF               GPIO_AF_SPI2
 
-#define CC2500_SPI_CS_PIN                GPIO_Pin_3                  /* PE.03 */
-#define CC2500_SPI_CS_GPIO_PORT          GPIOE                       /* GPIOE */
-#define CC2500_SPI_CS_GPIO_CLK           RCC_AHB1Periph_GPIOE
-
 #define CC2500_SPI_NSS_PIN							 GPIO_Pin_12
 #define CC2500_SPI_NSS_GPIO_PORT				 GPIOB
 #define CC2500_SPI_NSS_GPIO_CLK					 RCC_AHB1Periph_GPIOE
