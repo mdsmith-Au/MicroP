@@ -8,7 +8,7 @@
 #include "arm_math.h"
 #include "filter.h"
 
-#define WIRELESS_MESSAGE_QUEUE_SIZE 16
+#define WIRELESS_MESSAGE_QUEUE_SIZE 1000
 
 #define ANGLE_FILTER_DEPTH 16	/*!< Filter depth for angle filters */
 #define GRAV_ACC 1000.0f	/*!< Value of g */

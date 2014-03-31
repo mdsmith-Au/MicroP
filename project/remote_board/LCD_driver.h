@@ -11,7 +11,7 @@
 
 
 /* Pin mapping (GPIOE):
-    E3 = Reg select
+    E2 = Reg select
 	E4 = read/write
 	E5 = enable
 	E6 = data 0

@@ -52,6 +52,9 @@ int main (void)
 {
 	init_motors();
 	move_to_angles(0, 0);
+	
+	osDelay(2000);
+	
 	baseboard_tim2_interrupt_config();
 	
 	motor_pool = osPoolCreate(osPool(motor_pool));                 // create memory pool
@@ -75,6 +78,13 @@ int main (void)
 	interpolator_m->rollAngle = 0;
 	interpolator_m->pitchAngle = 0;
 	interpolator_m->delta_t = 2;
+	interpolator_m->realtime = 0;
+	osMessagePut(interpolator_message_box, (uint32_t)interpolator_m, osWaitForever);  // Send Message
+	
+	interpolator_m = osPoolAlloc(interpolator_pool);                     // Allocate memory for the message
+	interpolator_m->rollAngle = 90;
+	interpolator_m->pitchAngle = -90;
+	interpolator_m->delta_t = 1;
 	interpolator_m->realtime = 0;
 	osMessagePut(interpolator_message_box, (uint32_t)interpolator_m, osWaitForever);  // Send Message
 	
@@ -125,9 +135,6 @@ void interpolator_thread(const void* arg)
 	int prevRollAngle = 0;
 	int prevPitchAngle = 0;
 	
-	int rollSign = 1;
-	int pitchSign = 1;
-	
 	int rollAngleStart = 0;
 	int pitchAngleStart = 0;
 	
@@ -154,16 +161,13 @@ void interpolator_thread(const void* arg)
 			//else if keypad mode interpolate
 			else
 			{
-				rollSign = (interpolator_m->rollAngle < prevRollAngle)?	-1 : 1;
-				pitchSign = (interpolator_m->pitchAngle < prevPitchAngle)?	-1 : 1;
-				
 				rollAngleStart = prevRollAngle;
 				pitchAngleStart = prevPitchAngle;
 				
 				numMotorMessages = 1000000*interpolator_m->delta_t / motorPeriod;
 				
-				rollAngleIncrement = rollSign*((float)interpolator_m->rollAngle - prevRollAngle) / numMotorMessages;
-				pitchAngleIncrement = pitchSign*((float)interpolator_m->pitchAngle - prevPitchAngle) / numMotorMessages;
+				rollAngleIncrement = ((float)interpolator_m->rollAngle - prevRollAngle) / numMotorMessages;
+				pitchAngleIncrement = ((float)interpolator_m->pitchAngle - prevPitchAngle) / numMotorMessages;
 				
 				for (i = 0; i < numMotorMessages; i++)
 				{
@@ -179,6 +183,14 @@ void interpolator_thread(const void* arg)
 					
 					osMessagePut(motor_message_box, (uint32_t)motor_m, osWaitForever);  // Send Message
 				}
+				motor_m = osPoolAlloc(motor_pool);                     // Allocate memory for the message
+				motor_m->rollAngle = interpolator_m->rollAngle;
+				motor_m->pitchAngle = interpolator_m->pitchAngle;
+				
+				prevRollAngle = rollAngle;
+				prevPitchAngle = pitchAngle;
+				
+				osMessagePut(motor_message_box, (uint32_t)motor_m, osWaitForever);  // Send Message
 			}
 			
       osPoolFree(interpolator_pool, interpolator_m);                  // free memory allocated for message
