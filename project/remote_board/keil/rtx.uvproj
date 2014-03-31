@@ -642,6 +642,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\common\src\atan_LUT.c</FilePath>
             </File>
+            <File>
+              <FileName>keypad_driver.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\keypad_driver.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
