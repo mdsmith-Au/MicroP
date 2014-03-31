@@ -57,7 +57,7 @@
 #define BIT8 (uint8_t)0x80
 
 // Number of iterations for short delays
-#define DELAY 2000
+#define DELAY 1375
 
 void LCD_configure(void);
 void printLCDString(char* string, int row);
