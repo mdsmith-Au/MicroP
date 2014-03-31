@@ -25,7 +25,7 @@
 */
 
 #define LCD_GPIO_BANK GPIOE
-#define LCD_REG_SEL GPIO_Pin_3
+#define LCD_REG_SEL GPIO_Pin_2
 #define LCD_RW GPIO_Pin_4
 #define LCD_EN GPIO_Pin_5
 #define LCD_DATA_0 GPIO_Pin_6
