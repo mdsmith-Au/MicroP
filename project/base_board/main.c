@@ -6,8 +6,8 @@
 #include "base_board_interrupts_config.h"
 
 #define MOTOR_MOVE_SIGNAL 0x01
-#define MOTOR_MESSAGE_QUEUE_SIZE 16
-#define INTERPOLATOR_MESSAGE_QUEUE_SIZE 16
+#define MOTOR_MESSAGE_QUEUE_SIZE 1000
+#define INTERPOLATOR_MESSAGE_QUEUE_SIZE 1000
 
 int motorPeriod = BASEBOARD_TIM2_PERIOD;
 
@@ -50,6 +50,10 @@ void TIM2_IRQHandler(void);
  */
 int main (void)
 {
+	init_motors();
+	move_to_angles(0, 0);
+	baseboard_tim2_interrupt_config();
+	
 	motor_pool = osPoolCreate(osPool(motor_pool));                 // create memory pool
   motor_message_box = osMessageCreate(osMessageQ(motor_message_box), NULL);  // create msg queue
 	
@@ -58,7 +62,23 @@ int main (void)
 	
 	tid_motor = osThreadCreate(osThread(motor_thread), NULL);
 	tid_interpolator = osThreadCreate(osThread(interpolator_thread), NULL);
-	tid_wireless = osThreadCreate(osThread(wireless_thread), NULL);
+	
+	Interpolator_message *interpolator_m;
+	interpolator_m = osPoolAlloc(interpolator_pool);                     // Allocate memory for the message
+	interpolator_m->rollAngle = 45;
+	interpolator_m->pitchAngle = 45;
+	interpolator_m->delta_t = 2;
+	interpolator_m->realtime = 0;
+	osMessagePut(interpolator_message_box, (uint32_t)interpolator_m, osWaitForever);  // Send Message
+	
+	interpolator_m = osPoolAlloc(interpolator_pool);                     // Allocate memory for the message
+	interpolator_m->rollAngle = 0;
+	interpolator_m->pitchAngle = 0;
+	interpolator_m->delta_t = 2;
+	interpolator_m->realtime = 0;
+	osMessagePut(interpolator_message_box, (uint32_t)interpolator_m, osWaitForever);  // Send Message
+	
+	//tid_wireless = osThreadCreate(osThread(wireless_thread), NULL);
 	
 	// The below doesn't really need to be in a loop
 	while(1){
@@ -68,9 +88,6 @@ int main (void)
 
 void motor_thread(const void* arg)
 {
-	init_motors();
-	baseboard_tim2_interrupt_config();
-	
 	Motor_message  *motor_m;
   osEvent event;
 	
@@ -105,6 +122,15 @@ void interpolator_thread(const void* arg)
 	float rollAngleIncrement;
 	float pitchAngleIncrement;
 	
+	int prevRollAngle = 0;
+	int prevPitchAngle = 0;
+	
+	int rollSign = 1;
+	int pitchSign = 1;
+	
+	int rollAngleStart = 0;
+	int pitchAngleStart = 0;
+	
 	while(1)
 	{
 		event = osMessageGet(interpolator_message_box, osWaitForever);  // wait for message
@@ -119,24 +145,38 @@ void interpolator_thread(const void* arg)
 				motor_m = osPoolAlloc(motor_pool);                     // Allocate memory for the message
 				motor_m->rollAngle = interpolator_m->rollAngle;
 				motor_m->pitchAngle = interpolator_m->pitchAngle;
+				
+				prevRollAngle = rollAngle;
+				prevPitchAngle = pitchAngle;
+				
 				osMessagePut(motor_message_box, (uint32_t)motor_m, osWaitForever);  // Send Message
 			}
 			//else if keypad mode interpolate
 			else
 			{
-				numMotorMessages = interpolator_m->delta_t / motorPeriod;
+				rollSign = (interpolator_m->rollAngle < prevRollAngle)?	-1 : 1;
+				pitchSign = (interpolator_m->pitchAngle < prevPitchAngle)?	-1 : 1;
 				
-				rollAngleIncrement = ((float)interpolator_m->rollAngle) / numMotorMessages;
-				pitchAngleIncrement = ((float)interpolator_m->pitchAngle) / numMotorMessages;
+				rollAngleStart = prevRollAngle;
+				pitchAngleStart = prevPitchAngle;
+				
+				numMotorMessages = 1000000*interpolator_m->delta_t / motorPeriod;
+				
+				rollAngleIncrement = rollSign*((float)interpolator_m->rollAngle - prevRollAngle) / numMotorMessages;
+				pitchAngleIncrement = pitchSign*((float)interpolator_m->pitchAngle - prevPitchAngle) / numMotorMessages;
 				
 				for (i = 0; i < numMotorMessages; i++)
 				{
-					rollAngle = ceil(i*rollAngleIncrement);
-					pitchAngle = ceil(i*pitchAngleIncrement);
+					rollAngle = ceil(rollAngleStart + i*rollAngleIncrement);
+					pitchAngle = ceil(pitchAngleStart + i*pitchAngleIncrement);
 					
 					motor_m = osPoolAlloc(motor_pool);                     // Allocate memory for the message
 					motor_m->rollAngle = rollAngle;
 					motor_m->pitchAngle = pitchAngle;
+					
+					prevRollAngle = rollAngle;
+					prevPitchAngle = pitchAngle;
+					
 					osMessagePut(motor_message_box, (uint32_t)motor_m, osWaitForever);  // Send Message
 				}
 			}

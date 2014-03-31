@@ -5,8 +5,9 @@ C8  - Roll motor PWM
 A2 - Pitch motor PWM
 
 /* -------------------------------------------------------------
-TIMERS:
+TIMERS (BASE BOARD):
 
+TIM2 - Interrupt timer for motor thread
 TIM9 - Pitch motor PWM (channel 1)
 TIM3 - Roll motor PWM (channel 3)
 
