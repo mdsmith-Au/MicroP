@@ -14,6 +14,10 @@
  */
 
 #include "stdint.h"
+#include "stm32f4xx.h"
+#include "stm32f4xx_gpio.h"
+#include "stm32f4xx_rcc.h"
+#include "stm32f4xx_spi.h"
 
 // Wireless RF configuration - from TA
 #ifndef SMARTRF_CC2500_H
@@ -72,20 +76,20 @@ void ReceiveData(void* data, uint8_t address, int size);
 #define CC2500_SPI                       SPI2
 #define CC2500_SPI_CLK                   RCC_APB2Periph_SPI2
 
-#define CC2500_SPI_SCK_PIN               GPIO_Pin_13                  /* PA.05 */
-#define CC2500_SPI_SCK_GPIO_PORT         GPIOB                       /* GPIOA */
+#define CC2500_SPI_SCK_PIN               GPIO_Pin_13                 
+#define CC2500_SPI_SCK_GPIO_PORT         GPIOB                       
 #define CC2500_SPI_SCK_GPIO_CLK          RCC_AHB1Periph_GPIOB
 #define CC2500_SPI_SCK_SOURCE            GPIO_PinSource13
 #define CC2500_SPI_SCK_AF                GPIO_AF_SPI2
 
-#define CC2500_SPI_MISO_PIN              GPIO_Pin_14                  /* PA.6 */
-#define CC2500_SPI_MISO_GPIO_PORT        GPIOB                       /* GPIOA */
+#define CC2500_SPI_MISO_PIN              GPIO_Pin_14                 
+#define CC2500_SPI_MISO_GPIO_PORT        GPIOB                       
 #define CC2500_SPI_MISO_GPIO_CLK         RCC_AHB1Periph_GPIOB
 #define CC2500_SPI_MISO_SOURCE           GPIO_PinSource14
 #define CC2500_SPI_MISO_AF               GPIO_AF_SPI2
 
-#define CC2500_SPI_MOSI_PIN              GPIO_Pin_15                  /* PA.7 */
-#define CC2500_SPI_MOSI_GPIO_PORT        GPIOB                       /* GPIOA */
+#define CC2500_SPI_MOSI_PIN              GPIO_Pin_15                 
+#define CC2500_SPI_MOSI_GPIO_PORT        GPIOB                       
 #define CC2500_SPI_MOSI_GPIO_CLK         RCC_AHB1Periph_GPIOB
 #define CC2500_SPI_MOSI_SOURCE           GPIO_PinSource15
 #define CC2500_SPI_MOSI_AF               GPIO_AF_SPI2
@@ -96,20 +100,12 @@ void ReceiveData(void* data, uint8_t address, int size);
 #define CC2500_SPI_NSS_SOURCE            GPIO_PinSource12
 #define CC2500_SPI_NSS_AF                GPIO_AF_SPI2
 
-#define CC2500_SPI_INT1_PIN              GPIO_Pin_0                  /* PE.00 */
-#define CC2500_SPI_INT1_GPIO_PORT        GPIOE                       /* GPIOE */
+#define CC2500_SPI_INT1_PIN              GPIO_Pin_0                  
+#define CC2500_SPI_INT1_GPIO_PORT        GPIOE                       
 #define CC2500_SPI_INT1_GPIO_CLK         RCC_AHB1Periph_GPIOE
 #define CC2500_SPI_INT1_EXTI_LINE        EXTI_Line0
 #define CC2500_SPI_INT1_EXTI_PORT_SOURCE EXTI_PortSourceGPIOE
 #define CC2500_SPI_INT1_EXTI_PIN_SOURCE  EXTI_PinSource0
 #define CC2500_SPI_INT1_EXTI_IRQn        EXTI0_IRQn 
-
-#define CC2500_SPI_INT2_PIN              GPIO_Pin_1                  /* PE.01 */
-#define CC2500_SPI_INT2_GPIO_PORT        GPIOE                       /* GPIOE */
-#define CC2500_SPI_INT2_GPIO_CLK         RCC_AHB1Periph_GPIOE
-#define CC2500_SPI_INT2_EXTI_LINE        EXTI_Line1
-#define CC2500_SPI_INT2_EXTI_PORT_SOURCE EXTI_PortSourceGPIOE
-#define CC2500_SPI_INT2_EXTI_PIN_SOURCE  EXTI_PinSource1
-#define CC2500_SPI_INT2_EXTI_IRQn        EXTI1_IRQn 
 
 #endif

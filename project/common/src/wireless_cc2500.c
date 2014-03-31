@@ -6,5 +6,9 @@ void CC2500_LowLevelInit(void);
 
 void CC2500_LowLevelInit()
 {
+	GPIO_InitTypeDef GPIO_InitStructure;
+	SPI_InitTypeDef SPI_InitStructure;
 	
+	// Enable the SPI peripheral
+	RCC_AP2B2PeriphClockCmd(CC2500_SPI_CLK, ENABLE);
 }
