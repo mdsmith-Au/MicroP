@@ -118,7 +118,12 @@ int main (void) {
 	
 	// The below doesn't really need to be in a loop
 	while(1){
-		osDelay(osWaitForever);
+		osDelay(1000);
+		printLCDString("Hello World!",1);
+		osDelay(1000);
+		printLCDString("LCD test in progress.",2);
+		osDelay(1000);
+		clearLCD();
 	}
 }
 

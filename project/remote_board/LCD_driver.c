@@ -5,6 +5,7 @@ void LCD_GPIO_setup(void);
 void printToAddress(char* string, int length, uint8_t address);
 void sendASCII(char data);
 void sendCommand(uint8_t command);
+void delay(void);
 
 // Mutex to prevent conflicting singals
 // being sent to the LCD (i.e. start sending data, send command halfway through)
@@ -14,16 +15,17 @@ osMutexId Mutex_LCD_id;
 // Perform initial LCD configuration, such as GPIO commands
 void LCD_configure(void) {
     LCD_GPIO_setup();
-  
+		
+		// Create Mutex
+    Mutex_LCD_id = osMutexCreate(osMutex(MutexLCD));
+	
     // Send initial setup commands to the display, such as enabling the second row,
     // ensuring the display is on, clearing it and resetting the cursor.
     sendCommand(functionSet);
     sendCommand(displayOn);
-    sendCommand(clearDisplay);
-    sendCommand(displayCursorHome);
+		sendCommand(displayCursorHome);
+    clearLCD(); 
     
-    // Create Mutex
-    Mutex_LCD_id = osMutexCreate(osMutex(MutexLCD));
 }
 
 // Print a string to the LCD, starting at the beginning of a specified row
@@ -74,6 +76,8 @@ void printLCDToPos(char* string, int row, int col) {
 void clearLCD() {
     osMutexWait(Mutex_LCD_id, osWaitForever);
     sendCommand(clearDisplay);
+		// Must wait 1.5 ms...approx to 2
+		osDelay(2);
     osMutexRelease(Mutex_LCD_id);
 }
 
@@ -114,7 +118,7 @@ void sendCommand(uint8_t command) {
     // Bring enable up/down -> trig on falling edge
     GPIO_SetBits(LCD_GPIO_BANK, LCD_EN);
     // Give LCD time to process
-    osDelay(1);
+    delay();
     GPIO_ResetBits(LCD_GPIO_BANK, LCD_EN);
  
 }
@@ -138,11 +142,10 @@ void sendASCII(char data) {
     // ASCII write has REG_SEL = 1, Read/Write = 0, Enable 0
     GPIO_ResetBits(LCD_GPIO_BANK, LCD_RW | LCD_EN);
     GPIO_SetBits(LCD_GPIO_BANK, LCD_REG_SEL);
-	
     // Bring enable up/down -> trig on falling edge
     GPIO_SetBits(LCD_GPIO_BANK, LCD_EN);
     // Give LCD time to process
-    osDelay(1);
+    delay();
     GPIO_ResetBits(LCD_GPIO_BANK, LCD_EN);
 }
 
@@ -160,5 +163,12 @@ void LCD_GPIO_setup() {
     LCD_GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz; 
     LCD_GPIO_InitStruct.GPIO_PuPd  = GPIO_PuPd_NOPULL;
     GPIO_Init(LCD_GPIO_BANK, &LCD_GPIO_InitStruct);
+}
+
+void delay() {
+	int i = 0;
+	while (i < DELAY) {
+		i++;
+	}
 }
 
