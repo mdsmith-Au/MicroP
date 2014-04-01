@@ -45,6 +45,9 @@
 // 8 bit data lines, 2 LCD rows, 5x7 characters
 #define functionSet (uint8_t)0x38
 
+// For the low-level send command
+#define ASCII 0
+#define CMD 1
 
 // For selecting specific bits of a number (i.e. ANDing)
 #define BIT1 (uint8_t)0x1

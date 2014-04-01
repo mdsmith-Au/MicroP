@@ -3,8 +3,7 @@
 // Private method definitions
 void LCD_GPIO_setup(void);
 void printToAddress(char* string, int length, uint8_t address);
-void sendASCII(char data);
-void sendCommand(uint8_t command);
+void send(char data, int type);
 void delay(void);
 
 // Mutex to prevent conflicting singals
@@ -21,9 +20,9 @@ void LCD_configure(void) {
 	
     // Send initial setup commands to the display, such as enabling the second row,
     // ensuring the display is on, clearing it and resetting the cursor.
-    sendCommand(functionSet);
-    sendCommand(displayOn);
-		sendCommand(displayCursorHome);
+    send(functionSet, CMD);
+    send(displayOn, CMD);
+		send(displayCursorHome, CMD);
     clearLCD(); 
     
 }
@@ -75,7 +74,7 @@ void printLCDToPos(char* string, int row, int col) {
 // NOTE: Time to execute is approx. 1 msec
 void clearLCD() {
     osMutexWait(Mutex_LCD_id, osWaitForever);
-    sendCommand(clearDisplay);
+    send(clearDisplay, CMD);
 		// Must wait 1.5 ms...approx to 2
 		osDelay(2);
     osMutexRelease(Mutex_LCD_id);
@@ -86,50 +85,25 @@ void printToAddress(char* string, int length, uint8_t address) {
     osMutexWait(Mutex_LCD_id, osWaitForever);
     // Address commands have a 1 in the 8th bit (MSB), followed by the address -> OR with 0x80
     // This sets the cursor to that position
-    sendCommand(0x80 | address);
+    send(0x80 | address, CMD);
     
     // Send string one char at a time
     for (int i = 0; i < length; i++) {
-        sendASCII(string[i]);
+        send(string[i], ASCII);
     }
     
     osMutexRelease(Mutex_LCD_id);
 }
 
-// Private method: send a command with the bits as specified in the argument
-// Signals that identify the bits as a command are handled automatically, as 
+// Private method: send a command (with bits specified by the char)
+// or an ASCII character, as specified in the argument type
+// Signals that identify the bits as a command or dataare handled automatically, as 
 // are proper delays
 // See Generic Keypad and LCD Tutorial, p.2
-void sendCommand(uint8_t command) {
-  
-    // Place command on data lines, one bit at a time
-    GPIO_WriteBit(LCD_GPIO_BANK, LCD_DATA_0, (BitAction)(command & BIT1));
-    GPIO_WriteBit(LCD_GPIO_BANK, LCD_DATA_1, (BitAction)(command & BIT2));
-    GPIO_WriteBit(LCD_GPIO_BANK, LCD_DATA_2, (BitAction)(command & BIT3));
-    GPIO_WriteBit(LCD_GPIO_BANK, LCD_DATA_3, (BitAction)(command & BIT4));
-    GPIO_WriteBit(LCD_GPIO_BANK, LCD_DATA_4, (BitAction)(command & BIT5));
-    GPIO_WriteBit(LCD_GPIO_BANK, LCD_DATA_5, (BitAction)(command & BIT6));
-    GPIO_WriteBit(LCD_GPIO_BANK, LCD_DATA_6, (BitAction)(command & BIT7));
-    GPIO_WriteBit(LCD_GPIO_BANK, LCD_DATA_7, (BitAction)(command & BIT8));
-	
-    // Command mode has REG_SEL = 0, Read/Write = 0, Enable 0
-    GPIO_ResetBits(LCD_GPIO_BANK, LCD_REG_SEL | LCD_RW | LCD_EN);
-  
-    // Bring enable up/down -> trig on falling edge
-    GPIO_SetBits(LCD_GPIO_BANK, LCD_EN);
-    // Give LCD time to process
-    delay();
-    GPIO_ResetBits(LCD_GPIO_BANK, LCD_EN);
- 
-}
-
-// Private method: send a single character to the display
-// Signals that identify the bits as a character are handled automatically,
-// as are proper delays
-// Each new character is written in sequence after the old one, unless commands
+// For chracters, each new character is written in sequence after the old one, unless commands
 // are sent to explicitely override said functionality
-void sendASCII(char data) {
-    // Place command on data lines, one bit at a time
+void send(char data, int type) {
+    // Place command/data on data lines, one bit at a time
     GPIO_WriteBit(LCD_GPIO_BANK, LCD_DATA_0, (BitAction)(data & BIT1));
     GPIO_WriteBit(LCD_GPIO_BANK, LCD_DATA_1, (BitAction)(data & BIT2));
     GPIO_WriteBit(LCD_GPIO_BANK, LCD_DATA_2, (BitAction)(data & BIT3));
@@ -139,12 +113,21 @@ void sendASCII(char data) {
     GPIO_WriteBit(LCD_GPIO_BANK, LCD_DATA_6, (BitAction)(data & BIT7));
     GPIO_WriteBit(LCD_GPIO_BANK, LCD_DATA_7, (BitAction)(data & BIT8));
   
-    // ASCII write has REG_SEL = 1, Read/Write = 0, Enable 0
-    GPIO_ResetBits(LCD_GPIO_BANK, LCD_RW | LCD_EN);
-    GPIO_SetBits(LCD_GPIO_BANK, LCD_REG_SEL);
+    // Command
+    if (type == CMD) {
+        // Command mode has REG_SEL = 0, Read/Write = 0, Enable 0
+      GPIO_ResetBits(LCD_GPIO_BANK, LCD_REG_SEL | LCD_RW | LCD_EN);
+    }
+    // Data
+    else {
+      // ASCII write has REG_SEL = 1, Read/Write = 0, Enable 0
+      GPIO_ResetBits(LCD_GPIO_BANK, LCD_RW | LCD_EN);
+      GPIO_SetBits(LCD_GPIO_BANK, LCD_REG_SEL);
+    }
+    
     // Bring enable up/down -> trig on falling edge
     GPIO_SetBits(LCD_GPIO_BANK, LCD_EN);
-    // Give LCD time to process
+    // Give LCD time to process and reset
     delay();
     GPIO_ResetBits(LCD_GPIO_BANK, LCD_EN);
 }
