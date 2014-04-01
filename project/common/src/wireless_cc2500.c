@@ -90,6 +90,18 @@ void CC2500_LowLevelInit()
 }
 
 void CC2500_SPI_Write(uint8_t* buffer, uint8_t address, int numBytes) {
+	// By default, use burst
+	// Command strobe
+	if (address >= 0x30 && address <= 0x3D) {
+		
+	}
+}
+
+void CC2500_SPI_Read(uint8_t* buffer, uint8_t address, int numBytes) {
+	// Reading status reg
+	if (address >= 0x30 && address <= 0x3D) {
+		// burst bit = 1
+	}
 	
 }
 

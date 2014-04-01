@@ -28,6 +28,10 @@
 #define SMARTRF_SETTING_FREQ2 0x5D // Carrier Frequency is 2.433GHz
 #define SMARTRF_SETTING_FREQ1 0x93
 #define SMARTRF_SETTING_FREQ0 0xB1
+// Page 65 of datasheet - FREQ 0,1,2 registers
+// We set f_carrier, f_XOSC = 26Mhz
+// TODO : Fill in the registers
+
 #define SMARTRF_SETTING_MDMCFG4 0x0E //0x2D // BW of channel = 541.666kHz
 #define SMARTRF_SETTING_MDMCFG3 0x3B // Baud Rate = 125kb
 #define SMARTRF_SETTING_MDMCFG2 0x73 //before demodulator, MSK modulation, 16/16 sync word bits detected
