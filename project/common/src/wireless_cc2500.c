@@ -1,23 +1,97 @@
 #include "wireless_cc2500.h"
+#include <stdio.h>
 
-uint8_t CC2500_WriteByte(char byte);
-uint8_t CC2500_ReadByte(void);
 uint8_t CC2500_SendByte(uint8_t byte);
-
 int CC2500_Write(uint8_t* buffer, uint8_t address, int numBytes);
 int CC2500_Read(uint8_t* buffer, uint8_t address, int numBytes);
-
-// TODO: Move these back from the header
-//int CC2500_Read_Reg(uint8_t* buffer, uint8_t header, int numBytes);
-
-
+int CC2500_Read_Reg(uint8_t* buffer, uint8_t header, int numBytes);
 void CC2500_LowLevelInit(void);
 void CC2500_LowLevelWireless_Init(void);
-
 int CC2500_Check_Status(char status);
 void CC2500_Delay(void);
 
-void CC2500_Init(WirelessInitStruct* wirelessStruct)
+int CC2500_SPI_Cmd_Strobe(uint8_t command) {
+	CC2500_NSS_LOW();
+	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
+
+	uint8_t status = CC2500_SendByte(command);
+	return SUCCESS;
+}
+
+int CC2500_Write_Reg(uint8_t* buffer, uint8_t header, int numBytes) {
+	// Set chip select to low and wait for MISO to be low
+	CC2500_NSS_LOW();
+	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
+	
+	// Send the address of the register
+	uint8_t status = CC2500_SendByte(header);
+	
+	// Send data
+	while(numBytes > 0)
+	{
+		status = CC2500_SendByte(*buffer);
+		printf("Sending: %x\n", *buffer);
+		numBytes--;
+		buffer++;
+	}
+	
+	// Set chip select to high
+	CC2500_NSS_HIGH();
+	return SUCCESS;
+}
+
+int CC2500_Read_Reg(uint8_t* buffer, uint8_t header, int numBytes) {
+	// Set chip select to low and wait for MISO to be low
+	CC2500_NSS_LOW();
+	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
+	
+	// Send the address of the register
+	uint8_t status = CC2500_SendByte(header);
+	
+	// Read data
+	while(numBytes > 0)
+	{
+		*buffer = CC2500_SendByte(DUMMY_BYTE);
+		printf("Receiving: %x\n", *buffer);
+		numBytes--;
+		buffer++;
+	}
+	
+	// Set chip select to high
+	CC2500_NSS_HIGH();
+	return SUCCESS;
+}
+
+uint8_t CC2500_SendByte(uint8_t byte)
+{
+	// Loop while DR register is not empty
+	while(SPI_I2S_GetFlagStatus(CC2500_SPI, SPI_I2S_FLAG_TXE) == RESET) ;
+	
+	// Send a byte through the SPI peripheral
+	SPI_I2S_SendData(CC2500_SPI, byte);
+	printf("SendByte: %x\n", byte);
+	
+	// Wait to receive a byte
+	while (SPI_I2S_GetFlagStatus(CC2500_SPI, SPI_I2S_FLAG_RXNE) == RESET);
+	
+	// Return the byte read from the SPI bus
+	return (uint8_t)SPI_I2S_ReceiveData(CC2500_SPI);
+}
+
+// Returns 1 if good, 0 if error, 2 if buffer overflow
+int CC2500_Check_Status(char status)
+{
+		
+		return SUCCESS;
+}
+
+//TODO: Delay to wait for buffer to empty
+void CC2500_Delay()
+{
+  
+}
+
+void CC2500_Init()
 {
 	// Perform the low-level initialization of the SPI, GPIO, etc...
 	CC2500_LowLevelInit();
@@ -102,136 +176,4 @@ void CC2500_LowLevelInit()
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_NOPULL;
   GPIO_Init(CC2500_SPI_INT_GPIO_PORT, &GPIO_InitStructure);
-}
-
-int CC2500_Write_FIFO(uint8_t* buffer, int numBytes) {
-	// Set Csn low and wait for MISO to be low
-	CC2500_NSS_LOW();
-  while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
-	
-	// Send FIFA address header
-	if (numBytes > 1){
-		uint8_t status = CC2500_WriteByte(FIFO_WRITE_BURST_ADDRESS);
-		if (CC2500_Check_Status(status) == EXCEPTION_ERROR) {
-			return 0;
-		}
-	}
-	else {
-		uint8_t status = CC2500_WriteByte(FIFO_WRITE_ADDRESS);
-		if (CC2500_Check_Status(status) == EXCEPTION_ERROR) {
-			return 0;
-		}
-	}
-	
-	// Send data
-	uint8_t status;
-	while(numBytes > 0 || status == OVERFLOW_ERROR)
-	{
-		status = CC2500_WriteByte(*buffer);
-		numBytes--;
-		
-		// Write and handle underflows
-		
-	}
-	
-	return SUCCESS;
-}
-
-int CC2500_SPI_Cmd_Strobe(uint8_t command) {
-	CC2500_NSS_LOW();
-	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
-
-	uint8_t status = CC2500_WriteByte(command);
-	if(CC2500_Check_Status(status))
-		return ERROR;
-	else
-		return SUCCESS;
-}
-
-int CC2500_Write_Reg(uint8_t* buffer, uint8_t header, int numBytes) {
-	// Set chip select to low and wait for MISO to be low
-	CC2500_NSS_LOW();
-	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
-	
-	// Send the address of the register
-	uint8_t status = CC2500_WriteByte(header);
-	
-	// Send data
-	while(numBytes > 0)
-	{
-		status = CC2500_WriteByte(*buffer);
-		numBytes--;
-		buffer++;
-	}
-	
-	// Set chip select to high
-	CC2500_NSS_HIGH();
-	return SUCCESS;
-}
-
-int CC2500_Read_Reg(uint8_t* buffer, uint8_t header, int numBytes) {
-	// Set chip select to low and wait for MISO to be low
-	CC2500_NSS_LOW();
-	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
-	
-	// Send the address of the register
-	uint8_t status = CC2500_WriteByte(header);
-	
-	// Read data
-	while(numBytes > 0)
-	{
-		*buffer = CC2500_SendByte(DUMMY_BYTE);
-		numBytes--;
-		buffer++;
-	}
-	
-	// Set chip select to high
-	CC2500_NSS_HIGH();
-	return SUCCESS;
-}
-
-
-uint8_t CC2500_SendByte(uint8_t byte)
-{
-	// Loop while DR register is not empty
-	while(SPI_I2S_GetFlagStatus(CC2500_SPI, SPI_I2S_FLAG_TXE) == RESET) ;
-	
-	// Send a byte through the SPI peripheral
-	SPI_I2S_SendData(CC2500_SPI, byte);
-	
-	// Wait to receive a byte
-	while (SPI_I2S_GetFlagStatus(CC2500_SPI, SPI_I2S_FLAG_RXNE) == RESET);
-	
-	// Return the byte read from the SPI bus
-	return (uint8_t)SPI_I2S_ReceiveData(CC2500_SPI);
-}
-
-uint8_t CC2500_WriteByte(char byte) {
-	// Wait until the time is right
-	while (SPI_I2S_GetFlagStatus(CC2500_SPI, SPI_I2S_FLAG_TXE) == RESET) ;
-	
-	// Send data
-	SPI_I2S_SendData(CC2500_SPI, byte);
-	
-	// Wait to receive a response (status)
-	while (SPI_I2S_GetFlagStatus(CC2500_SPI, SPI_I2S_FLAG_RXNE) == RESET);
-	
-	return (uint8_t)SPI_I2S_ReceiveData(CC2500_SPI);
-}
-
-uint8_t CC2500_ReadByte() {
-	// Wait until the time is right
-	while (SPI_I2S_GetFlagStatus(CC2500_SPI, SPI_I2S_FLAG_RXNE) == RESET);
-	
-	return (uint8_t)SPI_I2S_ReceiveData(CC2500_SPI);
-}
-
-// Returns 1 if good, 0 if error, 2 if buffer overflow
-int CC2500_Check_Status(char status) {
-		return SUCCESS;
-}
-
-//TODO: Delay to wait for buffer to empty
-void CC2500_Delay() {
-  
 }
