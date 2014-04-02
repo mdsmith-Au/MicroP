@@ -8,6 +8,7 @@
 #include "arm_math.h"
 #include "filter.h"
 #include "wireless_cc2500.h"
+#include "keypad_driver.h"
 #include "stdio.h"
 
 #define WIRELESS_MESSAGE_QUEUE_SIZE 1000
@@ -118,7 +119,7 @@ int main (void) {
 	//start threads
 	tid_orientation = osThreadCreate(osThread(orientation_thread), NULL);
 	tid_wireless = osThreadCreate(osThread(wireless_thread), NULL);
-	
+	/*
 	CC2500_Init();
 	
 	uint8_t buffer[] = {0, 0, 0, 0};
@@ -129,13 +130,13 @@ int main (void) {
 	printf("Buff: %x\n", buffer[0]);
 	CC2500_Read_Reg(buffer, VERSION, 1);
 	printf("Buff: %x\n", buffer[0]);
-	
+	*/
 	//buffer[0] = 0xF;
 	//CC2500_Write_Reg(buffer, FREQ0_WRITE_SINGLE, 1);
 	//buffer[0] = 0;
 	//CC2500_Read_Reg(buffer, FREQ0_READ_SINGLE, 1);
 	//printf("Buff: %x\n", buffer[0]);
-	
+	/*
 	buffer[0] = 0xA;
 	buffer[1] = 0xB;
 	buffer[2] = 0xC;
@@ -146,7 +147,10 @@ int main (void) {
 	buffer[2] = 0;
 	buffer[3] = 0;
 	CC2500_Read_Reg(buffer, FREQ1_READ_BURST, 4);
-	printf("Buff: %x %x %x %x\n", buffer[0], buffer[1], buffer[2], buffer[3]);
+	printf("Buff: %x %x %x %x\n", buffer[0], buffer[1], buffer[2], buffer[3]);*/
+	
+	Keypad_configure();
+	
 	
 	// The below doesn't really need to be in a loop
 	while(1){
@@ -307,18 +311,22 @@ void EXTI1_IRQHandler()
 
 /* Keypad Interrupt Handlers */
 void EXTI2_IRQHandler() {
+	printf("EXTI2 Handler\n");
 	EXTI_ClearITPendingBit(EXTI_Line2);
 }
 
 void EXTI3_IRQHandler() {
+	printf("EXTI3 Handler\n");
 	EXTI_ClearITPendingBit(EXTI_Line3);
 }
 
 void EXTI9_5_IRQHandler() {
 	if (EXTI_GetFlagStatus(EXTI_Line6)) {
+		printf("EXTI6 Handler\n");
 		EXTI_ClearITPendingBit(EXTI_Line6);
 	}
 	else if (EXTI_GetFlagStatus(EXTI_Line7)) {
+		printf("EXTI7 Handler\n");
 		EXTI_ClearITPendingBit(EXTI_Line7);
 	}
 	
