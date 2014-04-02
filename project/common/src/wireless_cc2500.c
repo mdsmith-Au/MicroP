@@ -2,8 +2,13 @@
 
 uint8_t CC2500_WriteByte(char byte);
 uint8_t CC2500_ReadByte(void);
+
 int CC2500_Write(uint8_t* buffer, uint8_t address, int numBytes);
 int CC2500_Read(uint8_t* buffer, uint8_t address, int numBytes);
+
+// TODO: Move these back from the header
+//int CC2500_Read_Reg(uint8_t* buffer, uint8_t header, int numBytes);
+
 
 void CC2500_LowLevelInit(void);
 void CC2500_LowLevelWireless_Init(void);
@@ -176,23 +181,18 @@ int CC2500_Write_Reg(uint8_t* buffer, uint8_t header, int numBytes) {
 }
 
 int CC2500_Read_Reg(uint8_t* buffer, uint8_t header, int numBytes) {
-	if(header > CC2500_STATUS_REGS_ADDR_MAX)
-	{
-		return ERROR;
-	}
+	//if(header > CC2500_STATUS_REGS_ADDR_MAX)
+	//{
+	//	return ERROR;
+	//}
 	
 	CC2500_NSS_LOW();
 	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
 	
 	uint8_t status = CC2500_WriteByte(header);
-	if(CC2500_Check_Status(status))
-		return ERROR;
-	
-
-	status = CC2500_WriteByte(*buffer);
-	if(CC2500_Check_Status(status))
-			return ERROR;
-	numBytes--;
+	printf("Status: %u\n", status);
+	//if(CC2500_Check_Status(status))
+	//	return ERROR;
 	
 	while(numBytes > 0)
 	{

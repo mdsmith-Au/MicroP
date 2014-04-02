@@ -75,6 +75,8 @@ void CC2500_Init(WirelessInitStruct* initStruct);
 void CC2500_SendData(void* data, uint8_t address, int size);
 void CC2500_ReceiveData(void* data, uint8_t address, int size);
 
+int CC2500_Read_Reg(uint8_t* buffer, uint8_t header, int numBytes);
+
 // SPI Interface Pins
 #define CC2500_CONFG_REGS_ADDR_MIN			0x00
 #define CC2500_CONFG_REGS_ADDR_MAX			0x2E
