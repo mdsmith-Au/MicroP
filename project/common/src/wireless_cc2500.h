@@ -314,12 +314,10 @@ int CC2500_Write_Reg(uint8_t* buffer, uint8_t header, int numBytes);
 #define FIFO_WRITE_BURST_ADDRESS					0x7F
 #define FIFO_READ_BURST_ADDRESS						0xFF
 	
-#define ERROR															0x00
-#define SUCCESS														0x01
 	
-#define EXCEPTION_ERROR										0x00
-#define OVERFLOW_ERROR										0x02
-#define NO_ERROR													0x01
+// Errors and states
+#define ERROR															0x00
+#define SUCCESS														0x08
 	
 #define CHIP_RDY_MASK											0x80
 #define STATE_MASK												0x38

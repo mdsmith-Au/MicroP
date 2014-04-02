@@ -79,10 +79,31 @@ uint8_t CC2500_SendByte(uint8_t byte)
 }
 
 // Returns 1 if good, 0 if error, 2 if buffer overflow
-int CC2500_Check_Status(char status)
+int CC2500_Status(char status)
 {
+	int chip_rdy = status & CHIP_RDY_MASK;
+	chip_rdy = chip_rdy >> 3;
+	
+	if(chip_rdy == CHIP_RDY_ERROR)
+		return ERROR;
 		
-		return SUCCESS;
+	int state = status & STATE_MASK;
+	state = state >> 3;
+	
+	switch(state)
+	{
+		case IDLE_STATE: return IDLE_STATE;
+		case RX_STATE: return RX_STATE;
+		case TX_STATE: return TX_STATE;
+		case FSTXON_STATE: return FSTXON_STATE;
+		case CALIBRATE_STATE: return CALIBRATE_STATE;
+		case SETTLING_STATE: return SETTLING_STATE;
+		case RXFIFO_OVERFLOW_STATE: return RXFIFO_OVERFLOW_STATE;
+		case TXFIFO_UNDERFLOW_STATE: return TXFIFO_UNDERFLOW_STATE;
+		default: return ERROR;
+	}
+	
+	return SUCCESS;
 }
 
 //TODO: Delay to wait for buffer to empty
