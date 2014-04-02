@@ -14,7 +14,9 @@ osMutexId Mutex_LCD_id;
 // Perform initial LCD configuration, such as GPIO commands
 void LCD_configure(void) {
     LCD_GPIO_setup();
-		
+	
+		// Wait for LCD to boot up if it just turned on
+		osDelay(200);
 		// Create Mutex
     Mutex_LCD_id = osMutexCreate(osMutex(MutexLCD));
 	
