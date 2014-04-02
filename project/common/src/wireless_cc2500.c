@@ -1,13 +1,15 @@
 #include "wireless_cc2500.h"
 
-int CC2500_SPI_Write(uint8_t* buffer, uint8_t address, int numBytes);
-int CC2500_SPI_Read(uint8_t* buffer, uint8_t address, int numBytes);
-uint8_t CC2500_SPI_Write_Byte(char byte);
-uint8_t CC2500_SPI_Receive_Byte(char byte);
+uint8_t CC2500_WriteByte(char byte);
+uint8_t CC2500_ReadByte(void);
+int CC2500_Write(uint8_t* buffer, uint8_t address, int numBytes);
+int CC2500_Read(uint8_t* buffer, uint8_t address, int numBytes);
+
 void CC2500_LowLevelInit(void);
 void CC2500_LowLevelWireless_Init(void);
+
 int CC2500_Check_Status(char status);
-void CC2500_delay(void);
+void CC2500_Delay(void);
 
 void CC2500_Init(WirelessInitStruct* wirelessStruct)
 {
@@ -96,145 +98,115 @@ void CC2500_LowLevelInit()
   GPIO_Init(CC2500_SPI_INT_GPIO_PORT, &GPIO_InitStructure);
 }
 
-int CC2500_SPI_Write_FIFO(uint8_t* buffer, int numBytes) {
-	int burst = 0;
+int CC2500_Write_FIFO(uint8_t* buffer, int numBytes) {
+	// Set Csn low and wait for MISO to be low
+	CC2500_NSS_LOW();
+  while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
+	
+	// Send FIFA address header
 	if (numBytes > 1){
-		burst = 1;
+		uint8_t status = CC2500_WriteByte(FIFO_WRITE_BURST_ADDRESS);
+		if (CC2500_Check_Status(status) == EXCEPTION_ERROR) {
+			return 0;
+		}
 	}
-	uint8_t address = 0xBF;
-	
-	
-	
-	if (burst) {
-		address |= 
-		
-	}
-		
 	else {
+		uint8_t status = CC2500_WriteByte(FIFO_WRITE_ADDRESS);
+		if (CC2500_Check_Status(status) == EXCEPTION_ERROR) {
+			return 0;
+		}
+	}
+	
+	// Send data
+	uint8_t status;
+	while(numBytes > 0 || status == OVERFLOW_ERROR)
+	{
+		status = CC2500_WriteByte(*buffer);
+		numBytes--;
+		
+		// Write and handle underflows
 		
 	}
-}
-
-int CC2500_SPI_Write_Reg(uint8_t* buffer, int numBytes) {
 	
+	return SUCCESS;
 }
 
 int CC2500_SPI_Cmd_Strobe(uint8_t command) {
-	
+	CC2500_NSS_LOW();
+	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
+
+	uint8_t status = CC2500_WriteByte(command);
+	if(CC2500_Check_Status(status))
+		return ERROR;
+	else
+		return SUCCESS;
 }
 
-
-int CC2500_SPI_Write(uint8_t* buffer, uint8_t address, int numBytes) {
-	// By default, no burst or strobe
-  int burst = 0;
-  int strobe = 0;
-  int fifo = 0;
-  
-	// Make sure address is valid
-	if (address > 0x3F) {
-		return 0;
+int CC2500_Write_Reg(uint8_t* buffer, uint8_t header, int numBytes) {
+	if(header > CC2500_STATUS_REGS_ADDR_MAX)
+	{
+		return ERROR;
 	}
 	
-  // Normal register read/write with more than one byte: burst
-  if ((address <= 0x2E) && (numBytes > 1)) {
-      burst = 1;
-  }
-  else if (address >= 0x30 && address <= 0x3D) {
-    // Strobe = no burst
-    strobe = 1;
-  }
-	// FIFO address
-  else if (address == 0x3F) {
-      fifo = 1;
- 
-  }
-  
-  // Add R/W bit to address (write setting)
-  address |= 0x80;
-  
-  CC2500_NSS_LOW();
-  
+	CC2500_NSS_LOW();
 	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
 	
-  if (fifo) {
-    // Burst mode FIFO
-    if (burst) {
-        address |= 0x40;
-        uint8_t status = CC2500_SPI_Send_Receive_Byte(address);
-        if (!CC2500_Check_Status(status)) {
-          return 0;
-        }
-        while (numBytes >= 1) {
-          status = CC2500_SPI_Send_Receive_Byte(*buffer);
-          buffer++;
-          numBytes--;
-          if (CC2500_Check_Status(status) == 2) {
-            CC2500_delay();
-          }
-        }
-      }
-      // Normal FIFO : write one byte
-      else {
-        uint8_t status = CC2500_SPI_Send_Receive_Byte(address);
-				
-				if (CC2500_Check_Status(status) != 1) {
-					return 0;
-				}
-        
-        status = CC2500_SPI_Send_Receive_Byte(*buffer);
-					if (status == 0) {
-						return 0;
-        }
-      }  
-  }
-  // Not a buffer write; check if strobe
-  else if (strobe) {
-    uint8_t status = CC2500_SPI_Send_Receive_Byte(address);
-    if (!CC2500_Check_Status(status)) {       
-      return 0;
-    }
-  }
-  
-  // Normal Read/Write to registers
-  else {
-    if (burst) {
-        address |= 0x40;
-        uint8_t status = CC2500_SPI_Send_Receive_Byte(address);
-        if (!CC2500_Check_Status(status)) {
-          return 0;
-        }
-        while (numBytes >= 1) {
-          status = CC2500_SPI_Send_Receive_Byte(*buffer);
-          buffer++;
-          numBytes--;
-          if (!CC2500_Check_Status(status)) {
-            return 0;
-          }
-        }
-    }
-    else {
-        uint8_t status = CC2500_SPI_Send_Receive_Byte(address);
-        if (!CC2500_Check_Status(status)) {
-          return 0;
-        }
-        
-        status = CC2500_SPI_Send_Receive_Byte(*buffer);
-        if (!CC2500_Check_Status(status)) {
-          return 0;
-        }
-    }
-  }
-	CC2500_NSS_HIGH();
+	uint8_t status = CC2500_WriteByte(header);
+	if(CC2500_Check_Status(status))
+		return ERROR;
 	
-	return 1;
-  
+
+	status = CC2500_WriteByte(*buffer);
+	if(CC2500_Check_Status(status))
+			return ERROR;
+	numBytes--;
+	
+	while((status >> 3 & STATE_MASK) == TX_STATE && numBytes > 0)
+	{
+		buffer++;
+		status = CC2500_WriteByte(*buffer);
+		numBytes--;
+		
+		if(CC2500_Check_Status(status))
+			return ERROR;
+	}
+	
+	CC2500_NSS_HIGH();
+	return SUCCESS;
 }
 
-int CC2500_SPI_Read(uint8_t* buffer, uint8_t address, int numBytes) {
+int CC2500_Read_Reg(uint8_t* buffer, uint8_t header, int numBytes) {
+	if(header > CC2500_STATUS_REGS_ADDR_MAX)
+	{
+		return ERROR;
+	}
+	
+	CC2500_NSS_LOW();
+	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
+	
+	uint8_t status = CC2500_WriteByte(header);
+	if(CC2500_Check_Status(status))
+		return ERROR;
+	
 
+	status = CC2500_WriteByte(*buffer);
+	if(CC2500_Check_Status(status))
+			return ERROR;
+	numBytes--;
+	
+	while(numBytes > 0)
+	{
+		*buffer = CC2500_ReadByte();
+		numBytes--;
+		buffer++;
+	}
+	
+	CC2500_NSS_HIGH();
+	return SUCCESS;
 }
 
-uint8_t CC2500_SPI_Write_Byte(char byte) {
+
+uint8_t CC2500_WriteByte(char byte) {
 	// Wait until the time is right
 	while (SPI_I2S_GetFlagStatus(CC2500_SPI, SPI_I2S_FLAG_TXE) == RESET) ;
 	
@@ -247,7 +219,7 @@ uint8_t CC2500_SPI_Write_Byte(char byte) {
 	return (uint8_t)SPI_I2S_ReceiveData(CC2500_SPI);
 }
 
-int CC2500_SPI_Receive_Byte(char byte) {
+uint8_t CC2500_ReadByte() {
 	// Wait until the time is right
 	while (SPI_I2S_GetFlagStatus(CC2500_SPI, SPI_I2S_FLAG_RXNE) == RESET);
 	
@@ -256,10 +228,10 @@ int CC2500_SPI_Receive_Byte(char byte) {
 
 // Returns 1 if good, 0 if error, 2 if buffer overflow
 int CC2500_Check_Status(char status) {
-  
+		return SUCCESS;
 }
 
 //TODO: Delay to wait for buffer to empty
-void CC2500_delay() {
+void CC2500_Delay() {
   
 }

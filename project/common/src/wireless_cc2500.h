@@ -76,6 +76,37 @@ void CC2500_SendData(void* data, uint8_t address, int size);
 void CC2500_ReceiveData(void* data, uint8_t address, int size);
 
 // SPI Interface Pins
+#define CC2500_CONFG_REGS_ADDR_MIN			0x00
+#define CC2500_CONFG_REGS_ADDR_MAX			0x2E
+#define CC2500_STATUS_REGS_ADDR_MIN			0x30
+#define CC2500_STATUS_REGS_ADDR_MAX			0x3F
+
+#define FIFO_WRITE_ADDRESS					 		 0x3F
+#define FIFO_READ_ADDRESS								 0xBF
+#define FIFO_WRITE_BURST_ADDRESS				 0x7F
+#define FIFO_READ_BURST_ADDRESS					 0xFF
+
+#define ERROR												0x00
+#define SUCCESS											0x01
+
+#define EXCEPTION_ERROR									 0x00
+#define OVERFLOW_ERROR									 0x02
+#define NO_ERROR												 0x01
+
+#define CHIP_RDY_MASK										0x80
+#define STATE_MASK											0x38
+#define FIFO_BYTES_MASK									0xF0
+
+#define CHIP_RDY_ERROR									0x01
+
+#define IDLE_STATE											0x00
+#define RX_STATE												0x01
+#define TX_STATE												0x02
+#define FSTXON_STATE										0x03
+#define CALIBRATE_STATE									0x04
+#define SETTLING_STATE									0x05
+#define RXFIFO_OVERFLOW_STATE						0x06
+#define TXFIFO_UNDERFLOW_STATE					0x07
 
 #define CC2500_SPI                       SPI2
 #define CC2500_SPI_CLK                   RCC_APB1Periph_SPI2
