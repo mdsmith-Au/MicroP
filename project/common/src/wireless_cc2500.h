@@ -38,8 +38,6 @@ int CC2500_Write_Reg(uint8_t* buffer, uint8_t header, int numBytes);
 #define SMARTRF_SETTING_FREQ0 0xC5
 // Page 65 of datasheet - FREQ 0,1,2 registers
 // We set f_carrier, f_XOSC = 26Mhz
-// TODO : Fill in the registers
-
 #define SMARTRF_SETTING_MDMCFG4 0x0E //0x2D // BW of channel = 541.666kHz
 #define SMARTRF_SETTING_MDMCFG3 0x3B // Baud Rate = 125kb
 #define SMARTRF_SETTING_MDMCFG2 0x73 //before demodulator, MSK modulation, 16/16 sync word bits detected
@@ -70,6 +68,7 @@ int CC2500_Write_Reg(uint8_t* buffer, uint8_t header, int numBytes);
 #define SMARTRF_SETTING_PKTCTRL0 0x05 //0x05 // Fixed Packet Length (0x05)
 #define SMARTRF_SETTING_ADDR 0x00 // Global Broadcast Address
 #define SMARTRF_SETTING_PKTLEN 0x0A // Packet Length of 10bytes (0xFF)
+
 #endif
 //! @} 
 
@@ -316,7 +315,7 @@ int CC2500_Write_Reg(uint8_t* buffer, uint8_t header, int numBytes);
 	
 	
 // Errors and states
-#define ERROR															0x00
+#define ERROR															0x09
 #define SUCCESS														0x08
 	
 #define CHIP_RDY_MASK											0x80
