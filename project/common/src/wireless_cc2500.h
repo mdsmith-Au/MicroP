@@ -112,4 +112,7 @@ void CC2500_ReceiveData(void* data, uint8_t address, int size);
 #define CC2500_SPI_INT_EXTI_PIN_SOURCE  EXTI_PinSource0
 #define CC2500_SPI_INT_EXTI_IRQn        EXTI0_IRQn 
 
+#define CC2500_NSS_LOW()       GPIO_ResetBits(CC2500_SPI_NSS_GPIO_PORT, CC2500_SPI_NSS_PIN)
+#define CC2500_NSS_HIGH()      GPIO_SetBits(LIS302DL_SPI_NSS_GPIO_PORT, CC2500_SPI_NSS_PIN)
+
 #endif
