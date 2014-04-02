@@ -7,7 +7,7 @@ uint8_t CC2500_SPI_Send_Receive_Byte(char byte);
 void CC2500_LowLevelInit(void);
 void CC2500_LowLevelWireless_Init(void);
 int CC2500_Check_Status(char status);
-void delay(void);
+void CC2500_delay(void);
 
 void CC2500_Init(WirelessInitStruct* wirelessStruct)
 {
@@ -102,14 +102,17 @@ int CC2500_SPI_Write(uint8_t* buffer, uint8_t address, int numBytes) {
   int strobe = 0;
   int fifo = 0;
   
+	//TODO: add address check
+	
   // Normal register read/write with more than one byte: burst
-  if ((address >= 0x00 && address <= 0x2E) && (numBytes > 1)) {
+  if ((address <= 0x2E) && (numBytes > 1)) {
       burst = 1;
   }
   else if (address >= 0x30 && address <= 0x3D) {
     // Strobe = no burst
     strobe = 1;
   }
+	// FIFO address
   else if (address == 0x3F) {
       fifo = 1;
       if (numBytes > 1) {
@@ -135,7 +138,7 @@ int CC2500_SPI_Write(uint8_t* buffer, uint8_t address, int numBytes) {
           buffer++;
           numBytes--;
           if (CC2500_Check_Status(status) == 2) {
-            delay();
+            CC2500_delay();
           }
         }
       }
@@ -147,8 +150,8 @@ int CC2500_SPI_Write(uint8_t* buffer, uint8_t address, int numBytes) {
         }
         
         status = CC2500_SPI_Send_Receive_Byte(*buffer);
-        if (!CC2500_Check_Status(status)) {
-          return 0;
+					if (status == 0) {
+						return 0;
         }
       }  
   }
@@ -163,12 +166,35 @@ int CC2500_SPI_Write(uint8_t* buffer, uint8_t address, int numBytes) {
   // Normal Read/Write to registers
   else {
     if (burst) {
-      
+        address |= 0x40;
+        uint8_t status = CC2500_SPI_Send_Receive_Byte(address);
+        if (!CC2500_Check_Status(status)) {
+          return 0;
+        }
+        while (numBytes >= 1) {
+          status = CC2500_SPI_Send_Receive_Byte(*buffer);
+          buffer++;
+          numBytes--;
+          if (!CC2500_Check_Status(status)) {
+            return 0;
+          }
+        }
     }
     else {
-      
+        uint8_t status = CC2500_SPI_Send_Receive_Byte(address);
+        if (!CC2500_Check_Status(status)) {
+          return 0;
+        }
+        
+        status = CC2500_SPI_Send_Receive_Byte(*buffer);
+        if (!CC2500_Check_Status(status)) {
+          return 0;
+        }
     }
   }
+	CC2500_NSS_HIGH();
+	
+	return 1;
   
 }
 
@@ -203,6 +229,6 @@ int CC2500_Check_Status(char status) {
 }
 
 //TODO: Delay to wait for buffer to empty
-void delay() {
+void CC2500_delay() {
   
 }
