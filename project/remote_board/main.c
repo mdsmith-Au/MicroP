@@ -305,6 +305,24 @@ void EXTI1_IRQHandler()
 	EXTI_ClearITPendingBit(EXTI_Line1);
 }
 
+/* Keypad Interrupt Handlers */
+void EXTI2_IRQHandler() {
+	EXTI_ClearITPendingBit(EXTI_Line2);
+}
+
+void EXTI3_IRQHandler() {
+	EXTI_ClearITPendingBit(EXTI_Line3);
+}
+
+void EXTI9_5_IRQHandler() {
+	if (EXTI_GetFlagStatus(EXTI_Line6)) {
+		EXTI_ClearITPendingBit(EXTI_Line6);
+	}
+	else if (EXTI_GetFlagStatus(EXTI_Line7)) {
+		EXTI_ClearITPendingBit(EXTI_Line7);
+	}
+	
+}
 void init_user_button()
 {
 	EXTI_InitTypeDef extiInit;
