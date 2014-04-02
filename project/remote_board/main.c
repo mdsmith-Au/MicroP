@@ -121,8 +121,13 @@ int main (void) {
 	
 	CC2500_Init(NULL);
 	
+	
+	
 	uint8_t buffer[] = {0};
-	CC2500_Read_Reg(buffer, 0xF0, 1);
+	CC2500_SPI_Cmd_Strobe(SRES);
+	CC2500_SPI_Cmd_Strobe(SIDLE);
+	
+	CC2500_Read_Reg(buffer, 0xF1, 1);
 	
 	printf("Buff: %x\n", buffer[0]);
 	

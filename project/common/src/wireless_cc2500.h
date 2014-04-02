@@ -21,6 +21,8 @@
 
 #define DUMMY_BYTE 0x00
 
+int CC2500_SPI_Cmd_Strobe(uint8_t command);
+
 // Wireless RF configuration - from TA
 #ifndef SMARTRF_CC2500_H
 #define SMARTRF_CC2500_H
