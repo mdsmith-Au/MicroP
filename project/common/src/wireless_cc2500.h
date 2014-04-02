@@ -33,9 +33,9 @@ int CC2500_Write_Reg(uint8_t* buffer, uint8_t header, int numBytes);
 #define SMARTRF_RADIO_CC2500
 #define SMARTRF_SETTING_FSCTRL1 0x0C//0x12 //Frequency offset = 457kHz
 #define SMARTRF_SETTING_FSCTRL0 0x00
-#define SMARTRF_SETTING_FREQ2 0x5D // Carrier Frequency is 2.433GHz
+#define SMARTRF_SETTING_FREQ2 0x5D // Carrier Frequency is 2.433GHz + 8Khz
 #define SMARTRF_SETTING_FREQ1 0x93
-#define SMARTRF_SETTING_FREQ0 0xB1
+#define SMARTRF_SETTING_FREQ0 0xC5
 // Page 65 of datasheet - FREQ 0,1,2 registers
 // We set f_carrier, f_XOSC = 26Mhz
 // TODO : Fill in the registers
