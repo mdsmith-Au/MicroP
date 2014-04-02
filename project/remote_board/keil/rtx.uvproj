@@ -638,6 +638,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\common\src\wireless_cc2500.c</FilePath>
             </File>
+            <File>
+              <FileName>fputc_debug.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\common\src\fputc_debug.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
