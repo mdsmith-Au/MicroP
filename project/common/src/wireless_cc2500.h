@@ -26,6 +26,8 @@ void CC2500_SendData(void* data, uint8_t address, int size);
 void CC2500_ReceiveData(void* data, uint8_t address, int size);
 int CC2500_Read_Reg(uint8_t* buffer, uint8_t header, int numBytes);
 int CC2500_Write_Reg(uint8_t* buffer, uint8_t header, int numBytes);
+int CC2500_WriteFIFO(uint8_t* buffer, uint8_t header, int numBytes);
+int CC2500_ReadFIFO(uint8_t* buffer, uint8_t header, int numBytes);
 
 // Wireless RF configuration - from TA
 #ifndef SMARTRF_CC2500_H
@@ -316,7 +318,7 @@ int CC2500_Write_Reg(uint8_t* buffer, uint8_t header, int numBytes);
 	
 	
 // Errors and states
-#define ERROR															0x00
+#define ERROR															0x09
 #define SUCCESS														0x08
 	
 #define CHIP_RDY_MASK											0x80

@@ -18,6 +18,16 @@ int CC2500_SPI_Cmd_Strobe(uint8_t command) {
 	return SUCCESS;
 }
 
+int CC2500_WriteFIFO(uint8_t* buffer, uint8_t header, int numBytes)
+{
+	
+}
+
+int CC2500_ReadFIFO(uint8_t* buffer, uint8_t header, int numBytes)
+{
+	
+}
+
 int CC2500_Write_Reg(uint8_t* buffer, uint8_t header, int numBytes) {
 	// Set chip select to low and wait for MISO to be low
 	CC2500_NSS_LOW();
