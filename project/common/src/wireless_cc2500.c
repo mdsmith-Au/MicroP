@@ -2,6 +2,7 @@
 
 uint8_t CC2500_WriteByte(char byte);
 uint8_t CC2500_ReadByte(void);
+uint8_t CC2500_SendByte(uint8_t byte);
 int CC2500_Write(uint8_t* buffer, uint8_t address, int numBytes);
 int CC2500_Read(uint8_t* buffer, uint8_t address, int numBytes);
 
@@ -143,68 +144,62 @@ int CC2500_SPI_Cmd_Strobe(uint8_t command) {
 }
 
 int CC2500_Write_Reg(uint8_t* buffer, uint8_t header, int numBytes) {
-	if(header > CC2500_STATUS_REGS_ADDR_MAX)
-	{
-		return ERROR;
-	}
-	
+	// Set chip select to low and wait for MISO to be low
 	CC2500_NSS_LOW();
 	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
 	
+	// Send the address of the register
 	uint8_t status = CC2500_WriteByte(header);
-	if(CC2500_Check_Status(status))
-		return ERROR;
 	
-
-	status = CC2500_WriteByte(*buffer);
-	if(CC2500_Check_Status(status))
-			return ERROR;
-	numBytes--;
-	
-	while((status >> 3 & STATE_MASK) == TX_STATE && numBytes > 0)
+	// Send data
+	while(numBytes > 0)
 	{
-		buffer++;
 		status = CC2500_WriteByte(*buffer);
 		numBytes--;
-		
-		if(CC2500_Check_Status(status))
-			return ERROR;
+		buffer++;
 	}
 	
+	// Set chip select to high
 	CC2500_NSS_HIGH();
 	return SUCCESS;
 }
 
 int CC2500_Read_Reg(uint8_t* buffer, uint8_t header, int numBytes) {
-	if(header > CC2500_STATUS_REGS_ADDR_MAX)
-	{
-		return ERROR;
-	}
-	
+	// Set chip select to low and wait for MISO to be low
 	CC2500_NSS_LOW();
 	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
 	
+	// Send the address of the register
 	uint8_t status = CC2500_WriteByte(header);
-	if(CC2500_Check_Status(status))
-		return ERROR;
 	
-
-	status = CC2500_WriteByte(*buffer);
-	if(CC2500_Check_Status(status))
-			return ERROR;
-	numBytes--;
-	
+	// Read data
 	while(numBytes > 0)
 	{
-		*buffer = CC2500_ReadByte();
+		*buffer = CC2500_SendByte(DUMMY_BYTE);
 		numBytes--;
 		buffer++;
 	}
 	
+	// Set chip select to high
 	CC2500_NSS_HIGH();
 	return SUCCESS;
 }
 
+
+uint8_t CC2500_SendByte(uint8_t byte)
+{
+	// Loop while DR register is not empty
+	while(SPI_I2S_GetFlagStatus(CC2500_SPI, SPI_I2S_FLAG_TXE) == RESET) ;
+	
+	// Send a byte through the SPI peripheral
+	SPI_I2S_SendData(CC2500_SPI, byte);
+	
+	// Wait to receive a byte
+	while (SPI_I2S_GetFlagStatus(CC2500_SPI, SPI_I2S_FLAG_RXNE) == RESET);
+	
+	// Return the byte read from the SPI bus
+	return (uint8_t)SPI_I2S_ReceiveData(CC2500_SPI);
+}
 
 uint8_t CC2500_WriteByte(char byte) {
 	// Wait until the time is right
