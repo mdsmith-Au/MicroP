@@ -51,10 +51,10 @@ void Keypad_Interrupt_configure() {
   // Configure NVIC
   set_nvic_priority();
   NVIC_InitTypeDef NVIC_InitStruct;
-  // Use external interrupt channel 1 -> for pin 1
-  NVIC_InitStruct.NVIC_IRQChannel = EXTI1_IRQn;
-  // Priority settings. Give 4 .. not the highest, but fair
-  NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 4;   // arbitrary
+  // Use external interrupt channels as in header file
+  NVIC_InitStruct.NVIC_IRQChannel = KEYPAD_EXTI_IRQ ;
+  // Priority settings. Give 6 .. not the highest, but fair
+  NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 6;   // arbitrary
   // Don't need sub priority
   NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0;
   // Enable it
