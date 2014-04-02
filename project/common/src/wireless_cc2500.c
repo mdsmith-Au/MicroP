@@ -112,8 +112,6 @@ int CC2500_Status(char status)
 		case TXFIFO_UNDERFLOW_STATE: return TXFIFO_UNDERFLOW_STATE;
 		default: return ERROR;
 	}
-	
-	return SUCCESS;
 }
 
 //TODO: Delay to wait for buffer to empty
@@ -131,6 +129,59 @@ void CC2500_Init()
 
 void CC2500_LowLevelWireless_Init()
 {
+	CC2500_SPI_Cmd_Strobe(SRES);
+	
+	// Init the wireless settings using burst mode
+	// Note that we have to send registers in a certain order (i.e. by their addresses)
+	uint8_t registerData[16];
+	registerData[0] = SMARTRF_SETTING_IOCFG2;
+	CC2500_Write_Reg(registerData, IOCFG2_WRITE_SINGLE, 1);
+
+	registerData[0] = SMARTRF_SETTING_IOCFG0D;
+	registerData[1] = SMARTRF_SETTING_FIFOTHR;
+	CC2500_Write_Reg(registerData, IOCFG0_WRITE_BURST, 2);
+	
+	registerData[0] = SMARTRF_SETTING_PKTLEN;
+	registerData[1] = SMARTRF_SETTING_PKTCTRL1;
+	registerData[2] = SMARTRF_SETTING_PKTCTRL0;
+	registerData[3] = SMARTRF_SETTING_ADDR;
+	registerData[4] = SMARTRF_SETTING_CHANNR;
+	registerData[5] = SMARTRF_SETTING_FSCTRL1;
+	registerData[6] = SMARTRF_SETTING_FSCTRL0;
+	registerData[7] = SMARTRF_SETTING_FREQ2;
+	registerData[8] = SMARTRF_SETTING_FREQ1;
+	registerData[9] = SMARTRF_SETTING_FREQ0;
+	registerData[10] = SMARTRF_SETTING_MDMCFG4;
+	registerData[11] = SMARTRF_SETTING_MDMCFG3;
+	registerData[12] = SMARTRF_SETTING_MDMCFG2;
+	registerData[13] = SMARTRF_SETTING_MDMCFG1;
+	registerData[14] = SMARTRF_SETTING_MDMCFG0;
+	registerData[15] = SMARTRF_SETTING_DEVIATN;
+	CC2500_Write_Reg(registerData, PKTLEN_WRITE_BURST, 16);
+	
+	registerData[0] = SMARTRF_SETTING_MCSM0;
+	registerData[1] = SMARTRF_SETTING_FOCCFG;
+	registerData[2] = SMARTRF_SETTING_BSCFG;
+	registerData[3] = SMARTRF_SETTING_AGCCTRL2;
+	registerData[4] = SMARTRF_SETTING_AGCCTRL1;
+	registerData[5] = SMARTRF_SETTING_AGCCTRL0;
+	CC2500_Write_Reg(registerData, MCSM0_WRITE_BURST, 6);
+	
+	registerData[0] = SMARTRF_SETTING_FREND1;
+	registerData[1] = SMARTRF_SETTING_FREND0;
+	registerData[2] = SMARTRF_SETTING_FSCAL3;
+	registerData[3] = SMARTRF_SETTING_FSCAL2;
+	registerData[4] = SMARTRF_SETTING_FSCAL1;
+	registerData[5] = SMARTRF_SETTING_FSCAL0;
+	CC2500_Write_Reg(registerData, FREND1_WRITE_BURST, 6);
+	
+	registerData[0] = SMARTRF_SETTING_FSTEST;
+	CC2500_Write_Reg(registerData, FSTEST_WRITE_SINGLE, 1);
+	
+	registerData[0] = SMARTRF_SETTING_TEST2;
+	registerData[1] = SMARTRF_SETTING_TEST1;
+	registerData[2] = SMARTRF_SETTING_TEST0;
+	CC2500_Write_Reg(registerData, TEST2_WRITE_BURST, 3);
 	
 }
 
