@@ -7,6 +7,8 @@
 #include "atan_LUT.h"
 #include "arm_math.h"
 #include "filter.h"
+#include "wireless_cc2500.h"
+#include "stdio.h"
 
 #define WIRELESS_MESSAGE_QUEUE_SIZE 1000
 
@@ -96,6 +98,7 @@ void init_angle_filtering(void);
  @brief Program entry point
  */
 int main (void) {
+	
 	init_user_button();
 	LCD_configure();
 	
@@ -115,6 +118,13 @@ int main (void) {
 	//start threads
 	tid_orientation = osThreadCreate(osThread(orientation_thread), NULL);
 	tid_wireless = osThreadCreate(osThread(wireless_thread), NULL);
+	
+	CC2500_Init(NULL);
+	
+	uint8_t buffer[] = {0};
+	CC2500_Read_Reg(buffer, 0xF0, 1);
+	
+	printf("Buff: %x\n", buffer[0]);
 	
 	// The below doesn't really need to be in a loop
 	while(1){

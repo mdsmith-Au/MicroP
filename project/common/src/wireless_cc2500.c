@@ -3,8 +3,13 @@
 uint8_t CC2500_WriteByte(char byte);
 uint8_t CC2500_ReadByte(void);
 uint8_t CC2500_SendByte(uint8_t byte);
+
 int CC2500_Write(uint8_t* buffer, uint8_t address, int numBytes);
 int CC2500_Read(uint8_t* buffer, uint8_t address, int numBytes);
+
+// TODO: Move these back from the header
+//int CC2500_Read_Reg(uint8_t* buffer, uint8_t header, int numBytes);
+
 
 void CC2500_LowLevelInit(void);
 void CC2500_LowLevelWireless_Init(void);

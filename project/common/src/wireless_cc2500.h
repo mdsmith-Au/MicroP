@@ -291,6 +291,7 @@ void CC2500_ReceiveData(void* data, uint8_t address, int size);
 #define TEST1_READ_BURST                0x2D + BURST_READ_OFFSET
 #define TEST0_READ_BURST                0x2E + BURST_READ_OFFSET
 
+int CC2500_Read_Reg(uint8_t* buffer, uint8_t header, int numBytes);
 
 #define CC2500_CONFG_REGS_ADDR_MIN			0x00
 #define CC2500_CONFG_REGS_ADDR_MAX			0x2E
