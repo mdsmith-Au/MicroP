@@ -125,6 +125,8 @@ int CC2500_SPI_Write(uint8_t* buffer, uint8_t address, int numBytes) {
   
   CC2500_NSS_LOW();
   
+	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
+	
   if (fifo) {
     // Burst mode FIFO
     if (burst) {
