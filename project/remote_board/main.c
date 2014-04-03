@@ -141,16 +141,25 @@ int main (void) {
 	
 	CC2500_Init();
 	
-	uint8_t buffer[] = {0, 0, 0, 0, 0};
-	CC2500_CmdStrobe(SRES);
-	CC2500_CmdStrobe(SIDLE);
-	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
-	CC2500_CmdStrobe(SRX);
-	CC2500_Read_Reg(buffer, MARCSTATE, 1);
-	printf("Buff: %x\n", buffer[0]);
-	CC2500_Read_Reg(buffer, FIFO_READ_ADDRESS, 1);
-	CC2500_Read_Reg(buffer, MARCSTATE, 1);
-	printf("Buff: %x\n", buffer[0]);
+	uint8_t buffer[] = {0, 0, 0, 0, 0, 0, 0, 0};
+	
+	CC2500_CmdStrobe(STX);
+		
+	buffer[0] = 6;
+	buffer[1] = 1;
+	buffer[2] = 2;
+	buffer[3] = 3;
+	buffer[4] = 4;
+	buffer[5] = 5;
+	buffer[6] = 6;
+	
+	CC2500_WriteFIFO(buffer, FIFO_WRITE_BURST_ADDRESS, 7);
+		
+	//CC2500_Read_Reg(buffer, MARCSTATE, 1);
+	//printf("Buff: %x\n", buffer[0]);
+	//CC2500_Read_Reg(buffer, FIFO_READ_ADDRESS, 1);
+	//CC2500_Read_Reg(buffer, MARCSTATE, 1);
+	//printf("Buff: %x\n", buffer[0]);
 	
 	/*
 	buffer[0] = 4;
@@ -194,7 +203,7 @@ int main (void) {
 	CC2500_Read_Reg(buffer, FREQ1_READ_BURST, 1);
 	printf("Buff: %x %x %x %x\n", buffer[0], buffer[1], buffer[2], buffer[3]);
 	
-	
+	*/
 	
 	// The below doesn't really need to be in a loop
 	osDelay(osWaitForever);
@@ -369,6 +378,7 @@ void EXTI1_IRQHandler()
 
 /* Keypad Interrupt Handlers */
 //TODO: disable interrupts when called
+/*
 void EXTI15_10_IRQHandler() {
 	if (EXTI_GetFlagStatus(EXTI_Line10)) {
 		keypad_interrupt_message_handler(EXTI_Line10);
@@ -379,6 +389,7 @@ void EXTI15_10_IRQHandler() {
 		EXTI_ClearITPendingBit(EXTI_Line11);
 	}
 }
+*/
 
 void EXTI9_5_IRQHandler() {
 	if (EXTI_GetFlagStatus(EXTI_Line8)) {
