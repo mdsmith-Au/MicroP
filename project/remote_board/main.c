@@ -22,6 +22,7 @@
 #define SENSOR_Z_OFFSET -64	/*!< Z offset from calibration (expected 1000)*/
 
 #define ACCELERATON_FLAG	0x01	/*!< Acceleration signaling flag */
+#define KEYPAD_FLAG	0x02
 
 static int displayValue = 0;
 static int RXNow = 0;
@@ -67,7 +68,6 @@ osMessageQId keypad_message_box;
 void orientation_thread(const void* arg);
 void wireless_thread(const void* arg);
 void keypad_thread(const void* arg);
-static void inline keypad_interrupt_message_handler(uint32_t EXTI_Line);
 
 osThreadDef(orientation_thread, osPriorityNormal, 1, 0);
 osThreadDef(wireless_thread, osPriorityNormal, 1, 0);
@@ -143,11 +143,8 @@ int main (void) {
 	
 	CC2500_Init();
 	
-<<<<<<< HEAD
-=======
 	int8_t buffer[] = {0, 0, 0, 0, 0, 0, 0, 0};
 	
->>>>>>> ece4833d9491bdc580112fd3863683f0355a7f76
 	CC2500_CmdStrobe(STX);
 	
 	Wireless_message *wireless_m;
@@ -168,20 +165,17 @@ int main (void) {
 	buffer[3] = 5;
 	buffer[4] = 1;
 	
-<<<<<<< HEAD
 	CC2500_WriteFIFO(buffer, FIFO_WRITE_BURST_ADDRESS, 7);
-		*/
-=======
+
 	CC2500_WriteFIFO(buffer, FIFO_WRITE_BURST_ADDRESS, 5);
 		
->>>>>>> ece4833d9491bdc580112fd3863683f0355a7f76
 	//CC2500_Read_Reg(buffer, MARCSTATE, 1);
 	//printf("Buff: %x\n", buffer[0]);
 	//CC2500_Read_Reg(buffer, FIFO_READ_ADDRESS, 1);
 	//CC2500_Read_Reg(buffer, MARCSTATE, 1);
 	//printf("Buff: %x\n", buffer[0]);
 	
-	/*
+	
 	buffer[0] = 4;
 	buffer[1] = 10;
 	buffer[2] = 20;
@@ -195,7 +189,7 @@ int main (void) {
 		osDelay(1000);
 	}
 	
-	Keypad_configure();
+	
 	
 	
 	CC2500_Read_Reg(buffer, PARTNUM, 1);
@@ -224,6 +218,8 @@ int main (void) {
 	printf("Buff: %x %x %x %x\n", buffer[0], buffer[1], buffer[2], buffer[3]);
 	
 	*/
+	
+	Keypad_configure();
 	
 	// The below doesn't really need to be in a loop
 	osDelay(osWaitForever);
@@ -323,23 +319,12 @@ void wireless_thread(const void* arg)
 }
 
 void keypad_thread(const void* arg) {
-  Keypad_data  *keypad_data;
-  osEvent event;
 	
 	while(1)
 	{
-		event = osMessageGet(keypad_message_box, osWaitForever);  // wait for message
-		
-    if (event.status == osEventMessage)
-		{
-      keypad_data = event.value.p;
-			
-      char character = Keypad_Get_Character(keypad_data->EXTI_Line, keypad_data->row_data);
-      
-      printLCDCharKeypad(character);
-			
-      osPoolFree(keypad_pool, keypad_data);                  // free memory allocated for message
-    }
+		osSignalWait(KEYPAD_FLAG, osWaitForever);
+		uint16_t data= Keypad_poll();
+		printf("Char: %c\n", Keypad_Get_Character(data));
 	}
 }
 
@@ -392,51 +377,9 @@ void EXTI1_IRQHandler()
 	if(EXTI_GetITStatus(EXTI_Line1) != RESET)
   {
 		osSignalSet(tid_orientation, ACCELERATON_FLAG);
+		osSignalSet(tid_keypad, KEYPAD_FLAG);
 	}
 	EXTI_ClearITPendingBit(EXTI_Line1);
-}
-
-/* Keypad Interrupt Handlers */
-//TODO: disable interrupts when called
-/*
-void EXTI15_10_IRQHandler() {
-	if (EXTI_GetFlagStatus(EXTI_Line10)) {
-		keypad_interrupt_message_handler(EXTI_Line10);
-		EXTI_ClearITPendingBit(EXTI_Line10);
-	}
-	else if (EXTI_GetFlagStatus(EXTI_Line11)) {
-    keypad_interrupt_message_handler(EXTI_Line11);
-		EXTI_ClearITPendingBit(EXTI_Line11);
-	}
-}
-*/
-
-void EXTI9_5_IRQHandler() {
-	if (EXTI_GetFlagStatus(EXTI_Line8)) {
-		keypad_interrupt_message_handler(EXTI_Line8);
-		EXTI_ClearITPendingBit(EXTI_Line8);
-	}
-	else if (EXTI_GetFlagStatus(EXTI_Line6)) {
-    keypad_interrupt_message_handler(EXTI_Line6);
-		EXTI_ClearITPendingBit(EXTI_Line6);
-	}
-	
-}
-
-void EXTI15_10_IRQHandler() {
-	if (EXTI_GetFlagStatus(EXTI_Line10)) {
-		EXTI_ClearITPendingBit(EXTI_Line10);
-	}
-	else if(EXTI_GetFlagStatus(EXTI_Line11)) {
-		EXTI_ClearITPendingBit(EXTI_Line11);
-	}
-}
-
-static void inline keypad_interrupt_message_handler(uint32_t EXTI_Line) {
-    Keypad_data *data = osPoolAlloc(keypad_pool);
-    data->EXTI_Line = EXTI_Line;
-    data->row_data = Keypad_Handle_Interrupt();
-    osMessagePut(keypad_message_box, (uint32_t)data, osWaitForever);
 }
 
 /* Button interrupt handler */
