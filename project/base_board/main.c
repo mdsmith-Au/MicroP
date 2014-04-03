@@ -47,6 +47,7 @@ osThreadDef(wireless_thread, osPriorityNormal, 1, 0);
 osThreadId tid_motor, tid_interpolator, tid_wireless;
 
 void TIM2_IRQHandler(void);
+void read_wireless_message(Interpolator_message *m);
 
 /*!
  @brief Program entry point
@@ -55,7 +56,12 @@ int main (void)
 {
 	CC2500_Init();
 	
-	uint8_t buffer[] = {0, 0, 0, 0, 0};
+	interpolator_pool = osPoolCreate(osPool(interpolator_pool));                 // create memory pool
+  interpolator_message_box = osMessageCreate(osMessageQ(interpolator_message_box), NULL);  // create msg queue
+	
+	Interpolator_message *interpolator_m;
+	
+	//int8_t buffer[] = {0, 0, 0, 0, 0};
 	//CC2500_CmdStrobe(SRES);
 	//CC2500_CmdStrobe(SIDLE);
 	
@@ -64,9 +70,35 @@ int main (void)
 	//while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
 	CC2500_CmdStrobe(SRX);
 	
-	uint8_t numBytes[1] = {0};
-	uint8_t state[1] = {0};
+	int8_t numBytes[1] = {0};
+	int8_t state[1] = {0};
+	
 	while(1)
+	{
+		CC2500_Read_Reg(numBytes, RXBYTES, 1);
+		printf("num bytes: %d\n", numBytes[0]);
+		numBytes[0] = numBytes[0] & 0x7f;
+		CC2500_Read_Reg(state, MARCSTATE, 1);
+		printf("State: %x\n", state[0]);
+		
+		if(numBytes[0] > 0)
+		{
+			interpolator_m = osPoolAlloc(interpolator_pool);                     // Allocate memory for the message
+			read_wireless_message(interpolator_m);
+			
+			printf("roll angle: %d pitch angle: %d delta_t: %d realtime: %d\n", interpolator_m->rollAngle, interpolator_m->pitchAngle, interpolator_m->delta_t, interpolator_m->realtime);
+		}
+		osDelay(1000);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	/*while(1)
 	{
 		CC2500_Read_Reg(numBytes, RXBYTES, 1);
 		numBytes[0] = numBytes[0] & 0x7f;
@@ -87,7 +119,7 @@ int main (void)
 			
 			for (i = 0; i < numBytes[0]; i++)
 			{
-				printf("%x ", buffer[i]);
+				printf("%d ", buffer[i]);
 			}
 			
 			printf("\n");
@@ -95,7 +127,7 @@ int main (void)
 		}
 		osDelay(1000);
 	}
-	
+	*/
 	/*
 	init_motors();
 	move_to_angles(0, 0);
@@ -269,4 +301,18 @@ void TIM2_IRQHandler() {
     TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 }
 
+void read_wireless_message(Interpolator_message *m)
+{
+	int8_t packetSize;
+	int8_t junk;
+	
+	CC2500_ReadFIFO(&packetSize, FIFO_READ_ADDRESS, 1);		
+	CC2500_CmdStrobe(SRX);
+	
+	CC2500_ReadFIFO((int8_t*)m, FIFO_READ_BURST_ADDRESS, sizeof(Interpolator_message));		
+	CC2500_CmdStrobe(SRX);
+	
+	CC2500_ReadFIFO(&junk, FIFO_READ_BURST_ADDRESS, 2);		
+	CC2500_CmdStrobe(SRX);
+}
 
