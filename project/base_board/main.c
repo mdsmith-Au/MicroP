@@ -15,8 +15,8 @@
 int motorPeriod = BASEBOARD_TIM2_PERIOD;
 
 typedef struct {                               
-	int rollAngle;
-	int pitchAngle;
+	int8_t rollAngle;
+	int8_t pitchAngle;
 } Motor_message;
 
 osPoolDef(motor_pool, MOTOR_MESSAGE_QUEUE_SIZE, Motor_message);                    // Define memory pool queue size 16 for now
@@ -25,10 +25,10 @@ osMessageQDef(motor_message_box, MOTOR_MESSAGE_QUEUE_SIZE, Motor_message);   //q
 osMessageQId motor_message_box;
 
 typedef struct {                               
-	int rollAngle;
-	int pitchAngle;
-	int delta_t; //in seconds
-	int realtime; //is it realtime mode or not
+	int8_t rollAngle;
+	int8_t pitchAngle;
+	int8_t delta_t; //in seconds
+	int8_t realtime; //is it realtime mode or not
 } Interpolator_message;
 
 osPoolDef(interpolator_pool, INTERPOLATOR_MESSAGE_QUEUE_SIZE, Interpolator_message);                    // Define memory pool queue size 16 for now

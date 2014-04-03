@@ -36,10 +36,10 @@ typedef enum {
 OPERATION_MODE mode = REALTIME_MODE;
 
 typedef struct {                               
-	int rollAngle;
-	int pitchAngle;
-	int delta_t;						// 
-	int realtime;						// is it realtime mode or not
+	int8_t rollAngle;
+	int8_t pitchAngle;
+	int8_t delta_t;						// 
+	int8_t realtime;						// is it realtime mode or not
 } Wireless_message;
 
 typedef struct {
