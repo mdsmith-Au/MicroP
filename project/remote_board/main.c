@@ -118,7 +118,6 @@ void write_wireless_message(Wireless_message *m);
  @brief Program entry point
  */
 int main (void) {
-	
 	init_user_button();
 	LCD_configure();
 	
@@ -141,92 +140,10 @@ int main (void) {
   tid_keypad = osThreadCreate(osThread(keypad_thread), NULL);
 	
 	
-	CC2500_Init();
-	
-<<<<<<< HEAD
-=======
-	int8_t buffer[] = {0, 0, 0, 0, 0, 0, 0, 0};
-	
->>>>>>> ece4833d9491bdc580112fd3863683f0355a7f76
-	CC2500_CmdStrobe(STX);
-	
-	Wireless_message *wireless_m;
-	wireless_m = osPoolAlloc(wireless_pool);                     // Allocate memory for the message
-	wireless_m->rollAngle = 30;
-	wireless_m->pitchAngle = 32;
-	wireless_m->delta_t = 0;
-	wireless_m->realtime = 1;
-	
-	write_wireless_message(wireless_m);
-	
-	/*
-	uint8_t buffer[] = {0, 0, 0, 0, 0, 0, 0, 0};
-		
-	buffer[0] = 4;
-	buffer[1] = -30;
-	buffer[2] = 30;
-	buffer[3] = 5;
-	buffer[4] = 1;
-	
-<<<<<<< HEAD
-	CC2500_WriteFIFO(buffer, FIFO_WRITE_BURST_ADDRESS, 7);
-		*/
-=======
-	CC2500_WriteFIFO(buffer, FIFO_WRITE_BURST_ADDRESS, 5);
-		
->>>>>>> ece4833d9491bdc580112fd3863683f0355a7f76
-	//CC2500_Read_Reg(buffer, MARCSTATE, 1);
-	//printf("Buff: %x\n", buffer[0]);
-	//CC2500_Read_Reg(buffer, FIFO_READ_ADDRESS, 1);
-	//CC2500_Read_Reg(buffer, MARCSTATE, 1);
-	//printf("Buff: %x\n", buffer[0]);
-	
-	/*
-	buffer[0] = 4;
-	buffer[1] = 10;
-	buffer[2] = 20;
-	buffer[3] = 30;
-	buffer[4] = 40;
-	while(1)
-	{
-		CC2500_TXMode();
-		osDelay(500);
-		CC2500_WriteFIFO(buffer, FIFO_WRITE_BURST_ADDRESS, 5);
-		osDelay(1000);
-	}
-	
-	Keypad_configure();
-	
-	
-	CC2500_Read_Reg(buffer, PARTNUM, 1);
-	printf("Buff: %x\n", buffer[0]);
-	CC2500_Read_Reg(buffer, VERSION, 1);
-	printf("Buff: %x\n", buffer[0]);
-	
-	buffer[0] = 0xF;
-	CC2500_Write_Reg(buffer, FREQ0_WRITE_SINGLE, 1);
-	buffer[0] = 0;
-	CC2500_Read_Reg(buffer, FREQ0_READ_SINGLE, 1);
-	printf("Buff: %x\n", buffer[0]);
-	
-	buffer[0] = 0xA;
-	buffer[1] = 0xB;
-	buffer[2] = 0xC;
-	buffer[3] = 0xD;
-	CC2500_Write_Reg(buffer, FREQ1_WRITE_BURST, 1);
-	buffer[0] = 0xB;
-	CC2500_Write_Reg(buffer, FREQ1_WRITE_BURST, 1);
-	buffer[0] = 0;
-	buffer[1] = 0;
-	buffer[2] = 0;
-	buffer[3] = 0;
-	CC2500_Read_Reg(buffer, FREQ1_READ_BURST, 1);
-	printf("Buff: %x %x %x %x\n", buffer[0], buffer[1], buffer[2], buffer[3]);
-	
-	*/
-	
 	// The below doesn't really need to be in a loop
-	osDelay(osWaitForever);
+	while(1){
+		osDelay(osWaitForever);
+	}
 }
 
 void orientation_thread(const void* arg)
@@ -303,22 +220,37 @@ void orientation_thread(const void* arg)
 void wireless_thread(const void* arg)
 {
 	//init wireless
+	CC2500_Init();
+	CC2500_CmdStrobe(STX);
 	
 	Wireless_message  *wireless_m;
   osEvent event;
 	
+	int8_t numBytesFIFOBuffer;
+	
 	while(1)
 	{
-		event = osMessageGet(wireless_message_box, osWaitForever);  // wait for message
+		CC2500_Read_Reg(&numBytesFIFOBuffer, TXBYTES, 1);
+		numBytesFIFOBuffer = numBytesFIFOBuffer & 0x7f;
 		
-    if (event.status == osEventMessage)
+		//if fifo buffer is not full, send message else yield
+		if (numBytesFIFOBuffer + sizeof(Wireless_message) <= FIFO_SIZE)
 		{
-      wireless_m = event.value.p;
-			
-			//send wireless message
-			
-      osPoolFree(wireless_pool, wireless_m);                  // free memory allocated for message
-    }
+			event = osMessageGet(wireless_message_box, osWaitForever);  // wait for message
+			if (event.status == osEventMessage)
+			{
+				wireless_m = event.value.p;
+				
+				//send wireless message
+				write_wireless_message(wireless_m);
+				
+				osPoolFree(wireless_pool, wireless_m);                  // free memory allocated for message
+			}
+		}
+		else
+		{
+			osThreadYield();
+		}
 	}
 }
 

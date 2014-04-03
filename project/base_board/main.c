@@ -91,43 +91,6 @@ int main (void)
 		osDelay(1000);
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	/*while(1)
-	{
-		CC2500_Read_Reg(numBytes, RXBYTES, 1);
-		numBytes[0] = numBytes[0] & 0x7f;
-		CC2500_Read_Reg(state, MARCSTATE, 1);
-		printf("State: %x\n", state[0]);
-		
-		if(numBytes[0] > 0)
-		{
-			printf("Numbytes: %d\n", numBytes[0]);
-			
-			CC2500_ReadFIFO(buffer, FIFO_READ_BURST_ADDRESS, numBytes[0]);
-			
-			CC2500_CmdStrobe(SRX);
-			
-			printf("Buff: ");
-				
-			int i = 0;
-			
-			for (i = 0; i < numBytes[0]; i++)
-			{
-				printf("%d ", buffer[i]);
-			}
-			
-			printf("\n");
-		
-		}
-		osDelay(1000);
-	}
-	*/
 	/*
 	init_motors();
 	move_to_angles(0, 0);
