@@ -12,6 +12,7 @@
 #include "stdio.h"
 
 #define WIRELESS_MESSAGE_QUEUE_SIZE 1000
+#define KEYPAD_QUEUE_SIZE 10
 
 #define ANGLE_FILTER_DEPTH 16	/*!< Filter depth for angle filters */
 #define GRAV_ACC 1000.0f	/*!< Value of g */
@@ -40,6 +41,11 @@ typedef struct {
 	int realtime;						// is it realtime mode or not
 } Wireless_message;
 
+typedef struct {
+  uint32_t EXTI_Line;
+  uint16_t row_data;
+}Keypad_data;
+
 static Filter rollFilter;
 static Filter pitchFilter;
 static Queue rollBuffer;
@@ -47,16 +53,26 @@ static Queue pitchBuffer;
 
 osPoolDef(wireless_pool, WIRELESS_MESSAGE_QUEUE_SIZE, Wireless_message);                    // Define memory pool queue size 16 for now
 osPoolId wireless_pool;
+
 osMessageQDef(wireless_message_box, WIRELESS_MESSAGE_QUEUE_SIZE, Wireless_message);   //queue size 16 arbitrarily for now (queue should theoretically never get full)
 osMessageQId wireless_message_box;
 
+osPoolDef(keypad_pool, KEYPAD_QUEUE_SIZE, Keypad_data);
+osPoolId keypad_pool;
+
+osMessageQDef(keypad_message_box, KEYPAD_QUEUE_SIZE, Keypad_data);
+osMessageQId keypad_message_box;
+
 void orientation_thread(const void* arg);
 void wireless_thread(const void* arg);
+void keypad_thread(const void* arg);
+inline void keypad_interrupt_message_handler(uint32_t EXTI_Line);
 
 osThreadDef(orientation_thread, osPriorityNormal, 1, 0);
 osThreadDef(wireless_thread, osPriorityNormal, 1, 0);
+osThreadDef(keypad_thread, osPriorityNormal, 1, 0);
 
-osThreadId tid_orientation, tid_wireless;
+osThreadId tid_orientation, tid_wireless, tid_keypad;
 
 osSemaphoreId modeSemaphore;   
 osSemaphoreDef(modeSemaphore);
@@ -119,13 +135,14 @@ int main (void) {
 	//start threads
 	tid_orientation = osThreadCreate(osThread(orientation_thread), NULL);
 	tid_wireless = osThreadCreate(osThread(wireless_thread), NULL);
+  tid_keypad = osThreadCreate(osThread(keypad_thread), NULL);
 	
 	CC2500_Init();
 	
 	uint8_t buffer[] = {0, 0, 0, 0, 0};
 	CC2500_CmdStrobe(SRES);
 	CC2500_CmdStrobe(SIDLE);
-	/*
+	
 	CC2500_TXMode();
 	buffer[0] = 4;
 	buffer[1] = 10;
@@ -133,7 +150,7 @@ int main (void) {
 	buffer[3] = 30;
 	buffer[4] = 40;
 	CC2500_WriteFIFO(buffer, FIFO_WRITE_BURST_ADDRESS, 5);
-	*/
+	
 	
 	
 	
@@ -167,12 +184,6 @@ int main (void) {
 	
 	// The below doesn't really need to be in a loop
 	while(1){
-		osDelay(1000);
-		printLCDString("Hello World!",1);
-		osDelay(1000);
-		printLCDString("LCD test in progress.",2);
-		osDelay(1000);
-		clearLCD();
 	}
 }
 
@@ -269,6 +280,27 @@ void wireless_thread(const void* arg)
 	}
 }
 
+void keypad_thread(const void* arg) {
+  Keypad_data  *keypad_data;
+  osEvent event;
+	
+	while(1)
+	{
+		event = osMessageGet(keypad_message_box, osWaitForever);  // wait for message
+		
+    if (event.status == osEventMessage)
+		{
+      keypad_data = event.value.p;
+			
+      char character = Keypad_Get_Character(keypad_data->EXTI_Line, keypad_data->row_data);
+      
+      printLCDCharKeypad(character);
+			
+      osPoolFree(keypad_pool, keypad_data);                  // free memory allocated for message
+    }
+	}
+}
+
 void display_timer_ISR(void const *argument)
 {
 	osSemaphoreWait(displaySemaphore, osWaitForever);
@@ -323,27 +355,37 @@ void EXTI1_IRQHandler()
 }
 
 /* Keypad Interrupt Handlers */
+//TODO: disable interrupts when called
 void EXTI2_IRQHandler() {
-	printf("EXTI2 Handler\n");
-	EXTI_ClearITPendingBit(EXTI_Line2);
+    keypad_interrupt_message_handler(EXTI_Line2);
+    EXTI_ClearITPendingBit(EXTI_Line2);
 }
 
 void EXTI3_IRQHandler() {
-	printf("EXTI3 Handler\n");
-	EXTI_ClearITPendingBit(EXTI_Line3);
+    keypad_interrupt_message_handler(EXTI_Line3);
+    EXTI_ClearITPendingBit(EXTI_Line3);
 }
 
 void EXTI9_5_IRQHandler() {
 	if (EXTI_GetFlagStatus(EXTI_Line6)) {
-		printf("EXTI6 Handler\n");
+		keypad_interrupt_message_handler(EXTI_Line6);
 		EXTI_ClearITPendingBit(EXTI_Line6);
 	}
 	else if (EXTI_GetFlagStatus(EXTI_Line7)) {
-		printf("EXTI7 Handler\n");
+    keypad_interrupt_message_handler(EXTI_Line7);
 		EXTI_ClearITPendingBit(EXTI_Line7);
 	}
 	
 }
+
+inline void keypad_interrupt_message_handler(uint32_t EXTI_Line) {
+    Keypad_data *data = osPoolAlloc(keypad_pool);
+    data->EXTI_Line = EXTI_Line;
+    data->row_data = Keypad_Handle_Interrupt();
+    osMessagePut(keypad_message_box, (uint32_t)data, osWaitForever);
+}
+
+/* Button interrupt handler */
 void init_user_button()
 {
 	EXTI_InitTypeDef extiInit;
