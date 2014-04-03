@@ -112,6 +112,8 @@ int get_angle(int acc);
  */
 void init_angle_filtering(void);
 
+void write_wireless_message(Wireless_message *m);
+
 /*!
  @brief Program entry point
  */
@@ -141,9 +143,19 @@ int main (void) {
 	
 	CC2500_Init();
 	
-	uint8_t buffer[] = {0, 0, 0, 0, 0, 0, 0, 0};
-	
 	CC2500_CmdStrobe(STX);
+	
+	Wireless_message *wireless_m;
+	wireless_m = osPoolAlloc(wireless_pool);                     // Allocate memory for the message
+	wireless_m->rollAngle = 30;
+	wireless_m->pitchAngle = 32;
+	wireless_m->delta_t = 0;
+	wireless_m->realtime = 1;
+	
+	write_wireless_message(wireless_m);
+	
+	/*
+	uint8_t buffer[] = {0, 0, 0, 0, 0, 0, 0, 0};
 		
 	buffer[0] = 6;
 	buffer[1] = 1;
@@ -154,7 +166,7 @@ int main (void) {
 	buffer[6] = 6;
 	
 	CC2500_WriteFIFO(buffer, FIFO_WRITE_BURST_ADDRESS, 7);
-		
+		*/
 	//CC2500_Read_Reg(buffer, MARCSTATE, 1);
 	//printf("Buff: %x\n", buffer[0]);
 	//CC2500_Read_Reg(buffer, FIFO_READ_ADDRESS, 1);
@@ -445,4 +457,15 @@ void init_user_button()
 	nvicInit.NVIC_IRQChannelPreemptionPriority = 1;																
 	nvicInit.NVIC_IRQChannelSubPriority = 1;																			
 	NVIC_Init(&nvicInit);
+}
+
+void write_wireless_message(Wireless_message *m)
+{	
+	int8_t size = sizeof(Wireless_message);
+	
+	CC2500_WriteFIFO(&size, FIFO_WRITE_ADDRESS, 1);
+	CC2500_CmdStrobe(STX);
+	
+	CC2500_WriteFIFO((int8_t*) m, FIFO_WRITE_BURST_ADDRESS, sizeof(Wireless_message));
+	CC2500_CmdStrobe(STX);
 }
