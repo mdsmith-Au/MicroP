@@ -91,43 +91,6 @@ int main (void)
 		osDelay(1000);
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	/*while(1)
-	{
-		CC2500_Read_Reg(numBytes, RXBYTES, 1);
-		numBytes[0] = numBytes[0] & 0x7f;
-		CC2500_Read_Reg(state, MARCSTATE, 1);
-		printf("State: %x\n", state[0]);
-		
-		if(numBytes[0] > 0)
-		{
-			printf("Numbytes: %d\n", numBytes[0]);
-			
-			CC2500_ReadFIFO(buffer, FIFO_READ_BURST_ADDRESS, numBytes[0]);
-			
-			CC2500_CmdStrobe(SRX);
-			
-			printf("Buff: ");
-				
-			int i = 0;
-			
-			for (i = 0; i < numBytes[0]; i++)
-			{
-				printf("%d ", buffer[i]);
-			}
-			
-			printf("\n");
-		
-		}
-		osDelay(1000);
-	}
-	*/
 	/*
 	init_motors();
 	move_to_angles(0, 0);
@@ -279,19 +242,24 @@ void interpolator_thread(const void* arg)
 void wireless_thread(const void* arg)
 {
 	Interpolator_message *interpolator_m;
+	int8_t numBytes;
 	
 	//initialize wireless
+	CC2500_Init();
+	CC2500_CmdStrobe(SRX);
 	
 	while(1)
 	{
 		//wait for wireless receive
+		CC2500_Read_Reg(&numBytes, RXBYTES, 1);
+		numBytes = numBytes & 0x7f;
 		
-		interpolator_m = osPoolAlloc(interpolator_pool);                     // Allocate memory for the message
-		interpolator_m->rollAngle = 0;
-		interpolator_m->pitchAngle = 0;
-		interpolator_m->delta_t = 0;
-		interpolator_m->realtime = 0;
-		osMessagePut(interpolator_message_box, (uint32_t)interpolator_m, osWaitForever);  // Send Message
+		if(numBytes > 0)
+		{
+			interpolator_m = osPoolAlloc(interpolator_pool);                     // Allocate memory for the message
+			read_wireless_message(interpolator_m);
+			osMessagePut(interpolator_message_box, (uint32_t)interpolator_m, osWaitForever);  // Send Message
+		}		
 	}
 }
 

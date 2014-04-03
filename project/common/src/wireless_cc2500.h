@@ -79,6 +79,7 @@ int CC2500_Status(char status);
 //! @} 
 
 #define DUMMY_BYTE 												0x00
+#define FIFO_SIZE 64
 
 // Command Strobes
 #define SRES															0x30				// Reset chip
