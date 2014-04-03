@@ -1,9 +1,9 @@
 #include "wireless_cc2500.h"
 #include <stdio.h>
 
+int CC2500_Read(uint8_t* buffer, uint8_t address, int numBytes);
 uint8_t CC2500_SendByte(uint8_t byte);
 int CC2500_Write(uint8_t* buffer, uint8_t address, int numBytes);
-int CC2500_Read(uint8_t* buffer, uint8_t address, int numBytes);
 int CC2500_Read_Reg(uint8_t* buffer, uint8_t address, int numBytes);
 void CC2500_LowLevelInit(void);
 void CC2500_LowLevelWireless_Init(void);
@@ -15,6 +15,7 @@ int CC2500_CmdStrobe(uint8_t command) {
 	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
 
 	uint8_t status = CC2500_SendByte(command);
+	printf("Status: %d\n", CC2500_Status(status));
 	return SUCCESS;
 }
 
@@ -255,7 +256,8 @@ void CC2500_LowLevelInit()
 	RCC_AHB1PeriphClockCmd(CC2500_SPI_MISO_GPIO_CLK, ENABLE);		// MISO
 	RCC_AHB1PeriphClockCmd(CC2500_SPI_MOSI_GPIO_CLK, ENABLE);		// MOSI
 	RCC_AHB1PeriphClockCmd(CC2500_SPI_NSS_GPIO_CLK, ENABLE);		// NSS
-	RCC_AHB1PeriphClockCmd(CC2500_SPI_INT_GPIO_CLK, ENABLE);		// INT
+	RCC_AHB1PeriphClockCmd(CC2500_SPI_INT0_GPIO_CLK, ENABLE);		// INT
+	RCC_AHB1PeriphClockCmd(CC2500_SPI_INT2_GPIO_CLK, ENABLE);		// INT
 	
 	// Set Alternate Functions of pins
 	GPIO_PinAFConfig(CC2500_SPI_SCK_GPIO_PORT, CC2500_SPI_SCK_SOURCE, CC2500_SPI_SCK_AF);
@@ -343,7 +345,6 @@ void CC2500_TXGDIOInterrupts_Config()
 void CC2500_RXGDIOInterrupts_Config()
 {
 	uint8_t buffer;
-	GPIO_InitTypeDef gpioInit;
 	EXTI_InitTypeDef extiInit;
 	NVIC_InitTypeDef nvicInit;
 	

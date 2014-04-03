@@ -24,6 +24,7 @@
 #define ACCELERATON_FLAG	0x01	/*!< Acceleration signaling flag */
 
 static int displayValue = 0;
+static int RXNow = 0;
 
 // mode switching
 typedef enum {
@@ -137,17 +138,21 @@ int main (void) {
 	tid_wireless = osThreadCreate(osThread(wireless_thread), NULL);
   tid_keypad = osThreadCreate(osThread(keypad_thread), NULL);
 	
-	/*
+	
 	CC2500_Init();
 	
 	uint8_t buffer[] = {0, 0, 0, 0, 0};
 	CC2500_CmdStrobe(SRES);
-	osDelay(500);
 	CC2500_CmdStrobe(SIDLE);
-	osDelay(500);
-	CC2500_TXMode();
-	osDelay(500);
+	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
+	CC2500_CmdStrobe(SRX);
+	CC2500_Read_Reg(buffer, MARCSTATE, 1);
+	printf("Buff: %x\n", buffer[0]);
+	CC2500_Read_Reg(buffer, FIFO_READ_ADDRESS, 1);
+	CC2500_Read_Reg(buffer, MARCSTATE, 1);
+	printf("Buff: %x\n", buffer[0]);
 	
+	/*
 	buffer[0] = 4;
 	buffer[1] = 10;
 	buffer[2] = 20;
@@ -387,6 +392,15 @@ void EXTI9_5_IRQHandler() {
 		EXTI_ClearITPendingBit(EXTI_Line7);
 	}
 	
+}
+
+void EXTI15_10_IRQHandler() {
+	if (EXTI_GetFlagStatus(EXTI_Line10)) {
+		EXTI_ClearITPendingBit(EXTI_Line10);
+	}
+	else if(EXTI_GetFlagStatus(EXTI_Line11)) {
+		EXTI_ClearITPendingBit(EXTI_Line11);
+	}
 }
 
 static void inline keypad_interrupt_message_handler(uint32_t EXTI_Line) {
