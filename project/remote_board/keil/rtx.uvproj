@@ -658,6 +658,11 @@
               <FileType>1</FileType>
               <FilePath>..\LCD_driver.c</FilePath>
             </File>
+            <File>
+              <FileName>keypad_driver.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\keypad_driver.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
