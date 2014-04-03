@@ -191,6 +191,8 @@ void CC2500_Init()
 void CC2500_LowLevelWireless_Init()
 {
 	CC2500_CmdStrobe(SRES);
+	CC2500_CmdStrobe(SIDLE);
+	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
 	
 	// Init the wireless settings using burst mode
 	// Note that we have to send registers in a certain order (i.e. by their addresses)

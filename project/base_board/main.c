@@ -5,6 +5,9 @@
 #include "motors_driver.h"
 #include "base_board_interrupts_config.h"
 
+#include "wireless_cc2500.h"
+#include <stdio.h>
+
 #define MOTOR_MOVE_SIGNAL 0x01
 #define MOTOR_MESSAGE_QUEUE_SIZE 1000
 #define INTERPOLATOR_MESSAGE_QUEUE_SIZE 1000
@@ -50,6 +53,48 @@ void TIM2_IRQHandler(void);
  */
 int main (void)
 {
+	CC2500_Init();
+	
+	uint8_t buffer[] = {0, 0, 0, 0, 0};
+	//CC2500_CmdStrobe(SRES);
+	//CC2500_CmdStrobe(SIDLE);
+	
+	//CC2500_CmdStrobe(SFRX);
+
+	//while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
+	CC2500_CmdStrobe(SRX);
+	
+	uint8_t numBytes[1] = {0};
+	uint8_t state[1] = {0};
+	while(1)
+	{
+		CC2500_Read_Reg(numBytes, RXBYTES, 1);
+		numBytes[0] = numBytes[0] & 0x7f;
+		CC2500_Read_Reg(state, MARCSTATE, 1);
+		printf("State: %x\n", state[0]);
+		
+		if(numBytes[0] > 0)
+		{
+			printf("Numbytes: %d\n", numBytes[0]);
+			
+			CC2500_ReadFIFO(buffer, FIFO_READ_BURST_ADDRESS, numBytes[0]);
+			
+			printf("Buff: ");
+				
+			int i = 0;
+			
+			for (i = 0; i < numBytes[0]; i++)
+			{
+				printf("%x ", buffer[i]);
+			}
+			
+			printf("\n");
+		
+		}
+		osDelay(1000);
+	}
+	
+	/*
 	init_motors();
 	move_to_angles(0, 0);
 	
@@ -87,7 +132,7 @@ int main (void)
 	interpolator_m->delta_t = 1;
 	interpolator_m->realtime = 0;
 	osMessagePut(interpolator_message_box, (uint32_t)interpolator_m, osWaitForever);  // Send Message
-	
+	*/
 	//tid_wireless = osThreadCreate(osThread(wireless_thread), NULL);
 	
 	// The below doesn't really need to be in a loop
