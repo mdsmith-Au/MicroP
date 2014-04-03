@@ -166,9 +166,9 @@ int main (void) {
 		osDelay(1000);
 	}
 	
-	*/
+	Keypad_configure();
 	
-	/*
+	
 	CC2500_Read_Reg(buffer, PARTNUM, 1);
 	printf("Buff: %x\n", buffer[0]);
 	CC2500_Read_Reg(buffer, VERSION, 1);
@@ -193,14 +193,11 @@ int main (void) {
 	buffer[3] = 0;
 	CC2500_Read_Reg(buffer, FREQ1_READ_BURST, 1);
 	printf("Buff: %x %x %x %x\n", buffer[0], buffer[1], buffer[2], buffer[3]);
-	*/
 	
-	//Keypad_configure();
 	
 	
 	// The below doesn't really need to be in a loop
-	while(1){
-	}
+	osDelay(osWaitForever);
 }
 
 void orientation_thread(const void* arg)
@@ -372,24 +369,25 @@ void EXTI1_IRQHandler()
 
 /* Keypad Interrupt Handlers */
 //TODO: disable interrupts when called
-void EXTI2_IRQHandler() {
-    keypad_interrupt_message_handler(EXTI_Line2);
-    EXTI_ClearITPendingBit(EXTI_Line2);
-}
-
-void EXTI3_IRQHandler() {
-    keypad_interrupt_message_handler(EXTI_Line3);
-    EXTI_ClearITPendingBit(EXTI_Line3);
+void EXTI15_10_IRQHandler() {
+	if (EXTI_GetFlagStatus(EXTI_Line10)) {
+		keypad_interrupt_message_handler(EXTI_Line10);
+		EXTI_ClearITPendingBit(EXTI_Line10);
+	}
+	else if (EXTI_GetFlagStatus(EXTI_Line11)) {
+    keypad_interrupt_message_handler(EXTI_Line11);
+		EXTI_ClearITPendingBit(EXTI_Line11);
+	}
 }
 
 void EXTI9_5_IRQHandler() {
-	if (EXTI_GetFlagStatus(EXTI_Line6)) {
-		keypad_interrupt_message_handler(EXTI_Line6);
-		EXTI_ClearITPendingBit(EXTI_Line6);
+	if (EXTI_GetFlagStatus(EXTI_Line8)) {
+		keypad_interrupt_message_handler(EXTI_Line8);
+		EXTI_ClearITPendingBit(EXTI_Line8);
 	}
-	else if (EXTI_GetFlagStatus(EXTI_Line7)) {
-    keypad_interrupt_message_handler(EXTI_Line7);
-		EXTI_ClearITPendingBit(EXTI_Line7);
+	else if (EXTI_GetFlagStatus(EXTI_Line6)) {
+    keypad_interrupt_message_handler(EXTI_Line6);
+		EXTI_ClearITPendingBit(EXTI_Line6);
 	}
 	
 }
