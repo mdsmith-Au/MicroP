@@ -4,10 +4,12 @@
 uint8_t NVIC_PRIORITY_SET = 0;
 
 void Keypad_GPIO_setup(void);
+void Keypad_Interrupt_configure(void);
 void set_nvic_priority(void);
 
 void Keypad_configure() {
     Keypad_GPIO_setup();
+		Keypad_Interrupt_configure();
 }
 
 void Keypad_GPIO_setup() {
@@ -34,12 +36,12 @@ void Keypad_Interrupt_configure() {
 	// Enable SYSCFG
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
   // Enable interrupt for the columns
-  SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOD, KEYPAD_INT_SRC);
+  SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOD, EXTI_PinSource2);
   
   // Configure interrupts
   EXTI_InitTypeDef EXTI_InitStruct;
   
-  EXTI_InitStruct.EXTI_Line = KEYPAD_INT_LINE;
+  EXTI_InitStruct.EXTI_Line = EXTI_Line2;
   // Use interrupts (as opposed to events)
   EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
   // Trigger interrupt on rising edge -> data ready.
@@ -52,7 +54,7 @@ void Keypad_Interrupt_configure() {
   set_nvic_priority();
   NVIC_InitTypeDef NVIC_InitStruct;
   // Use external interrupt channels as in header file
-  NVIC_InitStruct.NVIC_IRQChannel = KEYPAD_EXTI_IRQ ;
+  NVIC_InitStruct.NVIC_IRQChannel = EXTI2_IRQn ;
   // Priority settings. Give 6 .. not the highest, but fair
   NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 6;   // arbitrary
   // Don't need sub priority
