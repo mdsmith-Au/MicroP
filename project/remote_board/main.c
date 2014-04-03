@@ -137,6 +137,7 @@ int main (void) {
 	tid_wireless = osThreadCreate(osThread(wireless_thread), NULL);
   tid_keypad = osThreadCreate(osThread(keypad_thread), NULL);
 	
+	/*
 	CC2500_Init();
 	
 	uint8_t buffer[] = {0, 0, 0, 0, 0};
@@ -160,7 +161,7 @@ int main (void) {
 		osDelay(1000);
 	}
 	
-	
+	*/
 	
 	/*
 	CC2500_Read_Reg(buffer, PARTNUM, 1);

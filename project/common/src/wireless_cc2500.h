@@ -368,13 +368,21 @@ int CC2500_Status(char status);
 #define CC2500_SPI_NSS_SOURCE           	GPIO_PinSource12
 #define CC2500_SPI_NSS_AF               	GPIO_AF_SPI2
 
-#define CC2500_SPI_INT_PIN              	GPIO_Pin_0                  
-#define CC2500_SPI_INT_GPIO_PORT        	GPIOE                       
-#define CC2500_SPI_INT_GPIO_CLK         	RCC_AHB1Periph_GPIOE
-#define CC2500_SPI_INT_EXTI_LINE        	EXTI_Line0
-#define CC2500_SPI_INT_EXTI_PORT_SOURCE 	EXTI_PortSourceGPIOE
-#define CC2500_SPI_INT_EXTI_PIN_SOURCE  	EXTI_PinSource0
-#define CC2500_SPI_INT_EXTI_IRQn        	EXTI0_IRQn 
+#define CC2500_SPI_INT0_PIN              	GPIO_Pin_11                 
+#define CC2500_SPI_INT0_GPIO_PORT        	GPIOB                      
+#define CC2500_SPI_INT0_GPIO_CLK         	RCC_AHB1Periph_GPIOB
+#define CC2500_SPI_INT0_EXTI_LINE        	EXTI_Line11
+#define CC2500_SPI_INT0_EXTI_PORT_SOURCE 	EXTI_PortSourceGPIOB
+#define CC2500_SPI_INT0_EXTI_PIN_SOURCE  	EXTI_PinSource11
+#define CC2500_SPI_INT0_EXTI_IRQn        	EXTI15_10_IRQn
+
+#define CC2500_SPI_INT2_PIN              	GPIO_Pin_10                  
+#define CC2500_SPI_INT2_GPIO_PORT        	GPIOB                       
+#define CC2500_SPI_INT2_GPIO_CLK         	RCC_AHB1Periph_GPIOB
+#define CC2500_SPI_INT2_EXTI_LINE        	EXTI_Line10
+#define CC2500_SPI_INT2_EXTI_PORT_SOURCE 	EXTI_PortSourceGPIOB
+#define CC2500_SPI_INT2_EXTI_PIN_SOURCE  	EXTI_PinSource10
+#define CC2500_SPI_INT2_EXTI_IRQn        	EXTI15_10_IRQn 
 
 #define CC2500_NSS_LOW()       						GPIO_ResetBits(CC2500_SPI_NSS_GPIO_PORT, CC2500_SPI_NSS_PIN)
 #define CC2500_NSS_HIGH()      						GPIO_SetBits(CC2500_SPI_NSS_GPIO_PORT, CC2500_SPI_NSS_PIN)
