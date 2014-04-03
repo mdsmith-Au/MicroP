@@ -119,37 +119,50 @@ int main (void) {
 	//start threads
 	tid_orientation = osThreadCreate(osThread(orientation_thread), NULL);
 	tid_wireless = osThreadCreate(osThread(wireless_thread), NULL);
-	/*
+	
 	CC2500_Init();
 	
-	uint8_t buffer[] = {0, 0, 0, 0};
-	CC2500_SPI_Cmd_Strobe(SRES);
-	CC2500_SPI_Cmd_Strobe(SIDLE);
+	uint8_t buffer[] = {0, 0, 0, 0, 0};
+	CC2500_CmdStrobe(SRES);
+	CC2500_CmdStrobe(SIDLE);
+	/*
+	CC2500_TXMode();
+	buffer[0] = 4;
+	buffer[1] = 10;
+	buffer[2] = 20;
+	buffer[3] = 30;
+	buffer[4] = 40;
+	CC2500_WriteFIFO(buffer, FIFO_WRITE_BURST_ADDRESS, 5);
+	*/
+	
+	
 	
 	CC2500_Read_Reg(buffer, PARTNUM, 1);
 	printf("Buff: %x\n", buffer[0]);
 	CC2500_Read_Reg(buffer, VERSION, 1);
 	printf("Buff: %x\n", buffer[0]);
-	*/
-	//buffer[0] = 0xF;
-	//CC2500_Write_Reg(buffer, FREQ0_WRITE_SINGLE, 1);
-	//buffer[0] = 0;
-	//CC2500_Read_Reg(buffer, FREQ0_READ_SINGLE, 1);
-	//printf("Buff: %x\n", buffer[0]);
-	/*
+	
+	buffer[0] = 0xF;
+	CC2500_Write_Reg(buffer, FREQ0_WRITE_SINGLE, 1);
+	buffer[0] = 0;
+	CC2500_Read_Reg(buffer, FREQ0_READ_SINGLE, 1);
+	printf("Buff: %x\n", buffer[0]);
+	
 	buffer[0] = 0xA;
 	buffer[1] = 0xB;
 	buffer[2] = 0xC;
 	buffer[3] = 0xD;
-	CC2500_Write_Reg(buffer, FREQ1_WRITE_BURST, 4);
+	CC2500_Write_Reg(buffer, FREQ1_WRITE_BURST, 1);
+	buffer[0] = 0xB;
+	CC2500_Write_Reg(buffer, FREQ1_WRITE_BURST, 1);
 	buffer[0] = 0;
 	buffer[1] = 0;
 	buffer[2] = 0;
 	buffer[3] = 0;
-	CC2500_Read_Reg(buffer, FREQ1_READ_BURST, 4);
-	printf("Buff: %x %x %x %x\n", buffer[0], buffer[1], buffer[2], buffer[3]);*/
+	CC2500_Read_Reg(buffer, FREQ1_READ_BURST, 1);
+	printf("Buff: %x %x %x %x\n", buffer[0], buffer[1], buffer[2], buffer[3]);
 	
-	Keypad_configure();
+	//Keypad_configure();
 	
 	
 	// The below doesn't really need to be in a loop

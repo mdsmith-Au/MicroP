@@ -1,16 +1,15 @@
 #include "wireless_cc2500.h"
-#include <stdio.h>
 
 uint8_t CC2500_SendByte(uint8_t byte);
 int CC2500_Write(uint8_t* buffer, uint8_t address, int numBytes);
 int CC2500_Read(uint8_t* buffer, uint8_t address, int numBytes);
-int CC2500_Read_Reg(uint8_t* buffer, uint8_t header, int numBytes);
+int CC2500_Read_Reg(uint8_t* buffer, uint8_t address, int numBytes);
 void CC2500_LowLevelInit(void);
 void CC2500_LowLevelWireless_Init(void);
 int CC2500_Check_Status(char status);
 void CC2500_Delay(void);
 
-int CC2500_SPI_Cmd_Strobe(uint8_t command) {
+int CC2500_CmdStrobe(uint8_t command) {
 	CC2500_NSS_LOW();
 	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
 
@@ -18,29 +17,44 @@ int CC2500_SPI_Cmd_Strobe(uint8_t command) {
 	return SUCCESS;
 }
 
-int CC2500_WriteFIFO(uint8_t* buffer, uint8_t header, int numBytes)
+void CC2500_TXMode()
 {
-	
+	CC2500_CmdStrobe(STX);
 }
 
-int CC2500_ReadFIFO(uint8_t* buffer, uint8_t header, int numBytes)
+void CC2500_RXMode()
 {
-	
+	CC2500_CmdStrobe(SRX);
 }
 
-int CC2500_Write_Reg(uint8_t* buffer, uint8_t header, int numBytes) {
+void CC2500_Idle()
+{
+	CC2500_CmdStrobe(SIDLE);
+}
+
+int CC2500_TransmitMessage(void* buffer)
+{
+	return SUCCESS;
+}
+
+int CC2500_ReceiveMessage(void* buffer)
+{
+	return SUCCESS;
+}
+
+int CC2500_WriteFIFO(uint8_t* buffer, uint8_t address, int numBytes)
+{
 	// Set chip select to low and wait for MISO to be low
 	CC2500_NSS_LOW();
 	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
-	
+		
 	// Send the address of the register
-	uint8_t status = CC2500_SendByte(header);
+	uint8_t status = CC2500_SendByte(address);
 	
 	// Send data
 	while(numBytes > 0)
 	{
 		status = CC2500_SendByte(*buffer);
-		printf("Sending: %x\n", *buffer);
 		numBytes--;
 		buffer++;
 	}
@@ -50,19 +64,63 @@ int CC2500_Write_Reg(uint8_t* buffer, uint8_t header, int numBytes) {
 	return SUCCESS;
 }
 
-int CC2500_Read_Reg(uint8_t* buffer, uint8_t header, int numBytes) {
+int CC2500_ReadFIFO(uint8_t* buffer, uint8_t address, int numBytes)
+{
 	// Set chip select to low and wait for MISO to be low
 	CC2500_NSS_LOW();
 	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
 	
 	// Send the address of the register
-	uint8_t status = CC2500_SendByte(header);
+	uint8_t status = CC2500_SendByte(address);
 	
 	// Read data
 	while(numBytes > 0)
 	{
 		*buffer = CC2500_SendByte(DUMMY_BYTE);
-		printf("Receiving: %x\n", *buffer);
+		numBytes--;
+		buffer++;
+	}
+	
+	// Set chip select to high
+	CC2500_NSS_HIGH();
+	return SUCCESS;
+}
+
+int CC2500_Write_Reg(uint8_t* buffer, uint8_t address, int numBytes) {
+	// Set chip select to low and wait for MISO to be low
+	CC2500_NSS_LOW();
+	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
+	
+	// Send the address of the register
+	uint8_t status = CC2500_SendByte(address);
+	
+	// Send data
+	while(numBytes > 0)
+	{
+		status = CC2500_SendByte(*buffer);
+		//printf("Sending: %x\n", *buffer);
+		numBytes--;
+		buffer++;
+	}
+	
+	// Set chip select to high
+	CC2500_NSS_HIGH();
+	return SUCCESS;
+}
+
+int CC2500_Read_Reg(uint8_t* buffer, uint8_t address, int numBytes) {
+	// Set chip select to low and wait for MISO to be low
+	CC2500_NSS_LOW();
+	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
+	
+	// Send the address of the register
+	uint8_t status = CC2500_SendByte(address);
+	
+	// Read data
+	while(numBytes > 0)
+	{
+		*buffer = CC2500_SendByte(DUMMY_BYTE);
+		//printf("Receiving: %x\n", *buffer);
 		numBytes--;
 		buffer++;
 	}
@@ -79,7 +137,7 @@ uint8_t CC2500_SendByte(uint8_t byte)
 	
 	// Send a byte through the SPI peripheral
 	SPI_I2S_SendData(CC2500_SPI, byte);
-	printf("SendByte: %x\n", byte);
+	//printf("SendByte: %x\n", byte);
 	
 	// Wait to receive a byte
 	while (SPI_I2S_GetFlagStatus(CC2500_SPI, SPI_I2S_FLAG_RXNE) == RESET);
@@ -129,7 +187,7 @@ void CC2500_Init()
 
 void CC2500_LowLevelWireless_Init()
 {
-	CC2500_SPI_Cmd_Strobe(SRES);
+	CC2500_CmdStrobe(SRES);
 	
 	// Init the wireless settings using burst mode
 	// Note that we have to send registers in a certain order (i.e. by their addresses)

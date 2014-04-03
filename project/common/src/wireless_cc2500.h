@@ -20,10 +20,13 @@
 #include "stm32f4xx_spi.h"
 
 // Function prototypes
-int CC2500_SPI_Cmd_Strobe(uint8_t command);
+int CC2500_CmdStrobe(uint8_t command);
+void CC2500_TXMode(void);
+void CC2500_RXMode(void);
+void CC2500_Idle(void);
 void CC2500_Init(void);
-void CC2500_SendData(void* data, uint8_t address, int size);
-void CC2500_ReceiveData(void* data, uint8_t address, int size);
+int CC2500_TransmitMessage(void* buffer);
+int CC2500_ReceiveMessage(void* buffer);
 int CC2500_Read_Reg(uint8_t* buffer, uint8_t header, int numBytes);
 int CC2500_Write_Reg(uint8_t* buffer, uint8_t header, int numBytes);
 int CC2500_WriteFIFO(uint8_t* buffer, uint8_t header, int numBytes);
