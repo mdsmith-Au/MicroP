@@ -69,7 +69,7 @@ void printLCDToPos(char* string, int row, int col);
 void clearLCD(void);
 void printLCDCharKeypad(char character);
 void resetLCDPosition(void);
-void enableCursor();
-void disableCursor()
+void enableCursor(void);
+void disableCursor(void);
 
 #endif

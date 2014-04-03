@@ -66,7 +66,7 @@ osMessageQId keypad_message_box;
 void orientation_thread(const void* arg);
 void wireless_thread(const void* arg);
 void keypad_thread(const void* arg);
-inline void keypad_interrupt_message_handler(uint32_t EXTI_Line);
+static void inline keypad_interrupt_message_handler(uint32_t EXTI_Line);
 
 osThreadDef(orientation_thread, osPriorityNormal, 1, 0);
 osThreadDef(wireless_thread, osPriorityNormal, 1, 0);
@@ -378,7 +378,7 @@ void EXTI9_5_IRQHandler() {
 	
 }
 
-inline void keypad_interrupt_message_handler(uint32_t EXTI_Line) {
+static void inline keypad_interrupt_message_handler(uint32_t EXTI_Line) {
     Keypad_data *data = osPoolAlloc(keypad_pool);
     data->EXTI_Line = EXTI_Line;
     data->row_data = Keypad_Handle_Interrupt();
