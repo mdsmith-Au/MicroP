@@ -141,19 +141,17 @@ int main (void) {
 	
 	CC2500_Init();
 	
-	uint8_t buffer[] = {0, 0, 0, 0, 0, 0, 0, 0};
+	int8_t buffer[] = {0, 0, 0, 0, 0, 0, 0, 0};
 	
 	CC2500_CmdStrobe(STX);
 		
-	buffer[0] = 6;
-	buffer[1] = 1;
-	buffer[2] = 2;
-	buffer[3] = 3;
-	buffer[4] = 4;
-	buffer[5] = 5;
-	buffer[6] = 6;
+	buffer[0] = 4;
+	buffer[1] = -30;
+	buffer[2] = 30;
+	buffer[3] = 5;
+	buffer[4] = 1;
 	
-	CC2500_WriteFIFO(buffer, FIFO_WRITE_BURST_ADDRESS, 7);
+	CC2500_WriteFIFO(buffer, FIFO_WRITE_BURST_ADDRESS, 5);
 		
 	//CC2500_Read_Reg(buffer, MARCSTATE, 1);
 	//printf("Buff: %x\n", buffer[0]);
