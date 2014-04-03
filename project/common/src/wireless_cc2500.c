@@ -1,4 +1,5 @@
 #include "wireless_cc2500.h"
+#include <stdio.h>
 
 uint8_t CC2500_SendByte(uint8_t byte);
 int CC2500_Write(uint8_t* buffer, uint8_t address, int numBytes);
@@ -50,7 +51,8 @@ int CC2500_WriteFIFO(uint8_t* buffer, uint8_t address, int numBytes)
 		
 	// Send the address of the register
 	uint8_t status = CC2500_SendByte(address);
-	
+	printf("Status: %d\n", CC2500_Status(status));
+		
 	// Send data
 	while(numBytes > 0)
 	{
@@ -156,7 +158,7 @@ int CC2500_Status(char status)
 		return ERROR;
 		
 	int state = status & STATE_MASK;
-	state = state >> 3;
+	state = state >> 4;
 	
 	switch(state)
 	{
@@ -316,4 +318,30 @@ void CC2500_LowLevelInit()
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_NOPULL;
   GPIO_Init(CC2500_SPI_INT_GPIO_PORT, &GPIO_InitStructure);
+}
+
+void CC2500_TXGDIOInterrupts_Config()
+{
+	uint8_t buffer;
+	
+	// Configure GDIO2 to interrupt when TX FIFO is full
+	buffer = 0x03;
+	CC2500_Write_Reg(&buffer, IOCFG2_WRITE_SINGLE, 1);
+	
+	// Configure GDIO0 to interrupt when sync word has been received
+	buffer = 0x06;
+	CC2500_Write_Reg(&buffer, IOCFG0_WRITE_SINGLE, 1);
+}
+
+void CC2500_RXGDIOInterrupts_Config()
+{
+	uint8_t buffer;
+	
+	// Configure GDIO2 to interrupt when RX FIFO is full
+	buffer = 0x01;
+	CC2500_Write_Reg(&buffer, IOCFG2_WRITE_SINGLE, 1);
+	
+	// Configure GDIO0 to interrupt when sync word has been received
+	buffer = 0x06;
+	CC2500_Write_Reg(&buffer, IOCFG0_WRITE_SINGLE, 1);
 }
