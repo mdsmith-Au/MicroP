@@ -2,6 +2,7 @@
 #define _KEYPAD_DRIVER_H_
 
 #include "stm32f4xx_conf.h"
+#include "LCD_driver.h"
 
 
 /* Keypad pin mapping (GPIO Pins <-> Keypad pins)
@@ -17,17 +18,26 @@
  *   PD11 = Pin 4
  */
 void Keypad_configure(void);
- 
+uint16_t Keypad_Handle_Interrupt(void);
+char Keypad_Get_Character(uint32_t EXTI_Line_Source, uint16_t rows);
+
+void enable_interrupt(uint32_t EXTI_Line);
+void disable_interrupt(uint32_t EXTI_Line);
  
 #define KEYPAD_GPIO_BANK GPIOD
+// Columns
 #define KEYPAD_PIN_1 GPIO_Pin_8
 #define KEYPAD_PIN_2 GPIO_Pin_6
 #define KEYPAD_PIN_3 GPIO_Pin_10
 #define KEYPAD_PIN_4 GPIO_Pin_11
+// Rows
 #define KEYPAD_PIN_5 GPIO_Pin_2
 #define KEYPAD_PIN_6 GPIO_Pin_3
 #define KEYPAD_PIN_7 GPIO_Pin_6
 #define KEYPAD_PIN_8 GPIO_Pin_7
+
+#define KEYPAD_COL KEYPAD_PIN_1 | KEYPAD_PIN_2 | KEYPAD_PIN_3 | KEYPAD_PIN_4
+#define KEYPAD_ROW KEYPAD_PIN_5 | KEYPAD_PIN_6 | KEYPAD_PIN_7 | KEYPAD_PIN_8
 
 #define KEPAD_INT_SRC_5 EXTI_PinSource2
 #define KEPAD_INT_SRC_6	EXTI_PinSource3
@@ -46,7 +56,8 @@ void Keypad_configure(void);
 #define KEYPAD_EXTI_IRQ_5 EXTI2_IRQn
 #define KEYPAD_EXTI_IRQ_6 EXTI3_IRQn
 #define KEYPAD_EXTI_IRQ_7 EXTI9_5_IRQn
+#define KEYPAD_EXTI_IRQ_8 EXTI9_5_IRQn
 
-#define KEYPAD_EXTI_IRQ KEYPAD_EXTI_IRQ_5 | KEYPAD_EXTI_IRQ_6 | KEYPAD_EXTI_IRQ_7
+#define KEYPAD_EXTI_IRQ KEYPAD_EXTI_IRQ_5 | KEYPAD_EXTI_IRQ_6 | KEYPAD_EXTI_IRQ_7 | KEYPAD_EXTI_IRQ_8
 
 #endif

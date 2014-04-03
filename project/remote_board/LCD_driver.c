@@ -37,6 +37,30 @@ void printLCDString(char* string, int row) {
     printLCDToPos(string, row, 1);
 }
 
+void printLCDCharKeypad(char character) {
+  osMutexWait(Mutex_LCD_id, osWaitForever);
+  send(character, ASCII);
+  osMutexRelease(Mutex_LCD_id);
+}
+
+void resetLCDPosition() {
+  osMutexWait(Mutex_LCD_id, osWaitForever);
+  send(displayCursorHome, CMD);
+  osMutexRelease(Mutex_LCD_id);
+}
+
+void enableCursor() {
+  osMutexWait(Mutex_LCD_id, osWaitForever);
+  send(displayOn_CursorOn, CMD);
+  osMutexRelease(Mutex_LCD_id);
+}
+
+void disableCursor() {
+  osMutexWait(Mutex_LCD_id, osWaitForever);
+  send(displayOn, CMD);
+  osMutexRelease(Mutex_LCD_id);
+}
+
 // Print a string to the LCD starting at a given row/column
 // Rows and columns start from 1; 2 rows, 24 columns
 // Length limited to 24 characters

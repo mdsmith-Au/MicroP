@@ -44,6 +44,7 @@
 #define displayOn (uint8_t)0xC
 // 8 bit data lines, 2 LCD rows, 5x7 characters
 #define functionSet (uint8_t)0x38
+#define displayOn_CursorOn (uint8_t)0xD
 
 // For the low-level send command
 #define ASCII 0
@@ -66,5 +67,9 @@ void LCD_configure(void);
 void printLCDString(char* string, int row);
 void printLCDToPos(char* string, int row, int col);
 void clearLCD(void);
+void printLCDCharKeypad(char character);
+void resetLCDPosition(void);
+void enableCursor();
+void disableCursor()
 
 #endif
