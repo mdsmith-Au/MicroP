@@ -20,17 +20,17 @@
 #include "stm32f4xx_spi.h"
 
 // Function prototypes
-int CC2500_CmdStrobe(uint8_t command);
+int CC2500_CmdStrobe(int8_t command);
 void CC2500_TXMode(void);
 void CC2500_RXMode(void);
 void CC2500_Idle(void);
 void CC2500_Init(void);
 int CC2500_TransmitMessage(void* buffer);
 int CC2500_ReceiveMessage(void* buffer);
-int CC2500_Read_Reg(uint8_t* buffer, uint8_t header, int numBytes);
-int CC2500_Write_Reg(uint8_t* buffer, uint8_t header, int numBytes);
-int CC2500_WriteFIFO(uint8_t* buffer, uint8_t header, int numBytes);
-int CC2500_ReadFIFO(uint8_t* buffer, uint8_t header, int numBytes);
+int CC2500_Read_Reg(int8_t* buffer, int8_t header, int numBytes);
+int CC2500_Write_Reg(int8_t* buffer, int8_t header, int numBytes);
+int CC2500_WriteFIFO(int8_t* buffer, int8_t header, int numBytes);
+int CC2500_ReadFIFO(int8_t* buffer, int8_t header, int numBytes);
 int CC2500_Status(char status);
 
 // Wireless RF configuration - from TA

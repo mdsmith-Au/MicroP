@@ -1,20 +1,20 @@
 #include "wireless_cc2500.h"
 #include <stdio.h>
 
-int CC2500_Read(uint8_t* buffer, uint8_t address, int numBytes);
-uint8_t CC2500_SendByte(uint8_t byte);
-int CC2500_Write(uint8_t* buffer, uint8_t address, int numBytes);
-int CC2500_Read_Reg(uint8_t* buffer, uint8_t address, int numBytes);
+int CC2500_Read(int8_t* buffer, int8_t address, int numBytes);
+int8_t CC2500_SendByte(int8_t byte);
+int CC2500_Write(int8_t* buffer, int8_t address, int numBytes);
+int CC2500_Read_Reg(int8_t* buffer, int8_t address, int numBytes);
 void CC2500_LowLevelInit(void);
 void CC2500_LowLevelWireless_Init(void);
 int CC2500_Check_Status(char status);
 void CC2500_Delay(void);
 
-int CC2500_CmdStrobe(uint8_t command) {
+int CC2500_CmdStrobe(int8_t command) {
 	CC2500_NSS_LOW();
 	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
 
-	uint8_t status = CC2500_SendByte(command);
+	int8_t status = CC2500_SendByte(command);
 	printf("Status: %d\n", CC2500_Status(status));
 	return SUCCESS;
 }
@@ -44,14 +44,14 @@ int CC2500_ReceiveMessage(void* buffer)
 	return SUCCESS;
 }
 
-int CC2500_WriteFIFO(uint8_t* buffer, uint8_t address, int numBytes)
+int CC2500_WriteFIFO(int8_t* buffer, int8_t address, int numBytes)
 {
 	// Set chip select to low and wait for MISO to be low
 	CC2500_NSS_LOW();
 	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
 		
 	// Send the address of the register
-	uint8_t status = CC2500_SendByte(address);
+	int8_t status = CC2500_SendByte(address);
 	printf("Status: %d\n", CC2500_Status(status));
 		
 	// Send data
@@ -67,14 +67,14 @@ int CC2500_WriteFIFO(uint8_t* buffer, uint8_t address, int numBytes)
 	return SUCCESS;
 }
 
-int CC2500_ReadFIFO(uint8_t* buffer, uint8_t address, int numBytes)
+int CC2500_ReadFIFO(int8_t* buffer, int8_t address, int numBytes)
 {
 	// Set chip select to low and wait for MISO to be low
 	CC2500_NSS_LOW();
 	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
 	
 	// Send the address of the register
-	uint8_t status = CC2500_SendByte(address);
+	int8_t status = CC2500_SendByte(address);
 	
 	// Read data
 	while(numBytes > 0)
@@ -89,13 +89,13 @@ int CC2500_ReadFIFO(uint8_t* buffer, uint8_t address, int numBytes)
 	return SUCCESS;
 }
 
-int CC2500_Write_Reg(uint8_t* buffer, uint8_t address, int numBytes) {
+int CC2500_Write_Reg(int8_t* buffer, int8_t address, int numBytes) {
 	// Set chip select to low and wait for MISO to be low
 	CC2500_NSS_LOW();
 	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
 	
 	// Send the address of the register
-	uint8_t status = CC2500_SendByte(address);
+	int8_t status = CC2500_SendByte(address);
 	
 	// Send data
 	while(numBytes > 0)
@@ -111,13 +111,13 @@ int CC2500_Write_Reg(uint8_t* buffer, uint8_t address, int numBytes) {
 	return SUCCESS;
 }
 
-int CC2500_Read_Reg(uint8_t* buffer, uint8_t address, int numBytes) {
+int CC2500_Read_Reg(int8_t* buffer, int8_t address, int numBytes) {
 	// Set chip select to low and wait for MISO to be low
 	CC2500_NSS_LOW();
 	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
 	
 	// Send the address of the register
-	uint8_t status = CC2500_SendByte(address);
+	int8_t status = CC2500_SendByte(address);
 	
 	// Read data
 	while(numBytes > 0)
@@ -133,7 +133,7 @@ int CC2500_Read_Reg(uint8_t* buffer, uint8_t address, int numBytes) {
 	return SUCCESS;
 }
 
-uint8_t CC2500_SendByte(uint8_t byte)
+int8_t CC2500_SendByte(int8_t byte)
 {
 	// Loop while DR register is not empty
 	while(SPI_I2S_GetFlagStatus(CC2500_SPI, SPI_I2S_FLAG_TXE) == RESET) ;
@@ -146,7 +146,7 @@ uint8_t CC2500_SendByte(uint8_t byte)
 	while (SPI_I2S_GetFlagStatus(CC2500_SPI, SPI_I2S_FLAG_RXNE) == RESET);
 	
 	// Return the byte read from the SPI bus
-	return (uint8_t)SPI_I2S_ReceiveData(CC2500_SPI);
+	return (int8_t)SPI_I2S_ReceiveData(CC2500_SPI);
 }
 
 // Returns 1 if good, 0 if error, 2 if buffer overflow
@@ -196,7 +196,7 @@ void CC2500_LowLevelWireless_Init()
 	
 	// Init the wireless settings using burst mode
 	// Note that we have to send registers in a certain order (i.e. by their addresses)
-	uint8_t registerData[16];
+	int8_t registerData[16];
 	registerData[0] = SMARTRF_SETTING_IOCFG2;
 	CC2500_Write_Reg(registerData, IOCFG2_WRITE_SINGLE, 1);
 
@@ -333,7 +333,7 @@ void CC2500_LowLevelInit()
 
 void CC2500_TXGDIOInterrupts_Config()
 {
-	uint8_t buffer;
+	int8_t buffer;
 	
 	// Configure GDIO2 to interrupt when TX FIFO is full
 	buffer = 0x03;
@@ -346,7 +346,7 @@ void CC2500_TXGDIOInterrupts_Config()
 
 void CC2500_RXGDIOInterrupts_Config()
 {
-	uint8_t buffer;
+	int8_t buffer;
 	EXTI_InitTypeDef extiInit;
 	NVIC_InitTypeDef nvicInit;
 	
