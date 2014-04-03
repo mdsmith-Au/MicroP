@@ -279,19 +279,24 @@ void interpolator_thread(const void* arg)
 void wireless_thread(const void* arg)
 {
 	Interpolator_message *interpolator_m;
+	int8_t numBytes;
 	
 	//initialize wireless
+	CC2500_Init();
+	CC2500_CmdStrobe(SRX);
 	
 	while(1)
 	{
 		//wait for wireless receive
+		CC2500_Read_Reg(&numBytes, RXBYTES, 1);
+		numBytes = numBytes & 0x7f;
 		
-		interpolator_m = osPoolAlloc(interpolator_pool);                     // Allocate memory for the message
-		interpolator_m->rollAngle = 0;
-		interpolator_m->pitchAngle = 0;
-		interpolator_m->delta_t = 0;
-		interpolator_m->realtime = 0;
-		osMessagePut(interpolator_message_box, (uint32_t)interpolator_m, osWaitForever);  // Send Message
+		if(numBytes > 0)
+		{
+			interpolator_m = osPoolAlloc(interpolator_pool);                     // Allocate memory for the message
+			read_wireless_message(interpolator_m);
+			osMessagePut(interpolator_message_box, (uint32_t)interpolator_m, osWaitForever);  // Send Message
+		}		
 	}
 }
 
