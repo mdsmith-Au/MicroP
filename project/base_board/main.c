@@ -79,6 +79,8 @@ int main (void)
 			
 			CC2500_ReadFIFO(buffer, FIFO_READ_BURST_ADDRESS, numBytes[0]);
 			
+			CC2500_CmdStrobe(SRX);
+			
 			printf("Buff: ");
 				
 			int i = 0;
