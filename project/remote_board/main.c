@@ -123,19 +123,28 @@ int main (void) {
 	
 	uint8_t buffer[] = {0, 0, 0, 0, 0};
 	CC2500_CmdStrobe(SRES);
+	osDelay(500);
 	CC2500_CmdStrobe(SIDLE);
-	
+	osDelay(500);
 	CC2500_TXMode();
+	osDelay(500);
+	
 	buffer[0] = 4;
 	buffer[1] = 10;
 	buffer[2] = 20;
 	buffer[3] = 30;
 	buffer[4] = 40;
-	CC2500_WriteFIFO(buffer, FIFO_WRITE_BURST_ADDRESS, 5);
+	while(1)
+	{
+		CC2500_TXMode();
+		osDelay(500);
+		CC2500_WriteFIFO(buffer, FIFO_WRITE_BURST_ADDRESS, 5);
+		osDelay(1000);
+	}
 	
 	
 	
-	
+	/*
 	CC2500_Read_Reg(buffer, PARTNUM, 1);
 	printf("Buff: %x\n", buffer[0]);
 	CC2500_Read_Reg(buffer, VERSION, 1);
@@ -160,6 +169,7 @@ int main (void) {
 	buffer[3] = 0;
 	CC2500_Read_Reg(buffer, FREQ1_READ_BURST, 1);
 	printf("Buff: %x %x %x %x\n", buffer[0], buffer[1], buffer[2], buffer[3]);
+	*/
 	
 	// The below doesn't really need to be in a loop
 	while(1){
