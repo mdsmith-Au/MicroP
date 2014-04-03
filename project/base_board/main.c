@@ -82,8 +82,8 @@ int main (void)
 	osMessagePut(interpolator_message_box, (uint32_t)interpolator_m, osWaitForever);  // Send Message
 	
 	interpolator_m = osPoolAlloc(interpolator_pool);                     // Allocate memory for the message
-	interpolator_m->rollAngle = 90;
-	interpolator_m->pitchAngle = -90;
+	interpolator_m->rollAngle = 0;
+	interpolator_m->pitchAngle = 0;
 	interpolator_m->delta_t = 1;
 	interpolator_m->realtime = 0;
 	osMessagePut(interpolator_message_box, (uint32_t)interpolator_m, osWaitForever);  // Send Message

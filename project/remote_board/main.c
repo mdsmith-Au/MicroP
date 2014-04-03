@@ -137,7 +137,7 @@ int main (void) {
 	tid_wireless = osThreadCreate(osThread(wireless_thread), NULL);
   tid_keypad = osThreadCreate(osThread(keypad_thread), NULL);
 	
-	/*
+	
 	CC2500_Init();
 	
 	uint8_t buffer[] = {0, 0, 0, 0, 0};
@@ -160,11 +160,10 @@ int main (void) {
 		CC2500_WriteFIFO(buffer, FIFO_WRITE_BURST_ADDRESS, 5);
 		osDelay(1000);
 	}
-	*/
+	
 	Keypad_configure();
 	
 	
-	/*
 	CC2500_Read_Reg(buffer, PARTNUM, 1);
 	printf("Buff: %x\n", buffer[0]);
 	CC2500_Read_Reg(buffer, VERSION, 1);
@@ -189,7 +188,7 @@ int main (void) {
 	buffer[3] = 0;
 	CC2500_Read_Reg(buffer, FREQ1_READ_BURST, 1);
 	printf("Buff: %x %x %x %x\n", buffer[0], buffer[1], buffer[2], buffer[3]);
-	*/
+	
 	
 	
 	// The below doesn't really need to be in a loop

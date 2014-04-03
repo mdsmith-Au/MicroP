@@ -312,12 +312,19 @@ void CC2500_LowLevelInit()
   GPIO_SetBits(CC2500_SPI_NSS_GPIO_PORT, CC2500_SPI_NSS_PIN);
   
   /* Configure GPIO PINs to detect Interrupts */
-  GPIO_InitStructure.GPIO_Pin = CC2500_SPI_INT_PIN;
+  GPIO_InitStructure.GPIO_Pin = CC2500_SPI_INT0_PIN;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
   GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_NOPULL;
-  GPIO_Init(CC2500_SPI_INT_GPIO_PORT, &GPIO_InitStructure);
+  GPIO_Init(CC2500_SPI_INT0_GPIO_PORT, &GPIO_InitStructure);
+	
+	GPIO_InitStructure.GPIO_Pin = CC2500_SPI_INT2_PIN;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_NOPULL;
+  GPIO_Init(CC2500_SPI_INT2_GPIO_PORT, &GPIO_InitStructure);
 }
 
 void CC2500_TXGDIOInterrupts_Config()
@@ -336,12 +343,44 @@ void CC2500_TXGDIOInterrupts_Config()
 void CC2500_RXGDIOInterrupts_Config()
 {
 	uint8_t buffer;
+	GPIO_InitTypeDef gpioInit;
+	EXTI_InitTypeDef extiInit;
+	NVIC_InitTypeDef nvicInit;
 	
 	// Configure GDIO2 to interrupt when RX FIFO is full
 	buffer = 0x01;
 	CC2500_Write_Reg(&buffer, IOCFG2_WRITE_SINGLE, 1);
 	
+	SYSCFG_EXTILineConfig(CC2500_SPI_INT2_EXTI_PORT_SOURCE, CC2500_SPI_INT2_EXTI_PIN_SOURCE);
+	
+	extiInit.EXTI_Line = CC2500_SPI_INT2_EXTI_LINE;						
+	extiInit.EXTI_Mode = EXTI_Mode_Interrupt;		
+	extiInit.EXTI_Trigger = EXTI_Trigger_Rising;
+	extiInit.EXTI_LineCmd = ENABLE;
+	EXTI_Init(&extiInit);
+	
+	
+	nvicInit.NVIC_IRQChannel = CC2500_SPI_INT2_EXTI_IRQn;					
+	nvicInit.NVIC_IRQChannelCmd = ENABLE;						
+	nvicInit.NVIC_IRQChannelPreemptionPriority = 1;
+	nvicInit.NVIC_IRQChannelSubPriority = 1;				
+	NVIC_Init(&nvicInit);
+	
 	// Configure GDIO0 to interrupt when sync word has been received
 	buffer = 0x06;
 	CC2500_Write_Reg(&buffer, IOCFG0_WRITE_SINGLE, 1);
+	
+	SYSCFG_EXTILineConfig(CC2500_SPI_INT0_EXTI_PORT_SOURCE, CC2500_SPI_INT0_EXTI_PIN_SOURCE);
+	
+	extiInit.EXTI_Line = CC2500_SPI_INT0_EXTI_LINE;						
+	extiInit.EXTI_Mode = EXTI_Mode_Interrupt;		
+	extiInit.EXTI_Trigger = EXTI_Trigger_Rising;
+	extiInit.EXTI_LineCmd = ENABLE;
+	EXTI_Init(&extiInit);
+	
+	nvicInit.NVIC_IRQChannel = CC2500_SPI_INT0_EXTI_IRQn;					
+	nvicInit.NVIC_IRQChannelCmd = ENABLE;						
+	nvicInit.NVIC_IRQChannelPreemptionPriority = 1;
+	nvicInit.NVIC_IRQChannelSubPriority = 1;				
+	NVIC_Init(&nvicInit);
 }
