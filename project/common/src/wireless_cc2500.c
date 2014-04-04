@@ -15,7 +15,6 @@ int CC2500_CmdStrobe(int8_t command) {
 	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
 
 	int8_t status = CC2500_SendByte(command);
-	//printf("Status: %d\n", CC2500_Status(status));
 	return SUCCESS;
 }
 
@@ -52,7 +51,6 @@ int CC2500_WriteFIFO(int8_t* buffer, int8_t address, int numBytes)
 		
 	// Send the address of the register
 	int8_t status = CC2500_SendByte(address);
-	//printf("Status: %d\n", CC2500_Status(status));
 		
 	// Send data
 	while(numBytes > 0)
@@ -101,7 +99,6 @@ int CC2500_Write_Reg(int8_t* buffer, int8_t address, int numBytes) {
 	while(numBytes > 0)
 	{
 		status = CC2500_SendByte(*buffer);
-		//printf("Sending: %x\n", *buffer);
 		numBytes--;
 		buffer++;
 	}
@@ -123,7 +120,6 @@ int CC2500_Read_Reg(int8_t* buffer, int8_t address, int numBytes) {
 	while(numBytes > 0)
 	{
 		*buffer = CC2500_SendByte(DUMMY_BYTE);
-		//printf("Receiving: %x\n", *buffer);
 		numBytes--;
 		buffer++;
 	}
@@ -140,7 +136,6 @@ int8_t CC2500_SendByte(int8_t byte)
 	
 	// Send a byte through the SPI peripheral
 	SPI_I2S_SendData(CC2500_SPI, byte);
-	//printf("SendByte: %x\n", byte);
 	
 	// Wait to receive a byte
 	while (SPI_I2S_GetFlagStatus(CC2500_SPI, SPI_I2S_FLAG_RXNE) == RESET);
