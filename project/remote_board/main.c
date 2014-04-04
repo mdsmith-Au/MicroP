@@ -137,7 +137,7 @@ int main (void) {
 	//start threads
 	tid_orientation = osThreadCreate(osThread(orientation_thread), NULL);
 	tid_wireless = osThreadCreate(osThread(wireless_thread), NULL);
-  tid_keypad = osThreadCreate(osThread(keypad_thread), NULL);
+  //tid_keypad = osThreadCreate(osThread(keypad_thread), NULL);
 	
 	
 	// The below doesn't really need to be in a loop
@@ -236,12 +236,14 @@ void wireless_thread(const void* arg)
 		//if fifo buffer is not full, send message else yield
 		if (numBytesFIFOBuffer + sizeof(Wireless_message) <= FIFO_SIZE)
 		{
+			printf("FIFO SIZE: %d\n", numBytesFIFOBuffer);
 			event = osMessageGet(wireless_message_box, osWaitForever);  // wait for message
 			if (event.status == osEventMessage)
 			{
 				wireless_m = event.value.p;
 				
 				//send wireless message
+				printf("Writing message... pitch: %d roll: %d\n", wireless_m->pitchAngle, wireless_m->rollAngle);
 				write_wireless_message(wireless_m);
 				
 				osPoolFree(wireless_pool, wireless_m);                  // free memory allocated for message
