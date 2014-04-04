@@ -350,7 +350,7 @@ void wireless_thread(const void* arg)
 		//if fifo buffer is not full, send message else yield
 		if (numBytesFIFOBuffer + sizeof(Wireless_message) <= FIFO_SIZE)
 		{
-			printf("FIFO SIZE: %d\n", numBytesFIFOBuffer);
+			//printf("FIFO SIZE: %d\n", numBytesFIFOBuffer);
 			event = osMessageGet(wireless_message_box, osWaitForever);  // wait for message
 			if (event.status == osEventMessage)
 			{
@@ -371,12 +371,19 @@ void wireless_thread(const void* arg)
 }
 
 void keypad_thread(const void* arg) {
-	
+	char prevKeypress = 0;
 	while(1)
 	{
 		osSignalWait(KEYPAD_FLAG, osWaitForever);
 		uint32_t data= Keypad_poll();
-		printf("Char: %c\n", Keypad_Get_Character(data));
+        char currKeypress = Keypad_Get_Character(data);
+        
+        if (currKeypress != prevKeypress) {
+            prevKeypress = currKeypress;
+            
+            if (currKeypress != 0)
+                printf("Char: %c\n", currKeypress);
+        }
 	}
 }
 

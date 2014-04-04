@@ -52,8 +52,7 @@ void Keypad_Reverse_GPIO() {
 }
 
 
-char Keypad_Get_Character(uint32_t data) {
-  
+char Keypad_Get_Character(uint32_t data) {  
 	int col = 0;
   // Figure out column
   if ((data & KEYPAD_PIN_1) == KEYPAD_PIN_1) {
@@ -87,30 +86,30 @@ char Keypad_Get_Character(uint32_t data) {
 
   char key = 0;
   
-	if (row == 1) {
-		if (col == 1) key = '1';
-		else if (col == 2) key = '2';
-		else if (col == 3) key = '3';
-		else if (col == 4) key = 'A';
-	}
-	else if (row == 2) {
-		if (col == 1) key = '4';
-		else if (col == 2) key = '5';
-		else if (col == 3) key = '6';
-		else if (col == 4) key = 'B';
-	}
-	else if (row == 3) {
-		if (col == 1) key = '7';
-		else if (col == 2) key = '8';
-		else if (col == 3) key = '9';
-		else if (col == 4) key = 'C';
-	}
-	else if (row == 4) {
-		if (col == 1) key = '*';
-		else if (col == 2) key = '0';
-		else if (col == 3) key = '#';
-		else if (col == 4) key = 'D';
-	}
+    if (row == 1) {
+        if (col == 1) key = '1';
+        else if (col == 2) key = '2';
+        else if (col == 3) key = '3';
+        else if (col == 4) key = 'A';
+    }
+    else if (row == 2) {
+        if (col == 1) key = '4';
+        else if (col == 2) key = '5';
+        else if (col == 3) key = '6';
+        else if (col == 4) key = 'B';
+    }
+    else if (row == 3) {
+        if (col == 1) key = '7';
+        else if (col == 2) key = '8';
+        else if (col == 3) key = '9';
+        else if (col == 4) key = 'C';
+    }
+    else if (row == 4) {
+        if (col == 1) key = '*';
+        else if (col == 2) key = '0';
+        else if (col == 3) key = '#';
+        else if (col == 4) key = 'D';
+    }
 	
   return key;
 }
