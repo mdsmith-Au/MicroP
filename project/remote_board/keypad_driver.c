@@ -111,7 +111,7 @@ char Keypad_Get_Character(uint32_t data) {
 		else if (col == 3) key = '#';
 		else if (col == 4) key = 'D';
 	}
-	=
+	
   return key;
 }
 
