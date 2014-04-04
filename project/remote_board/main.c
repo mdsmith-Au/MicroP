@@ -137,7 +137,7 @@ int main (void) {
 	//start threads
 	tid_orientation = osThreadCreate(osThread(orientation_thread), NULL);
 	tid_wireless = osThreadCreate(osThread(wireless_thread), NULL);
-  //tid_keypad = osThreadCreate(osThread(keypad_thread), NULL);
+  tid_keypad = osThreadCreate(osThread(keypad_thread), NULL);
 	/*
 			Wireless_message *wireless_m1;
 			wireless_m1 = osPoolAlloc(wireless_pool);                     // Allocate memory for the message
@@ -210,7 +210,7 @@ int main (void) {
 			wireless_m8->realtime = 0;
 			osMessagePut(wireless_message_box, (uint32_t)wireless_m8, osWaitForever);  // Send Message
 	*/		
-	//Keypad_configure();
+	Keypad_configure();
 	// The below doesn't really need to be in a loop
 	while(1){
 		osDelay(osWaitForever);
@@ -375,7 +375,7 @@ void keypad_thread(const void* arg) {
 	while(1)
 	{
 		osSignalWait(KEYPAD_FLAG, osWaitForever);
-		uint16_t data= Keypad_poll();
+		uint32_t data= Keypad_poll();
 		printf("Char: %c\n", Keypad_Get_Character(data));
 	}
 }

@@ -18,20 +18,20 @@
  *   PD11 = Pin 4
  */
 void Keypad_configure(void);
-uint16_t Keypad_poll(void);
-char Keypad_Get_Character(uint16_t data);
+uint32_t Keypad_poll(void);
+char Keypad_Get_Character(uint32_t data);
  
 #define KEYPAD_GPIO_BANK GPIOD
 // Columns
-#define KEYPAD_PIN_1 GPIO_Pin_8
-#define KEYPAD_PIN_2 GPIO_Pin_6
-#define KEYPAD_PIN_3 GPIO_Pin_10
-#define KEYPAD_PIN_4 GPIO_Pin_11
+#define KEYPAD_PIN_1 GPIO_Pin_2
+#define KEYPAD_PIN_2 GPIO_Pin_3
+#define KEYPAD_PIN_3 GPIO_Pin_6
+#define KEYPAD_PIN_4 GPIO_Pin_7
 // Rows
-#define KEYPAD_PIN_5 GPIO_Pin_2
-#define KEYPAD_PIN_6 GPIO_Pin_3
-#define KEYPAD_PIN_7 GPIO_Pin_6
-#define KEYPAD_PIN_8 GPIO_Pin_7
+#define KEYPAD_PIN_5 GPIO_Pin_8
+#define KEYPAD_PIN_6 GPIO_Pin_9
+#define KEYPAD_PIN_7 GPIO_Pin_10
+#define KEYPAD_PIN_8 GPIO_Pin_11
 
 #define KEYPAD_COL KEYPAD_PIN_1 | KEYPAD_PIN_2 | KEYPAD_PIN_3 | KEYPAD_PIN_4
 #define KEYPAD_ROW KEYPAD_PIN_5 | KEYPAD_PIN_6 | KEYPAD_PIN_7 | KEYPAD_PIN_8
