@@ -371,6 +371,7 @@ void wireless_thread(const void* arg)
 }
 
 void keypad_thread(const void* arg) {
+    clearLCD();
 	char prevKeypress = 0;
 	while(1)
 	{
@@ -381,8 +382,9 @@ void keypad_thread(const void* arg) {
         if (currKeypress != prevKeypress) {
             prevKeypress = currKeypress;
             
-            if (currKeypress != 0)
-                printf("Char: %c\n", currKeypress);
+            if (currKeypress != 0) {
+                printLCDCharKeypad(currKeypress);
+            }
         }
 	}
 }
