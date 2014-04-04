@@ -15,7 +15,7 @@ int CC2500_CmdStrobe(int8_t command) {
 	while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
 
 	int8_t status = CC2500_SendByte(command);
-	printf("Status: %d\n", CC2500_Status(status));
+	//printf("Status: %d\n", CC2500_Status(status));
 	return SUCCESS;
 }
 
@@ -52,7 +52,7 @@ int CC2500_WriteFIFO(int8_t* buffer, int8_t address, int numBytes)
 		
 	// Send the address of the register
 	int8_t status = CC2500_SendByte(address);
-	printf("Status: %d\n", CC2500_Status(status));
+	//printf("Status: %d\n", CC2500_Status(status));
 		
 	// Send data
 	while(numBytes > 0)
