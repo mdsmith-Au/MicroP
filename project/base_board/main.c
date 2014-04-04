@@ -9,6 +9,8 @@
 #include <stdio.h>
 
 #define MOTOR_MOVE_SIGNAL 0x01
+#define WIRELESS_SIGNAL 	0x02
+
 #define MOTOR_MESSAGE_QUEUE_SIZE 1000
 #define INTERPOLATOR_MESSAGE_QUEUE_SIZE 1000
 
@@ -48,56 +50,26 @@ osThreadId tid_motor, tid_interpolator, tid_wireless;
 
 void TIM2_IRQHandler(void);
 void read_wireless_message(Interpolator_message *m);
+void wireless_timer_callback(void const *arg);
+
+
+osTimerDef (wireless_timer, wireless_timer_callback); 
+osTimerId wireless_timer_id;
 
 /*!
  @brief Program entry point
  */
 int main (void)
 {
-	CC2500_Init();
-	
-	interpolator_pool = osPoolCreate(osPool(interpolator_pool));                 // create memory pool
-  interpolator_message_box = osMessageCreate(osMessageQ(interpolator_message_box), NULL);  // create msg queue
-	
-	Interpolator_message *interpolator_m;
-	
-	//int8_t buffer[] = {0, 0, 0, 0, 0};
-	//CC2500_CmdStrobe(SRES);
-	//CC2500_CmdStrobe(SIDLE);
-	
-	//CC2500_CmdStrobe(SFRX);
-
-	//while(GPIO_ReadInputDataBit(CC2500_SPI_MISO_GPIO_PORT, CC2500_SPI_MISO_PIN) != 0) {};
-	CC2500_CmdStrobe(SRX);
-	
-	int8_t numBytes[1] = {0};
-	int8_t state[1] = {0};
-	
-	while(1)
-	{
-		CC2500_Read_Reg(numBytes, RXBYTES, 1);
-		printf("num bytes: %d\n", numBytes[0]);
-		numBytes[0] = numBytes[0] & 0x7f;
-		CC2500_Read_Reg(state, MARCSTATE, 1);
-		printf("State: %x\n", state[0]);
-		
-		if(numBytes[0] > 0)
-		{
-			interpolator_m = osPoolAlloc(interpolator_pool);                     // Allocate memory for the message
-			read_wireless_message(interpolator_m);
-			
-			printf("roll angle: %d pitch angle: %d delta_t: %d realtime: %d\n", interpolator_m->rollAngle, interpolator_m->pitchAngle, interpolator_m->delta_t, interpolator_m->realtime);
-		}
-		osDelay(1000);
-	}
-	
-	/*
 	init_motors();
 	move_to_angles(0, 0);
 	
-	osDelay(2000);
+	osDelay(5000);
 	
 	baseboard_tim2_interrupt_config();
+	
+	wireless_timer_id = osTimerCreate (osTimer(wireless_timer), osTimerPeriodic, NULL);
+	osTimerStart(wireless_timer_id, 10);
 	
 	motor_pool = osPoolCreate(osPool(motor_pool));                 // create memory pool
   motor_message_box = osMessageCreate(osMessageQ(motor_message_box), NULL);  // create msg queue
@@ -107,30 +79,7 @@ int main (void)
 	
 	tid_motor = osThreadCreate(osThread(motor_thread), NULL);
 	tid_interpolator = osThreadCreate(osThread(interpolator_thread), NULL);
-	
-	Interpolator_message *interpolator_m;
-	interpolator_m = osPoolAlloc(interpolator_pool);                     // Allocate memory for the message
-	interpolator_m->rollAngle = 45;
-	interpolator_m->pitchAngle = 45;
-	interpolator_m->delta_t = 2;
-	interpolator_m->realtime = 0;
-	osMessagePut(interpolator_message_box, (uint32_t)interpolator_m, osWaitForever);  // Send Message
-	
-	interpolator_m = osPoolAlloc(interpolator_pool);                     // Allocate memory for the message
-	interpolator_m->rollAngle = 0;
-	interpolator_m->pitchAngle = 0;
-	interpolator_m->delta_t = 2;
-	interpolator_m->realtime = 0;
-	osMessagePut(interpolator_message_box, (uint32_t)interpolator_m, osWaitForever);  // Send Message
-	
-	interpolator_m = osPoolAlloc(interpolator_pool);                     // Allocate memory for the message
-	interpolator_m->rollAngle = 0;
-	interpolator_m->pitchAngle = 0;
-	interpolator_m->delta_t = 1;
-	interpolator_m->realtime = 0;
-	osMessagePut(interpolator_message_box, (uint32_t)interpolator_m, osWaitForever);  // Send Message
-	*/
-	//tid_wireless = osThreadCreate(osThread(wireless_thread), NULL);
+	tid_wireless = osThreadCreate(osThread(wireless_thread), NULL);
 	
 	// The below doesn't really need to be in a loop
 	while(1){
@@ -154,7 +103,7 @@ void motor_thread(const void* arg)
       motor_m = event.value.p;
 			
 			//move motors according to message received
-			move_to_angles(motor_m->rollAngle, motor_m->pitchAngle);
+			move_to_angles(motor_m->rollAngle, -motor_m->pitchAngle);
 			
       osPoolFree(motor_pool, motor_m);                  // free memory allocated for message
     }
@@ -243,6 +192,7 @@ void wireless_thread(const void* arg)
 {
 	Interpolator_message *interpolator_m;
 	int8_t numBytes;
+	int8_t state;
 	
 	//initialize wireless
 	CC2500_Init();
@@ -250,14 +200,20 @@ void wireless_thread(const void* arg)
 	
 	while(1)
 	{
+		osSignalWait(WIRELESS_SIGNAL, osWaitForever);
+		
 		//wait for wireless receive
 		CC2500_Read_Reg(&numBytes, RXBYTES, 1);
 		numBytes = numBytes & 0x7f;
+		CC2500_Read_Reg(&state, MARCSTATE, 1);
+		
+		printf("State: %x\n", state);
 		
 		if(numBytes > 0)
 		{
 			interpolator_m = osPoolAlloc(interpolator_pool);                     // Allocate memory for the message
 			read_wireless_message(interpolator_m);
+			
 			osMessagePut(interpolator_message_box, (uint32_t)interpolator_m, osWaitForever);  // Send Message
 		}		
 	}
@@ -282,5 +238,10 @@ void read_wireless_message(Interpolator_message *m)
 	
 	CC2500_ReadFIFO(&junk, FIFO_READ_BURST_ADDRESS, 2);		
 	CC2500_CmdStrobe(SRX);
+}
+
+void wireless_timer_callback(void const *arg)
+{
+	osSignalSet(tid_wireless, WIRELESS_SIGNAL);
 }
 

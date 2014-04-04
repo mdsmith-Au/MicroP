@@ -18,11 +18,8 @@
  *   PD11 = Pin 4
  */
 void Keypad_configure(void);
-uint16_t Keypad_Handle_Interrupt(void);
-char Keypad_Get_Character(uint32_t EXTI_Line_Source, uint16_t rows);
-
-void enable_interrupt(uint32_t EXTI_Line);
-void disable_interrupt(uint32_t EXTI_Line);
+uint16_t Keypad_poll(void);
+char Keypad_Get_Character(uint16_t data);
  
 #define KEYPAD_GPIO_BANK GPIOD
 // Columns
@@ -38,26 +35,5 @@ void disable_interrupt(uint32_t EXTI_Line);
 
 #define KEYPAD_COL KEYPAD_PIN_1 | KEYPAD_PIN_2 | KEYPAD_PIN_3 | KEYPAD_PIN_4
 #define KEYPAD_ROW KEYPAD_PIN_5 | KEYPAD_PIN_6 | KEYPAD_PIN_7 | KEYPAD_PIN_8
-
-#define KEPAD_INT_SRC_1 EXTI_PinSource8
-#define KEPAD_INT_SRC_2	EXTI_PinSource6
-#define KEPAD_INT_SRC_3	EXTI_PinSource10
-#define KEPAD_INT_SRC_4 EXTI_PinSource11
-
-#define KEYPAD_INT_SRC KEPAD_INT_SRC_1 | KEPAD_INT_SRC_2 | KEPAD_INT_SRC_3 | KEPAD_INT_SRC_4
-
-#define KEYPAD_INT_LINE_1 EXTI_Line8
-#define KEYPAD_INT_LINE_2 EXTI_Line6
-#define KEYPAD_INT_LINE_3 EXTI_Line10
-#define KEYPAD_INT_LINE_4 EXTI_Line11
-
-#define KEYPAD_INT_LINE KEYPAD_INT_LINE_1 | KEYPAD_INT_LINE_2 | KEYPAD_INT_LINE_3 | KEYPAD_INT_LINE_4
-
-#define KEYPAD_EXTI_IRQ_1 EXTI9_5_IRQn
-#define KEYPAD_EXTI_IRQ_2 EXTI9_5_IRQn
-#define KEYPAD_EXTI_IRQ_3 EXTI15_10_IRQn
-#define KEYPAD_EXTI_IRQ_4 EXTI15_10_IRQn
-
-#define KEYPAD_EXTI_IRQ KEYPAD_EXTI_IRQ_1 | KEYPAD_EXTI_IRQ_2 | KEYPAD_EXTI_IRQ_3 | KEYPAD_EXTI_IRQ_4
 
 #endif
