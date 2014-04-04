@@ -138,23 +138,79 @@ int main (void) {
 	tid_orientation = osThreadCreate(osThread(orientation_thread), NULL);
 	tid_wireless = osThreadCreate(osThread(wireless_thread), NULL);
   //tid_keypad = osThreadCreate(osThread(keypad_thread), NULL);
-	
-	
-	CC2500_Init();
-	
-	int8_t buffer[] = {0, 0, 0, 0, 0, 0, 0, 0};
-	
-	CC2500_CmdStrobe(STX);
-	
-	Wireless_message *wireless_m;
-	wireless_m = osPoolAlloc(wireless_pool);                     // Allocate memory for the message
-	wireless_m->rollAngle = 30;
-	wireless_m->pitchAngle = 32;
-	wireless_m->delta_t = 0;
-	wireless_m->realtime = 1;
-	
-	write_wireless_message(wireless_m);
-	Keypad_configure();
+	/*
+			Wireless_message *wireless_m1;
+			wireless_m1 = osPoolAlloc(wireless_pool);                     // Allocate memory for the message
+			wireless_m1->rollAngle = 30;
+			wireless_m1->pitchAngle = 0;
+			wireless_m1->delta_t = 5;
+			wireless_m1->realtime = 0;
+			osMessagePut(wireless_message_box, (uint32_t)wireless_m1, osWaitForever);  // Send Message
+			
+			osDelay(1000);
+			Wireless_message *wireless_m2;
+			wireless_m2 = osPoolAlloc(wireless_pool);
+			wireless_m2->rollAngle = 30;
+			wireless_m2->pitchAngle = 30;
+			wireless_m2->delta_t = 2;
+			wireless_m2->realtime = 0;
+			osMessagePut(wireless_message_box, (uint32_t)wireless_m2, osWaitForever);  // Send Message
+			
+			osDelay(1000);
+			Wireless_message *wireless_m3;
+			wireless_m3 = osPoolAlloc(wireless_pool);
+			wireless_m3->rollAngle = 30;
+			wireless_m3->pitchAngle = 0;
+			wireless_m3->delta_t = 5;
+			wireless_m3->realtime = 0;
+			osMessagePut(wireless_message_box, (uint32_t)wireless_m3, osWaitForever);  // Send Message
+			
+			osDelay(1000);
+			Wireless_message *wireless_m4;
+			wireless_m4 = osPoolAlloc(wireless_pool);
+			wireless_m4->rollAngle = 0;
+			wireless_m4->pitchAngle = 0;
+			wireless_m4->delta_t = 2;
+			wireless_m4->realtime = 0;
+			osMessagePut(wireless_message_box, (uint32_t)wireless_m4, osWaitForever);  // Send Message
+			
+			osDelay(1000);
+			Wireless_message *wireless_m5;
+			wireless_m5 = osPoolAlloc(wireless_pool);
+			wireless_m5->rollAngle = -30;
+			wireless_m5->pitchAngle = 0;
+			wireless_m5->delta_t = 5;
+			wireless_m5->realtime = 0;
+			osMessagePut(wireless_message_box, (uint32_t)wireless_m5, osWaitForever);  // Send Message
+			
+			osDelay(1000);
+			Wireless_message *wireless_m6;
+			wireless_m6 = osPoolAlloc(wireless_pool);
+			wireless_m6->rollAngle = -30;
+			wireless_m6->pitchAngle = -30;
+			wireless_m6->delta_t = 2;
+			wireless_m6->realtime = 0;
+			osMessagePut(wireless_message_box, (uint32_t)wireless_m6, osWaitForever);  // Send Message
+			
+			osDelay(1000);
+			Wireless_message *wireless_m7;
+			wireless_m7 = osPoolAlloc(wireless_pool);
+			wireless_m7->rollAngle = -30;
+			wireless_m7->pitchAngle = 0;
+			wireless_m7->delta_t = 5;
+			wireless_m7->realtime = 0;
+			osMessagePut(wireless_message_box, (uint32_t)wireless_m7, osWaitForever);  // Send Message
+			
+			osDelay(1000);
+			Wireless_message *wireless_m8;
+			wireless_m8 = osPoolAlloc(wireless_pool);
+			wireless_m8->rollAngle = 0;
+			wireless_m8->pitchAngle = 0;
+			wireless_m8->delta_t = 2;
+			wireless_m8->realtime = 0;
+			osMessagePut(wireless_message_box, (uint32_t)wireless_m8, osWaitForever);  // Send Message
+	*/		
+	//Keypad_configure();
 	// The below doesn't really need to be in a loop
 	while(1){
 		osDelay(osWaitForever);
@@ -221,13 +277,56 @@ void orientation_thread(const void* arg)
 		else
 		{
 			//get information from keypad
-			
+			/*
 			wireless_m = osPoolAlloc(wireless_pool);                     // Allocate memory for the message
-			wireless_m->rollAngle = 0;
+			wireless_m->rollAngle = 90;
 			wireless_m->pitchAngle = 0;
-			wireless_m->delta_t = 0;
+			wireless_m->delta_t = 10;
 			wireless_m->realtime = 0;
 			osMessagePut(wireless_message_box, (uint32_t)wireless_m, osWaitForever);  // Send Message
+			
+			wireless_m->rollAngle = 90;
+			wireless_m->pitchAngle = 90;
+			wireless_m->delta_t = 10;
+			wireless_m->realtime = 0;
+			osMessagePut(wireless_message_box, (uint32_t)wireless_m, osWaitForever);  // Send Message
+			
+			wireless_m->rollAngle = 90;
+			wireless_m->pitchAngle = 0;
+			wireless_m->delta_t = 5;
+			wireless_m->realtime = 0;
+			osMessagePut(wireless_message_box, (uint32_t)wireless_m, osWaitForever);  // Send Message
+			
+			wireless_m->rollAngle = 0;
+			wireless_m->pitchAngle = 0;
+			wireless_m->delta_t = 5;
+			wireless_m->realtime = 0;
+			osMessagePut(wireless_message_box, (uint32_t)wireless_m, osWaitForever);  // Send Message
+			
+			wireless_m->rollAngle = -90;
+			wireless_m->pitchAngle = 0;
+			wireless_m->delta_t = 10;
+			wireless_m->realtime = 0;
+			osMessagePut(wireless_message_box, (uint32_t)wireless_m, osWaitForever);  // Send Message
+			
+			wireless_m->rollAngle = -90;
+			wireless_m->pitchAngle = -90;
+			wireless_m->delta_t = 10;
+			wireless_m->realtime = 0;
+			osMessagePut(wireless_message_box, (uint32_t)wireless_m, osWaitForever);  // Send Message
+			
+			wireless_m->rollAngle = -90;
+			wireless_m->pitchAngle = 0;
+			wireless_m->delta_t = 5;
+			wireless_m->realtime = 0;
+			osMessagePut(wireless_message_box, (uint32_t)wireless_m, osWaitForever);  // Send Message
+			
+			wireless_m->rollAngle = 0;
+			wireless_m->pitchAngle = 0;
+			wireless_m->delta_t = 5;
+			wireless_m->realtime = 0;
+			osMessagePut(wireless_message_box, (uint32_t)wireless_m, osWaitForever);  // Send Message
+			*/
 		}
 	}
 }
@@ -258,7 +357,7 @@ void wireless_thread(const void* arg)
 				wireless_m = event.value.p;
 				
 				//send wireless message
-				printf("Writing message... pitch: %d roll: %d\n", wireless_m->pitchAngle, wireless_m->rollAngle);
+				//printf("Writing message... pitch: %d roll: %d\n", wireless_m->pitchAngle, wireless_m->rollAngle);
 				write_wireless_message(wireless_m);
 				
 				osPoolFree(wireless_pool, wireless_m);                  // free memory allocated for message
