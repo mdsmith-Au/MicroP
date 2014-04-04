@@ -22,6 +22,7 @@
 #define SENSOR_Z_OFFSET -64	/*!< Z offset from calibration (expected 1000)*/
 
 #define ACCELERATON_FLAG	0x01	/*!< Acceleration signaling flag */
+#define KEYPAD_FLAG	0x02
 
 static int displayValue = 0;
 static int RXNow = 0;
@@ -67,7 +68,6 @@ osMessageQId keypad_message_box;
 void orientation_thread(const void* arg);
 void wireless_thread(const void* arg);
 void keypad_thread(const void* arg);
-static void inline keypad_interrupt_message_handler(uint32_t EXTI_Line);
 
 osThreadDef(orientation_thread, osPriorityNormal, 1, 0);
 osThreadDef(wireless_thread, osPriorityNormal, 1, 0);
@@ -140,6 +140,21 @@ int main (void) {
   tid_keypad = osThreadCreate(osThread(keypad_thread), NULL);
 	
 	
+	CC2500_Init();
+	
+	int8_t buffer[] = {0, 0, 0, 0, 0, 0, 0, 0};
+	
+	CC2500_CmdStrobe(STX);
+	
+	Wireless_message *wireless_m;
+	wireless_m = osPoolAlloc(wireless_pool);                     // Allocate memory for the message
+	wireless_m->rollAngle = 30;
+	wireless_m->pitchAngle = 32;
+	wireless_m->delta_t = 0;
+	wireless_m->realtime = 1;
+	
+	write_wireless_message(wireless_m);
+	Keypad_configure();
 	// The below doesn't really need to be in a loop
 	while(1){
 		osDelay(osWaitForever);
@@ -255,23 +270,12 @@ void wireless_thread(const void* arg)
 }
 
 void keypad_thread(const void* arg) {
-  Keypad_data  *keypad_data;
-  osEvent event;
 	
 	while(1)
 	{
-		event = osMessageGet(keypad_message_box, osWaitForever);  // wait for message
-		
-    if (event.status == osEventMessage)
-		{
-      keypad_data = event.value.p;
-			
-      char character = Keypad_Get_Character(keypad_data->EXTI_Line, keypad_data->row_data);
-      
-      printLCDCharKeypad(character);
-			
-      osPoolFree(keypad_pool, keypad_data);                  // free memory allocated for message
-    }
+		osSignalWait(KEYPAD_FLAG, osWaitForever);
+		uint16_t data= Keypad_poll();
+		printf("Char: %c\n", Keypad_Get_Character(data));
 	}
 }
 
@@ -324,51 +328,9 @@ void EXTI1_IRQHandler()
 	if(EXTI_GetITStatus(EXTI_Line1) != RESET)
   {
 		osSignalSet(tid_orientation, ACCELERATON_FLAG);
+		osSignalSet(tid_keypad, KEYPAD_FLAG);
 	}
 	EXTI_ClearITPendingBit(EXTI_Line1);
-}
-
-/* Keypad Interrupt Handlers */
-//TODO: disable interrupts when called
-/*
-void EXTI15_10_IRQHandler() {
-	if (EXTI_GetFlagStatus(EXTI_Line10)) {
-		keypad_interrupt_message_handler(EXTI_Line10);
-		EXTI_ClearITPendingBit(EXTI_Line10);
-	}
-	else if (EXTI_GetFlagStatus(EXTI_Line11)) {
-    keypad_interrupt_message_handler(EXTI_Line11);
-		EXTI_ClearITPendingBit(EXTI_Line11);
-	}
-}
-*/
-
-void EXTI9_5_IRQHandler() {
-	if (EXTI_GetFlagStatus(EXTI_Line8)) {
-		keypad_interrupt_message_handler(EXTI_Line8);
-		EXTI_ClearITPendingBit(EXTI_Line8);
-	}
-	else if (EXTI_GetFlagStatus(EXTI_Line6)) {
-    keypad_interrupt_message_handler(EXTI_Line6);
-		EXTI_ClearITPendingBit(EXTI_Line6);
-	}
-	
-}
-
-void EXTI15_10_IRQHandler() {
-	if (EXTI_GetFlagStatus(EXTI_Line10)) {
-		EXTI_ClearITPendingBit(EXTI_Line10);
-	}
-	else if(EXTI_GetFlagStatus(EXTI_Line11)) {
-		EXTI_ClearITPendingBit(EXTI_Line11);
-	}
-}
-
-static void inline keypad_interrupt_message_handler(uint32_t EXTI_Line) {
-    Keypad_data *data = osPoolAlloc(keypad_pool);
-    data->EXTI_Line = EXTI_Line;
-    data->row_data = Keypad_Handle_Interrupt();
-    osMessagePut(keypad_message_box, (uint32_t)data, osWaitForever);
 }
 
 /* Button interrupt handler */
