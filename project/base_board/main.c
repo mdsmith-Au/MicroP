@@ -207,8 +207,8 @@ void wireless_thread(const void* arg)
 		numBytes = numBytes & 0x7f;
 		CC2500_Read_Reg(&state, MARCSTATE, 1);
 		
-		printf("State: %x\n", state);
-		
+		//printf("State: %x\n", state);
+		osDelay(1);
 		if(numBytes > 0)
 		{
 			interpolator_m = osPoolAlloc(interpolator_pool);                     // Allocate memory for the message
