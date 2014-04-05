@@ -1,5 +1,3 @@
-#ifndef _WIRELESS_CC2500_H
-#define _WIRELESS_CC2500_H
 /*!
  @file wireless_cc2500.h
  @author Nicholas Destounis
@@ -12,6 +10,9 @@
 /*! @addtogroup Microp Project Group 1
  *  @{
  */
+ 
+#ifndef _WIRELESS_CC2500_H
+#define _WIRELESS_CC2500_H
 
 #include "stdint.h"
 #include "stm32f4xx.h"
@@ -20,17 +21,81 @@
 #include "stm32f4xx_spi.h"
 
 // Function prototypes
+
+/*!
+ Send command strobe
+ @param[in] command The command to send
+ */
 int CC2500_CmdStrobe(int8_t command);
+
+/*!
+	Puts wireless into transmit mode
+ */
 void CC2500_TXMode(void);
+
+/*!
+	Puts wireless into receive mode
+ */
 void CC2500_RXMode(void);
+
+/*!
+ Puts wireless into idle mode
+ */
 void CC2500_Idle(void);
+
+/*!
+ Initialize the wireless
+ */
 void CC2500_Init(void);
+
+/*!
+ Transmit wireless message
+ @param[in] buffer The message to send
+ */
 int CC2500_TransmitMessage(void* buffer);
+
+/*!
+ Receive wireless message
+ @param[in,out] buffer The buffer to store the message in
+ */
 int CC2500_ReceiveMessage(void* buffer);
+
+/*!
+ Read register
+ @param[in,out] buffer The destination buffer
+ @param[in] header The address
+ @param[in] numBytes Number of bytes to read
+ */
 int CC2500_Read_Reg(int8_t* buffer, int8_t header, int numBytes);
+
+/*!
+ Write
+ @param[in] buffer The buffer containing data
+ @param[in] header The address
+ @param[in] numBytes Number of bytes to write
+ */
 int CC2500_Write_Reg(int8_t* buffer, int8_t header, int numBytes);
+
+/*!
+ Write to FIFO buffer
+ @param[in] buffer The buffer containing data
+ @param[in] header The address
+ @param[in] numBytes Number of bytes to write
+ */
 int CC2500_WriteFIFO(int8_t* buffer, int8_t header, int numBytes);
+
+/*!
+ Read FIFO buffer
+ @param[in,out] buffer The destination buffer
+ @param[in] header The address
+ @param[in] numBytes Number of bytes to read
+ */
 int CC2500_ReadFIFO(int8_t* buffer, int8_t header, int numBytes);
+
+/*!
+ Parse wireless status
+ @param[in] status The status to check
+ */
 int CC2500_Status(char status);
 
 // Wireless RF configuration - from TA
@@ -76,7 +141,6 @@ int CC2500_Status(char status);
 #define SMARTRF_SETTING_PKTLEN 0x0A // Packet Length of 10bytes (0xFF)
 
 #endif
-//! @} 
 
 #define DUMMY_BYTE 												0x00
 #define FIFO_SIZE 64
@@ -389,3 +453,5 @@ int CC2500_Status(char status);
 #define CC2500_NSS_HIGH()      						GPIO_SetBits(CC2500_SPI_NSS_GPIO_PORT, CC2500_SPI_NSS_PIN)
 
 #endif
+
+//! @} 

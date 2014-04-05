@@ -1,14 +1,3 @@
-/* Authors: 	Nicholas Destounis
- *						Nikolaos Bukas
- *
- * Lab 2
- * Date:			February 13, 2014
- *
- * Course: 		ECSE 426 - Microprocessor Systems
- * Professor: Mark Coates
-*/
-
- 
 /*
  * Inspired by implementation at http://en.wikipedia.org/wiki/Circular_queue
  */
