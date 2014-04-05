@@ -214,12 +214,16 @@ void wireless_thread(const void* arg)
 		numBytes = numBytes & 0x7f;
 		CC2500_Read_Reg(&state, MARCSTATE, 1);
 		
+		printf("State: %x, numBytes: %x\n", state, numBytes);
+		
 		//printf("State: %x\n", state);
 		osDelay(1);
-		if(numBytes > 0)
+		if(numBytes > 7)
 		{
 			interpolator_m = osPoolAlloc(interpolator_pool);                     // Allocate memory for the message
 			read_wireless_message(interpolator_m);
+		
+			//printf("to interp: roll: %d pitch: %d delta_t: %d realtime: %d\n", interpolator_m->rollAngle, interpolator_m->pitchAngle, interpolator_m->delta_t, interpolator_m->realtime);
 			
 			osMessagePut(interpolator_message_box, (uint32_t)interpolator_m, osWaitForever);  // Send Message
 		}		
