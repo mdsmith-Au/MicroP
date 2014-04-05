@@ -71,12 +71,14 @@ int main (void)
 	wireless_timer_id = osTimerCreate (osTimer(wireless_timer), osTimerPeriodic, NULL);
 	osTimerStart(wireless_timer_id, 10);
 	
+	//initialize OS pools
 	motor_pool = osPoolCreate(osPool(motor_pool));                 // create memory pool
   motor_message_box = osMessageCreate(osMessageQ(motor_message_box), NULL);  // create msg queue
 	
 	interpolator_pool = osPoolCreate(osPool(interpolator_pool));                 // create memory pool
   interpolator_message_box = osMessageCreate(osMessageQ(interpolator_message_box), NULL);  // create msg queue
 	
+	//start threads
 	tid_motor = osThreadCreate(osThread(motor_thread), NULL);
 	tid_interpolator = osThreadCreate(osThread(interpolator_thread), NULL);
 	tid_wireless = osThreadCreate(osThread(wireless_thread), NULL);
@@ -87,6 +89,7 @@ int main (void)
 	}
 }
 
+//Motor thread: responsible for moving motors
 void motor_thread(const void* arg)
 {
 	Motor_message  *motor_m;
@@ -109,6 +112,8 @@ void motor_thread(const void* arg)
     }
 	}
 }
+
+//Interpolator thread: responsible for interpolation if in keypad mode
 void interpolator_thread(const void* arg)
 {
 	Interpolator_message *interpolator_m;
@@ -188,6 +193,8 @@ void interpolator_thread(const void* arg)
     }
 	}
 }
+
+//Wireless thread: responsible for receiving instructions from other board
 void wireless_thread(const void* arg)
 {
 	Interpolator_message *interpolator_m;
@@ -225,6 +232,7 @@ void TIM2_IRQHandler() {
     TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 }
 
+//Read wireless message from wireless chip
 void read_wireless_message(Interpolator_message *m)
 {
 	int8_t packetSize;

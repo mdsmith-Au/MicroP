@@ -127,17 +127,18 @@ int main (void) {
 	osTimerId display_timerId = osTimerCreate(osTimer(display_timer), osTimerPeriodic, NULL);
 	osTimerStart(display_timerId, display_period);
 	
+	//init semaphores
 	osSemaphoreCreate(osSemaphore(displaySemaphore), 1);
 	osSemaphoreCreate(osSemaphore(modeSemaphore), 1);
 	
 	//init message box and mem pool
 	wireless_pool = osPoolCreate(osPool(wireless_pool));                 // create memory pool
-    wireless_message_box = osMessageCreate(osMessageQ(wireless_message_box), NULL);  // create msg queue
+   wireless_message_box = osMessageCreate(osMessageQ(wireless_message_box), NULL);  // create msg queue
 	
 	//start threads
 	tid_orientation = osThreadCreate(osThread(orientation_thread), NULL);
 	tid_wireless = osThreadCreate(osThread(wireless_thread), NULL);
-    tid_keypad = osThreadCreate(osThread(keypad_thread), NULL);
+  tid_keypad = osThreadCreate(osThread(keypad_thread), NULL);
 	/*
 			Wireless_message *wireless_m1;
 			wireless_m1 = osPoolAlloc(wireless_pool);                     // Allocate memory for the message
@@ -217,6 +218,7 @@ int main (void) {
 	}
 }
 
+//Orientation thread: responsible for accelerometer polling
 void orientation_thread(const void* arg)
 {
 	Wireless_message *wireless_m;
@@ -331,6 +333,7 @@ void orientation_thread(const void* arg)
 	}
 }
 
+//Wireless thread: responsible for transmitting messages to other board.
 void wireless_thread(const void* arg)
 {
 	//init wireless
@@ -370,6 +373,7 @@ void wireless_thread(const void* arg)
 	}
 }
 
+//Keypad thread: responsible for keypad input
 void keypad_thread(const void* arg) {
     clearLCD();
     //enableCursor();
@@ -473,6 +477,7 @@ void init_user_button()
 	NVIC_Init(&nvicInit);
 }
 
+//write wireless message to wireless queue
 void write_wireless_message(Wireless_message *m)
 {	
 	int8_t size = sizeof(Wireless_message);

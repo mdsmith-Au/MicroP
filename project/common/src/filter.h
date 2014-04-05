@@ -4,10 +4,12 @@
  @file filter.h
  @author Nicholas Destounis
  @author Nikolaos Bukas
+ @author Michael Smith
+ @author Kevin Dam
  @brief This file contains an implementation of a moving average filter.
  */
-
-/*! @addtogroup LAB2
+ 
+/*! @addtogroup Microp Project Group 1
  *  @{
  */
  

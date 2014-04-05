@@ -1,14 +1,3 @@
-/* Authors: 	Nicholas Destounis
- *				Nikolaos Bukas
- *
- * Lab 2
- * Date:			
- *
- * Course: 		ECSE 426 - Microprocessor Systems
- * Professor: Mark Coates
- *
- */
- 
 /*
  * Inspired by implementation at http://en.wikipedia.org/wiki/Circular_queue
 */
@@ -17,10 +6,12 @@
  @file circular_queue.h
  @author Nicholas Destounis
  @author Nikolaos Bukas
+ @author Michael Smith
+ @author Kevin Dam
  @brief This is an implementation of an array based circular buffer.
  */
  
-/*! @addtogroup LAB2
+/*! @addtogroup Microp Project Group 1
  *  @{
  */
 
