@@ -61,17 +61,12 @@ void disableCursor() {
   osMutexRelease(Mutex_LCD_id);
 }
 
-void enableLCDCharMode() {
+void shiftRight() {
   osMutexWait(Mutex_LCD_id, osWaitForever);
-  send(characterEntry, CMD);
+  send(rightShift, CMD);
   osMutexRelease(Mutex_LCD_id);
 }
 
-void disableLCDCharMode()  {
-  osMutexWait(Mutex_LCD_id, osWaitForever);
-  send(characterEntryDisable, CMD);
-  osMutexRelease(Mutex_LCD_id);
-}
 
 // Print a string to the LCD starting at a given row/column
 // Rows and columns start from 1; 2 rows, 24 columns

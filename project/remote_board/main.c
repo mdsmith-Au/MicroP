@@ -1,6 +1,8 @@
 #include "arm_math.h"
 #include "stm32f4xx.h"
 #include "cmsis_os.h"
+#include "stdio.h"
+#include "stdlib.h"
 
 #include "LCD_driver.h"
 #include "mems_controller.h"
@@ -9,7 +11,8 @@
 #include "filter.h"
 #include "wireless_cc2500.h"
 #include "keypad_driver.h"
-#include "stdio.h"
+#include "interrupts_config.h"
+
 
 #define WIRELESS_MESSAGE_QUEUE_SIZE 1000
 #define KEYPAD_QUEUE_SIZE 10
@@ -118,14 +121,8 @@ void write_wireless_message(Wireless_message *m);
  @brief Program entry point
  */
 int main (void) {
-	init_user_button();
+	Interrupts_configure();
 	LCD_configure();
-	
-	//Set up LCD timer
-	int display_period = 500; //500 milliseconds
-	osTimerDef(display_timer, display_timer_ISR);
-	osTimerId display_timerId = osTimerCreate(osTimer(display_timer), osTimerPeriodic, NULL);
-	osTimerStart(display_timerId, display_period);
 	
 	osSemaphoreCreate(osSemaphore(displaySemaphore), 1);
 	osSemaphoreCreate(osSemaphore(modeSemaphore), 1);
@@ -138,78 +135,7 @@ int main (void) {
 	tid_orientation = osThreadCreate(osThread(orientation_thread), NULL);
 	tid_wireless = osThreadCreate(osThread(wireless_thread), NULL);
     tid_keypad = osThreadCreate(osThread(keypad_thread), NULL);
-	/*
-			Wireless_message *wireless_m1;
-			wireless_m1 = osPoolAlloc(wireless_pool);                     // Allocate memory for the message
-			wireless_m1->rollAngle = 30;
-			wireless_m1->pitchAngle = 0;
-			wireless_m1->delta_t = 5;
-			wireless_m1->realtime = 0;
-			osMessagePut(wireless_message_box, (uint32_t)wireless_m1, osWaitForever);  // Send Message
-			
-			osDelay(1000);
-			Wireless_message *wireless_m2;
-			wireless_m2 = osPoolAlloc(wireless_pool);
-			wireless_m2->rollAngle = 30;
-			wireless_m2->pitchAngle = 30;
-			wireless_m2->delta_t = 2;
-			wireless_m2->realtime = 0;
-			osMessagePut(wireless_message_box, (uint32_t)wireless_m2, osWaitForever);  // Send Message
-			
-			osDelay(1000);
-			Wireless_message *wireless_m3;
-			wireless_m3 = osPoolAlloc(wireless_pool);
-			wireless_m3->rollAngle = 30;
-			wireless_m3->pitchAngle = 0;
-			wireless_m3->delta_t = 5;
-			wireless_m3->realtime = 0;
-			osMessagePut(wireless_message_box, (uint32_t)wireless_m3, osWaitForever);  // Send Message
-			
-			osDelay(1000);
-			Wireless_message *wireless_m4;
-			wireless_m4 = osPoolAlloc(wireless_pool);
-			wireless_m4->rollAngle = 0;
-			wireless_m4->pitchAngle = 0;
-			wireless_m4->delta_t = 2;
-			wireless_m4->realtime = 0;
-			osMessagePut(wireless_message_box, (uint32_t)wireless_m4, osWaitForever);  // Send Message
-			
-			osDelay(1000);
-			Wireless_message *wireless_m5;
-			wireless_m5 = osPoolAlloc(wireless_pool);
-			wireless_m5->rollAngle = -30;
-			wireless_m5->pitchAngle = 0;
-			wireless_m5->delta_t = 5;
-			wireless_m5->realtime = 0;
-			osMessagePut(wireless_message_box, (uint32_t)wireless_m5, osWaitForever);  // Send Message
-			
-			osDelay(1000);
-			Wireless_message *wireless_m6;
-			wireless_m6 = osPoolAlloc(wireless_pool);
-			wireless_m6->rollAngle = -30;
-			wireless_m6->pitchAngle = -30;
-			wireless_m6->delta_t = 2;
-			wireless_m6->realtime = 0;
-			osMessagePut(wireless_message_box, (uint32_t)wireless_m6, osWaitForever);  // Send Message
-			
-			osDelay(1000);
-			Wireless_message *wireless_m7;
-			wireless_m7 = osPoolAlloc(wireless_pool);
-			wireless_m7->rollAngle = -30;
-			wireless_m7->pitchAngle = 0;
-			wireless_m7->delta_t = 5;
-			wireless_m7->realtime = 0;
-			osMessagePut(wireless_message_box, (uint32_t)wireless_m7, osWaitForever);  // Send Message
-			
-			osDelay(1000);
-			Wireless_message *wireless_m8;
-			wireless_m8 = osPoolAlloc(wireless_pool);
-			wireless_m8->rollAngle = 0;
-			wireless_m8->pitchAngle = 0;
-			wireless_m8->delta_t = 2;
-			wireless_m8->realtime = 0;
-			osMessagePut(wireless_message_box, (uint32_t)wireless_m8, osWaitForever);  // Send Message
-	*/		
+	
 	Keypad_configure();
 	// The below doesn't really need to be in a loop
 	while(1){
@@ -338,7 +264,7 @@ void wireless_thread(const void* arg)
 	CC2500_CmdStrobe(STX);
 	
 	Wireless_message  *wireless_m;
-  osEvent event;
+    osEvent event;
 	
 	int8_t numBytesFIFOBuffer;
 	
@@ -372,30 +298,74 @@ void wireless_thread(const void* arg)
 
 void keypad_thread(const void* arg) {
     clearLCD();
-    //enableCursor();
-    //enableLCDCharMode();
-	char prevKeypress = 0;
-	while(1)
-	{
-		osSignalWait(KEYPAD_FLAG, osWaitForever);
-		uint32_t data= Keypad_poll();
-        char currKeypress = Keypad_Get_Character(data);
-        
-        if (currKeypress != prevKeypress) {
-            prevKeypress = currKeypress;
-            
-            if (currKeypress != 0) {
-                printLCDCharKeypad(currKeypress);
-            }
-        }
-	}
-}
+    enableCursor();    
+    int samplingMode = 0;
+    Wireless_message wireless[32];
+    
+    char prevKeypress = 0;
+    
+    int counter = 0;
+    int pitch = 0;
+    int roll = 0;
+    int time = 0;
+    char keypadEntry[24];
+    while(1)
+        {   
+          	osSemaphoreWait(modeSemaphore, osWaitForever);
+            samplingMode = (mode == KEYPAD_MODE)? 0: 1;
+            osSemaphoreRelease(modeSemaphore);
 
-void display_timer_ISR(void const *argument)
-{
-	osSemaphoreWait(displaySemaphore, osWaitForever);
-	displayValue = 1;
-	osSemaphoreRelease(displaySemaphore);
+            if (!samplingMode) {
+ 
+                osSignalWait(KEYPAD_FLAG, osWaitForever);
+                uint32_t data= Keypad_poll();
+                char currKeypress = Keypad_Get_Character(data);
+                
+                if (currKeypress != prevKeypress) {
+                    prevKeypress = currKeypress;
+                    
+                    if (currKeypress != 0) {
+                        
+                        keypadEntry[counter] = currKeypress;
+                        counter++;
+                        printLCDCharKeypad(currKeypress);
+                        if (currKeypress == 'A') {
+                            counter = 0;
+                            // Parse string
+                            if (keypadEntry[0] == '*') {
+                                keypadEntry[0] = '-';
+                            }
+                            else {
+                                keypadEntry[0] = ' ';
+                            }
+                            char rollString[3];
+                            memcpy(rollString, keypadEntry, 3);
+                            roll = atoi(rollString);
+                            
+                            if (keypadEntry[4] == '*') {
+                                keypadEntry[4] = '-';
+                            }
+                            else {
+                                keypadEntry[4] = ' ';
+                            }
+                            
+                            char pitchString[3];
+                            memcpy(pitchString, keypadEntry + sizeof(char)*4, 3);
+                            pitch = atoi(pitchString);
+                            
+                            char timeString[2];
+                            memcpy(timeString, keypadEntry + sizeof(char)*8, 2);
+                            time = atoi(timeString);
+                            
+                            clearLCD();
+                            resetLCDPosition();
+                            
+                            printf("Roll: %i, Pitch: %i, Time: %i\n", roll, pitch, time);
+                        }
+                    }
+                }
+        }
+    }
 }
 
 int get_angle(int acc)
@@ -438,39 +408,16 @@ void EXTI0_IRQHandler()
 void EXTI1_IRQHandler()
 {
 	if(EXTI_GetITStatus(EXTI_Line1) != RESET)
-  {
-		osSignalSet(tid_orientation, ACCELERATON_FLAG);
-		osSignalSet(tid_keypad, KEYPAD_FLAG);
+    {
+        osSignalSet(tid_orientation, ACCELERATON_FLAG);
 	}
 	EXTI_ClearITPendingBit(EXTI_Line1);
 }
 
-/* Button interrupt handler */
-void init_user_button()
-{
-	EXTI_InitTypeDef extiInit;
-	NVIC_InitTypeDef nvicInit;
-	
-	/* Enable the GPIO A and SYSCFG clocks */
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
-	
-	/* Configure external interrupt to port E*/
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA, EXTI_PinSource0);									
-	
-	/* Configure the EXTI */
-	extiInit.EXTI_Line = EXTI_Line0;																							
-	extiInit.EXTI_Mode = EXTI_Mode_Interrupt;																			
-	extiInit.EXTI_Trigger = EXTI_Trigger_Rising;																	
-	extiInit.EXTI_LineCmd = ENABLE;																								
-	EXTI_Init(&extiInit);
-	
-	/* Configure NVIC */
-	nvicInit.NVIC_IRQChannel = EXTI0_IRQn;																				
-	nvicInit.NVIC_IRQChannelCmd = ENABLE;																					
-	nvicInit.NVIC_IRQChannelPreemptionPriority = 1;																
-	nvicInit.NVIC_IRQChannelSubPriority = 1;																			
-	NVIC_Init(&nvicInit);
+void TIM3_IRQHandler() {
+    osSignalSet(tid_keypad, KEYPAD_FLAG);
+    
+    TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
 }
 
 void write_wireless_message(Wireless_message *m)

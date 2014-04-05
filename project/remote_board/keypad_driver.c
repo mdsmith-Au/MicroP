@@ -1,8 +1,5 @@
 #include "keypad_driver.h"
 
-// Global variable used to define whether or not NVIC prio. group has already been set
-uint8_t NVIC_PRIORITY_SET = 0;
-
 void Keypad_GPIO_setup(void);
 void Keypad_Reverse_GPIO(void);
 
