@@ -657,6 +657,11 @@
               <FileType>1</FileType>
               <FilePath>..\keypad_driver.c</FilePath>
             </File>
+            <File>
+              <FileName>interrupts_config.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\interrupts_config.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

@@ -104,6 +104,10 @@ void display_timer_ISR(void const *argument);
  */
 void init_user_button(void);
 
+void turnOnGreenLED(void);
+void turnOffGreenLED(void);
+void LED_GPIO_config(void);
+
 /*!
  Get angle corresponding to given acceleration value
  @param[in] acc Acceleration value
@@ -121,6 +125,7 @@ void write_wireless_message(Wireless_message *m);
  @brief Program entry point
  */
 int main (void) {
+    LED_GPIO_config();
 	Interrupts_configure();
 	LCD_configure();
 		
@@ -130,7 +135,7 @@ int main (void) {
 	
 	//init message box and mem pool
 	wireless_pool = osPoolCreate(osPool(wireless_pool));                 // create memory pool
-   wireless_message_box = osMessageCreate(osMessageQ(wireless_message_box), NULL);  // create msg queue
+    wireless_message_box = osMessageCreate(osMessageQ(wireless_message_box), NULL);  // create msg queue
 	
 	//start threads
 	tid_orientation = osThreadCreate(osThread(orientation_thread), NULL);
@@ -138,6 +143,7 @@ int main (void) {
     tid_keypad = osThreadCreate(osThread(keypad_thread), NULL);
 	
 	Keypad_configure();
+    
 	// The below doesn't really need to be in a loop
 	while(1){
 		osDelay(osWaitForever);
@@ -277,7 +283,7 @@ void wireless_thread(const void* arg)
 		numBytesFIFOBuffer = numBytesFIFOBuffer & 0x7f;
 		
 		//if fifo buffer is not full, send message else yield
-		if (numBytesFIFOBuffer + sizeof(Wireless_message) <= FIFO_SIZE)
+		if (numBytesFIFOBuffer + sizeof(Wireless_message) + 10 <= FIFO_SIZE)
 		{
 			//printf("FIFO SIZE: %d\n", numBytesFIFOBuffer);
 			event = osMessageGet(wireless_message_box, osWaitForever);  // wait for message
@@ -301,8 +307,8 @@ void wireless_thread(const void* arg)
 
 //Keypad thread: responsible for keypad input
 void keypad_thread(const void* arg) {
-    clearLCD();
-    enableCursor();    
+    enableCursor();
+    clearLCD();    
     int samplingMode = 0;
     Wireless_message wireless[32];
     
@@ -315,13 +321,14 @@ void keypad_thread(const void* arg) {
     char keypadEntry[24];
     while(1)
         {   
+            osSignalWait(KEYPAD_FLAG, osWaitForever);
+            
           	osSemaphoreWait(modeSemaphore, osWaitForever);
             samplingMode = (mode == KEYPAD_MODE)? 0: 1;
             osSemaphoreRelease(modeSemaphore);
 
-            if (!samplingMode) {
- 
-                osSignalWait(KEYPAD_FLAG, osWaitForever);
+            if (!samplingMode) { 
+                turnOnGreenLED();
                 uint32_t data= Keypad_poll();
                 char currKeypress = Keypad_Get_Character(data);
                 
@@ -364,10 +371,19 @@ void keypad_thread(const void* arg) {
                             clearLCD();
                             resetLCDPosition();
                             
-                            printf("Roll: %i, Pitch: %i, Time: %i\n", roll, pitch, time);
+                            Wireless_message *wireless_m;
+                            wireless_m = osPoolAlloc(wireless_pool);                     // Allocate memory for the message
+                            wireless_m->rollAngle = roll;
+                            wireless_m->pitchAngle = pitch;
+                            wireless_m->delta_t = time;
+                            wireless_m->realtime = 0;
+                            osMessagePut(wireless_message_box, (uint32_t)wireless_m, osWaitForever);  // Send Message
                         }
                     }
                 }
+        }
+        else {
+            turnOffGreenLED();
         }
     }
 }
@@ -435,3 +451,27 @@ void write_wireless_message(Wireless_message *m)
 	CC2500_WriteFIFO((int8_t*) m, FIFO_WRITE_BURST_ADDRESS, sizeof(Wireless_message));
 	CC2500_CmdStrobe(STX);
 }
+
+void LED_GPIO_config() {
+    
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+    
+    GPIO_InitTypeDef GPIO_InitStructure;
+    /* Drive green LED (Pin 12), normal output. For debug use. */
+	GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_12;
+	GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_OUT; 
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz; 
+	GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_NOPULL;
+	GPIO_Init(GPIOD, &GPIO_InitStructure);
+}
+
+/* Turns on the green LED light. For testing purposes only. */
+void turnOnGreenLED() {
+    GPIO_SetBits(GPIOD, GPIO_Pin_12);
+}
+
+void turnOffGreenLED() {
+    GPIO_ResetBits(GPIOD, GPIO_Pin_12);
+}
+
