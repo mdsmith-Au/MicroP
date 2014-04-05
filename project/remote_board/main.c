@@ -446,10 +446,10 @@ void write_wireless_message(Wireless_message *m)
 	int8_t size = sizeof(Wireless_message);
 	
 	CC2500_WriteFIFO(&size, FIFO_WRITE_ADDRESS, 1);
-	CC2500_CmdStrobe(STX);
+	//CC2500_CmdStrobe(STX);
 	
 	CC2500_WriteFIFO((int8_t*) m, FIFO_WRITE_BURST_ADDRESS, sizeof(Wireless_message));
-	CC2500_CmdStrobe(STX);
+	//CC2500_CmdStrobe(STX);
 }
 
 void LED_GPIO_config() {
