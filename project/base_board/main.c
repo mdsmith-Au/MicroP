@@ -103,7 +103,7 @@ void motor_thread(const void* arg)
       motor_m = event.value.p;
 			
 			//move motors according to message received
-			move_to_angles(motor_m->rollAngle, -motor_m->pitchAngle);
+			move_to_angles(-motor_m->rollAngle, motor_m->pitchAngle);
 			
       osPoolFree(motor_pool, motor_m);                  // free memory allocated for message
     }
