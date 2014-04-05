@@ -15,16 +15,16 @@ osMutexId Mutex_LCD_id;
 void LCD_configure(void) {
     LCD_GPIO_setup();
 	
-		// Wait for LCD to boot up if it just turned on
-		osDelay(200);
-		// Create Mutex
+	// Wait for LCD to boot up if it just turned on
+    osDelay(400);
+	// Create Mutex
     Mutex_LCD_id = osMutexCreate(osMutex(MutexLCD));
 	
     // Send initial setup commands to the display, such as enabling the second row,
     // ensuring the display is on, clearing it and resetting the cursor.
     send(functionSet, CMD);
     send(displayOn, CMD);
-		send(displayCursorHome, CMD);
+    send(displayCursorHome, CMD);
     clearLCD(); 
     
 }
@@ -58,6 +58,18 @@ void enableCursor() {
 void disableCursor() {
   osMutexWait(Mutex_LCD_id, osWaitForever);
   send(displayOn, CMD);
+  osMutexRelease(Mutex_LCD_id);
+}
+
+void enableLCDCharMode() {
+  osMutexWait(Mutex_LCD_id, osWaitForever);
+  send(characterEntry, CMD);
+  osMutexRelease(Mutex_LCD_id);
+}
+
+void disableLCDCharMode()  {
+  osMutexWait(Mutex_LCD_id, osWaitForever);
+  send(characterEntryDisable, CMD);
   osMutexRelease(Mutex_LCD_id);
 }
 

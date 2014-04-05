@@ -52,23 +52,8 @@ void Keypad_Reverse_GPIO() {
 }
 
 
-char Keypad_Get_Character(uint16_t data) {
-  int row = 0;
-  // Figure out row
-  if ((data & KEYPAD_PIN_5) == KEYPAD_PIN_5) {
-    row = 1;
-  }
-  else if ((data & KEYPAD_PIN_6) == KEYPAD_PIN_6) {
-    row = 2;
-  }
-  else if ((data & KEYPAD_PIN_7) == KEYPAD_PIN_7) {
-    row = 3;
-  }
-  else if ((data & KEYPAD_PIN_8) == KEYPAD_PIN_8) {
-    row = 4;
-  }
-  
-  int col = 0;
+char Keypad_Get_Character(uint32_t data) {  
+	int col = 0;
   // Figure out column
   if ((data & KEYPAD_PIN_1) == KEYPAD_PIN_1) {
     col = 1;
@@ -82,50 +67,62 @@ char Keypad_Get_Character(uint16_t data) {
   else if ((data & KEYPAD_PIN_4) == KEYPAD_PIN_4) {
     col = 4;
   }
-  
-  char key = 0;
-  switch(row) {
-    case 1:
-      switch (col) {
-      case 1: key = '1';
-      case 2: key = '2';
-      case 3: key = '3';
-      case 4: key = 'C';
-    };
-    case 2:
-      switch (col) {
-      case 1: key = '4';
-      case 2: key = '5';
-      case 3: key = '6';
-      case 4: key = 'D';
-        };
-    case 3:
-      switch (col) {
-      case 1: key = '7';
-      case 2: key = '8';
-      case 3: key = '9';
-      case 4: key = 'E';
-        };
-    case 4:
-      switch (col) {
-      case 1: key = 'A';
-      case 2: key = '0';
-      case 3: key = 'B';
-      case 4: key = 'F';
-        };
+	
+	data = data >> 16;
+	int row = 0;
+  // Figure out row
+  if ((data & KEYPAD_PIN_5) == KEYPAD_PIN_5) {
+    row = 1;
   }
+  else if ((data & KEYPAD_PIN_6) == KEYPAD_PIN_6) {
+    row = 2;
+  }
+  else if ((data & KEYPAD_PIN_7) == KEYPAD_PIN_7) {
+    row = 3;
+  }
+  else if ((data & KEYPAD_PIN_8) == KEYPAD_PIN_8) {
+    row = 4;
+  }
+
+  char key = 0;
+  
+    if (row == 1) {
+        if (col == 1) key = '1';
+        else if (col == 2) key = '2';
+        else if (col == 3) key = '3';
+        else if (col == 4) key = 'A';
+    }
+    else if (row == 2) {
+        if (col == 1) key = '4';
+        else if (col == 2) key = '5';
+        else if (col == 3) key = '6';
+        else if (col == 4) key = 'B';
+    }
+    else if (row == 3) {
+        if (col == 1) key = '7';
+        else if (col == 2) key = '8';
+        else if (col == 3) key = '9';
+        else if (col == 4) key = 'C';
+    }
+    else if (row == 4) {
+        if (col == 1) key = '*';
+        else if (col == 2) key = '0';
+        else if (col == 3) key = '#';
+        else if (col == 4) key = 'D';
+    }
+	
   return key;
 }
 
-uint16_t Keypad_poll(void) {
+uint32_t Keypad_poll(void) {
 	
-	uint16_t data = GPIO_ReadInputData(KEYPAD_GPIO_BANK);
+	// Get column data
+	uint32_t data = GPIO_ReadInputData(KEYPAD_GPIO_BANK);
 	
 	Keypad_Reverse_GPIO();
   
   // Poll rows for source; get whole register since time is of the essense
-  data |= GPIO_ReadInputData(KEYPAD_GPIO_BANK);
-  
+  data |= (GPIO_ReadInputData(KEYPAD_GPIO_BANK) << 16);
   // Reset GPIO
   Keypad_GPIO_setup();
   
