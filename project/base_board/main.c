@@ -64,8 +64,8 @@ int main (void)
 	init_motors();
 	move_to_angles(0, 0);
 	
-	osDelay(5000);
-	
+	osDelay(3000);
+
 	baseboard_tim2_interrupt_config();
 	
 	wireless_timer_id = osTimerCreate (osTimer(wireless_timer), osTimerPeriodic, NULL);

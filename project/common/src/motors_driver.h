@@ -18,8 +18,8 @@
 #define TIMER_CLOCK_FREQ 1000000	/*!< Clock frequency to timer */
 #define PWM_PERIOD 20000					/*!< PWM period in us */
 
-#define ROLL_DUTY_CYCLE_AT_90_DEG 2480 /*!< Duty cycle of 90 degree roll motor angle in us */
-#define ROLL_DUTY_CYCLE_AT_0_DEG 1100	/*!< Duty cycle of 0 degree roll motor angle in us */
+#define ROLL_DUTY_CYCLE_AT_90_DEG 2250 /*!< Duty cycle of 90 degree roll motor angle in us */
+#define ROLL_DUTY_CYCLE_AT_0_DEG 1000	/*!< Duty cycle of 0 degree roll motor angle in us */
 
 #define PITCH_DUTY_CYCLE_AT_90_DEG 2500 /*!< Duty cycle of 90 degree pitch motor angle in us */
 #define PITCH_DUTY_CYCLE_AT_0_DEG 1550	/*!< Duty cycle of 0 degree pitch motor angle in us */
