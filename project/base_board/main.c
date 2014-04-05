@@ -213,16 +213,22 @@ void wireless_thread(const void* arg)
 		CC2500_Read_Reg(&numBytes, RXBYTES, 1);
 		numBytes = numBytes & 0x7f;
 		CC2500_Read_Reg(&state, MARCSTATE, 1);
-		//printf("State: %x, numBytes: %x\n", state, numBytes);
+		printf("State: %x, numBytes: %d\n", state, numBytes);
 		
 		//printf("State: %x\n", state);
-		osDelay(1);
-		if(numBytes >= 7)
+		//osDelay(1);
+		if(numBytes > 7)
+		{
+			int8_t junk;
+			
+			CC2500_ReadFIFO(&junk, FIFO_READ_BURST_ADDRESS, numBytes);
+		}
+		else if (numBytes == 7)
 		{
 			interpolator_m = osPoolAlloc(interpolator_pool);                     // Allocate memory for the message
 			read_wireless_message(interpolator_m);
 		
-			//printf("to interp: roll: %d pitch: %d delta_t: %d realtime: %d\n", interpolator_m->rollAngle, interpolator_m->pitchAngle, interpolator_m->delta_t, interpolator_m->realtime);
+			printf("to interp: roll: %d pitch: %d delta_t: %d realtime: %d\n", interpolator_m->rollAngle, interpolator_m->pitchAngle, interpolator_m->delta_t, interpolator_m->realtime);
 			
 			osMessagePut(interpolator_message_box, (uint32_t)interpolator_m, osWaitForever);  // Send Message
 		}		
@@ -241,14 +247,20 @@ void read_wireless_message(Interpolator_message *m)
 	int8_t packetSize;
 	int8_t junk;
 	
-	CC2500_ReadFIFO(&packetSize, FIFO_READ_ADDRESS, 1);		
-	CC2500_CmdStrobe(SRX);
+	CC2500_ReadFIFO(&packetSize, FIFO_READ_ADDRESS, 1);
+	//osDelay(1);
+	//CC2500_CmdStrobe(SRX);
+	//osDelay(1);
 	
 	CC2500_ReadFIFO((int8_t*)m, FIFO_READ_BURST_ADDRESS, sizeof(Interpolator_message));		
-	CC2500_CmdStrobe(SRX);
+	//osDelay(1);
+	//CC2500_CmdStrobe(SRX);
+	//osDelay(1);
 	
-	CC2500_ReadFIFO(&junk, FIFO_READ_BURST_ADDRESS, 2);		
-	CC2500_CmdStrobe(SRX);
+	CC2500_ReadFIFO(&junk, FIFO_READ_BURST_ADDRESS, 2);
+	//osDelay(1);
+	//CC2500_CmdStrobe(SRX);
+	//osDelay(1);
 }
 
 void wireless_timer_callback(void const *arg)

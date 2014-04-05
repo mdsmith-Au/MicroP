@@ -241,6 +241,9 @@ void CC2500_LowLevelWireless_Init()
 	registerData[2] = SMARTRF_SETTING_TEST0;
 	CC2500_Write_Reg(registerData, TEST2_WRITE_BURST, 3);
 	
+	registerData[0] = 0x3c;
+	CC2500_Write_Reg(registerData, MCSM1_WRITE_SINGLE, 1);
+	
 }
 
 void CC2500_LowLevelInit()
