@@ -252,6 +252,27 @@ void wireless_thread(const void* arg)
 }
 
 //Keypad thread: responsible for keypad input
+/*
+ Input format:
+	#/* = positive/negative
+	D - space between variables
+	A - Accept sequence
+	C - Cancel (reset keypad)
+	B - Send to baseboard all sequences
+			that have been accepted\
+
+  Ex. Roll -20, Pitch 30, Time 5 sec
+	#20D*30D5A
+
+	Ex. Roll 5, Pich -2, Time 10
+	*05D#02D10A
+	
+	Press B when done (not in middle of typing)
+
+	Cancel works whenever (clears EVERYTHING)
+	
+	Time is max. 2 digits, pitch and roll are limited as well
+*/
 void keypad_thread(const void* arg) {
     enableCursor();
     clearLCD();    
