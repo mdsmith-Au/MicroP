@@ -208,60 +208,6 @@ void orientation_thread(const void* arg)
 			wireless_m->realtime = 1;
 			osMessagePut(wireless_message_box, (uint32_t)wireless_m, osWaitForever);  // Send Message
 		}
-		else
-		{
-			//get information from keypad
-			/*
-			wireless_m = osPoolAlloc(wireless_pool);                     // Allocate memory for the message
-			wireless_m->rollAngle = 90;
-			wireless_m->pitchAngle = 0;
-			wireless_m->delta_t = 10;
-			wireless_m->realtime = 0;
-			osMessagePut(wireless_message_box, (uint32_t)wireless_m, osWaitForever);  // Send Message
-			
-			wireless_m->rollAngle = 90;
-			wireless_m->pitchAngle = 90;
-			wireless_m->delta_t = 10;
-			wireless_m->realtime = 0;
-			osMessagePut(wireless_message_box, (uint32_t)wireless_m, osWaitForever);  // Send Message
-			
-			wireless_m->rollAngle = 90;
-			wireless_m->pitchAngle = 0;
-			wireless_m->delta_t = 5;
-			wireless_m->realtime = 0;
-			osMessagePut(wireless_message_box, (uint32_t)wireless_m, osWaitForever);  // Send Message
-			
-			wireless_m->rollAngle = 0;
-			wireless_m->pitchAngle = 0;
-			wireless_m->delta_t = 5;
-			wireless_m->realtime = 0;
-			osMessagePut(wireless_message_box, (uint32_t)wireless_m, osWaitForever);  // Send Message
-			
-			wireless_m->rollAngle = -90;
-			wireless_m->pitchAngle = 0;
-			wireless_m->delta_t = 10;
-			wireless_m->realtime = 0;
-			osMessagePut(wireless_message_box, (uint32_t)wireless_m, osWaitForever);  // Send Message
-			
-			wireless_m->rollAngle = -90;
-			wireless_m->pitchAngle = -90;
-			wireless_m->delta_t = 10;
-			wireless_m->realtime = 0;
-			osMessagePut(wireless_message_box, (uint32_t)wireless_m, osWaitForever);  // Send Message
-			
-			wireless_m->rollAngle = -90;
-			wireless_m->pitchAngle = 0;
-			wireless_m->delta_t = 5;
-			wireless_m->realtime = 0;
-			osMessagePut(wireless_message_box, (uint32_t)wireless_m, osWaitForever);  // Send Message
-			
-			wireless_m->rollAngle = 0;
-			wireless_m->pitchAngle = 0;
-			wireless_m->delta_t = 5;
-			wireless_m->realtime = 0;
-			osMessagePut(wireless_message_box, (uint32_t)wireless_m, osWaitForever);  // Send Message
-			*/
-		}
 	}
 }
 
@@ -311,6 +257,9 @@ void keypad_thread(const void* arg) {
     clearLCD();    
     int samplingMode = 0;
     Wireless_message wireless[32];
+    Wireless_message *wireless_m;
+    int messageIndex = 0;
+  
     
     char prevKeypress = 0;
     
@@ -370,14 +319,45 @@ void keypad_thread(const void* arg) {
                             
                             clearLCD();
                             resetLCDPosition();
+                              
+                            memset(keypadEntry, 0, sizeof(keypadEntry));
                             
-                            Wireless_message *wireless_m;
                             wireless_m = osPoolAlloc(wireless_pool);                     // Allocate memory for the message
                             wireless_m->rollAngle = roll;
                             wireless_m->pitchAngle = pitch;
                             wireless_m->delta_t = time;
                             wireless_m->realtime = 0;
-                            osMessagePut(wireless_message_box, (uint32_t)wireless_m, osWaitForever);  // Send Message
+                            wireless[messageIndex] = *wireless_m;
+                            messageIndex++;
+                            //osMessagePut(wireless_message_box, (uint32_t)wireless_m, osWaitForever);  // Send Message
+                        }
+                        else if (currKeypress == 'B')
+                        {
+                          counter = 0;
+                          memset(keypadEntry, 0, sizeof(keypadEntry));
+                          int j;
+                          for (j = 0; j < messageIndex; j++)
+                          {
+                            Wireless_message m = wireless[j];
+                            osMessagePut(wireless_message_box, (uint32_t)&m, osWaitForever);  // Send Message
+                          }
+                          messageIndex = 0;
+                          clearLCD();
+                          resetLCDPosition();    
+                        }
+                        else if (currKeypress == 'C')
+                        {
+                          counter = 0;
+                          memset(keypadEntry, 0, sizeof(keypadEntry));
+                          int j;
+                          for (j = 0; j < messageIndex; j++)
+                          {
+                            Wireless_message m = wireless[j];
+                            osPoolFree(wireless_pool, wireless_m); // free memory allocated for message
+                          }
+                          messageIndex = 0;
+                          clearLCD();
+                          resetLCDPosition();
                         }
                     }
                 }
