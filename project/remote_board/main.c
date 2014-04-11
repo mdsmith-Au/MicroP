@@ -356,12 +356,28 @@ void keypad_thread(const void* arg) {
                         {
                           counter = 0;
                           memset(keypadEntry, 0, sizeof(keypadEntry));
+                          
+                          Wireless_message *m = osPoolAlloc(wireless_pool); 
+                          wireless_m->rollAngle = 0;
+                          wireless_m->pitchAngle = 0;
+                          wireless_m->delta_t = 1;
+                          wireless_m->realtime = 0;
+                          osMessagePut(wireless_message_box, (uint32_t)&m, osWaitForever);  // Send Message
+                          
                           int j;
                           for (j = 0; j < messageIndex; j++)
                           {
                             Wireless_message m = wireless[j];
                             osMessagePut(wireless_message_box, (uint32_t)&m, osWaitForever);  // Send Message
                           }
+                          
+                          m = osPoolAlloc(wireless_pool); 
+                          wireless_m->rollAngle = 0;
+                          wireless_m->pitchAngle = 0;
+                          wireless_m->delta_t = 1;
+                          wireless_m->realtime = 0;
+                          osMessagePut(wireless_message_box, (uint32_t)&m, osWaitForever);  // Send Message
+                          
                           messageIndex = 0;
                           clearLCD();
                           resetLCDPosition();    
